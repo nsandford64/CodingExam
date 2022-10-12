@@ -35,6 +35,10 @@
 		"space-in-parens": [
 			"warn",
 			"always"
+		],
+		"array-bracket-spacing": [
+			"warn",
+			"always"
 		]
     }
 }
