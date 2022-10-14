@@ -77,13 +77,13 @@ INSERT INTO "CodingExam".Exam(CanvasExamID, TotalPoints)
 VALUES ('a94f149b-336c-414f-a05b-8b193322cbd8', 1);
 
 INSERT INTO "CodingExam".UserExam(UserID, ExamID)
-VALUES ('668ce32912fc74ec7e60cc59f32f304dc4379617', 'a94f149b-336c-414f-a05b-8b193322cbd8');
+VALUES (1, 1);
 
 INSERT INTO "CodingExam".QuestionType(QuestionType)
 VALUES ('Multiple Choice'), ('Short Answer');
 
 INSERT INTO "CodingExam".ExamQuestion(QuestionText, HasCorrectAnswers, QuestionType, ExamID)
-VALUES ('What''s the best programming language?', TRUE, 1, 'a94f149b-336c-414f-a05b-8b193322cbd8');
+VALUES ('What''s the best programming language?', TRUE, 1, 1);
 
 INSERT INTO "CodingExam".QuestionAnswer(QuestionID, CorrectAnswer, AnswerIndex, AnswerText)
 VALUES (1, TRUE, 0, 'C#'), (1, TRUE, 1, 'C'), (1, TRUE, 2, 'TypeScript'), (1, TRUE, 3, 'Fortran');
