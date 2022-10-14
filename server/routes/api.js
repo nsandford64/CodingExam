@@ -1,6 +1,6 @@
 //Copyright 2022 under MIT License
-const express = require('express');
-const router = express.Router();
+const express = require( "express" )
+const router = express.Router()
 const { Pool } = require( "pg" )
 
 /* Sample credentials for PostGres database */
@@ -15,8 +15,8 @@ const credentials = {
 /**
  * Get a list of questions from the requested examid
  */
-router.get('/questions', async function(req, res, next) {
-  	const pool = new Pool(credentials)
+router.get( "/questions", async function( req, res ) {
+	const pool = new Pool( credentials )
 
 	const results = await pool.query( `
 		SELECT *
@@ -24,7 +24,7 @@ router.get('/questions', async function(req, res, next) {
 		INNER JOIN "CodingExam".QuestionAnswer QA ON QA.QuestionID = EQ.QuestionID
 		WHERE ExamID = ${req.headers.examid}
 		ORDER BY QA.AnswerIndex
-	`)
+	` )
 
 	await pool.end()
 
@@ -34,13 +34,13 @@ router.get('/questions', async function(req, res, next) {
 		text: results.rows[0].questiontext,
 		answers: results.rows.map( row => row.answertext )
 	} )
-});
+} )
 
 /**
  * Inserts an answer into the StudentResponse table in the database
  */
-router.post('/', async (req, res) => {
-	const pool = new Pool(credentials)
+router.post( "/", async ( req, res ) => {
+	const pool = new Pool( credentials )
 
 	await pool.query( `
 		INSERT INTO "CodingExam".StudentResponse(IsTextResponse, AnswerResponse, QuestionID)
@@ -56,9 +56,9 @@ router.post('/', async (req, res) => {
 	await pool.end()
 
 	/* Respond a success message to the poster */
-	res.send({
+	res.send( {
 		answer: `You requested: ${results.rows[results.rows.length - 1].answerresponse}`
-	})
-});
+	} )
+} )
 
-module.exports = router;
+module.exports = router
