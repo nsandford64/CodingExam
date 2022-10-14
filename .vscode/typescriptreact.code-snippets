@@ -29,7 +29,7 @@
 		"body": [
 			"interface ${1}Props {\n\n}\n",
 			"const Styled${1} = styled.div`\n\n`\n",
-			"const ${1} = React.memo( ( props: ${1}Props) => {",
+			"const ${1} = React.memo( ( props: ${1}Props ) => {",
 			"\treturn (",
 			"\t\tnull\n\t)",
 			"} )",
