@@ -71,13 +71,13 @@ GRANT USAGE ON SCHEMA "CodingExam" TO codingexam;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA "CodingExam" TO codingexam;
 
 INSERT INTO "CodingExam".Users(CanvasUserID)
-VALUES ('bf4070182cb5859841ccfc78f9f41044b7cbfb60');
+VALUES ('668ce32912fc74ec7e60cc59f32f304dc4379617');
 
 INSERT INTO "CodingExam".Exam(CanvasExamID, TotalPoints)
 VALUES ('a94f149b-336c-414f-a05b-8b193322cbd8', 1);
 
 INSERT INTO "CodingExam".UserExam(UserID, ExamID)
-VALUES ('bf4070182cb5859841ccfc78f9f41044b7cbfb60', 'a94f149b-336c-414f-a05b-8b193322cbd8');
+VALUES ('668ce32912fc74ec7e60cc59f32f304dc4379617', 'a94f149b-336c-414f-a05b-8b193322cbd8');
 
 INSERT INTO "CodingExam".QuestionType(QuestionType)
 VALUES ('Multiple Choice'), ('Short Answer');
