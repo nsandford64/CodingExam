@@ -22,7 +22,7 @@ router.get( "/questions", async function( req, res ) {
 		SELECT *
 		FROM "CodingExam".ExamQuestion EQ
 		INNER JOIN "CodingExam".QuestionAnswer QA ON QA.QuestionID = EQ.QuestionID
-		WHERE ExamID = ${req.headers.examid}
+		WHERE ExamID = 1
 		ORDER BY QA.AnswerIndex
 	` )
 
@@ -30,9 +30,7 @@ router.get( "/questions", async function( req, res ) {
 
 	/* Sends a question object to the requester */
 	res.send( {
-		id: results.rows[0].questionid,
-		text: results.rows[0].questiontext,
-		answers: results.rows.map( row => row.answertext )
+		questions: results.rows
 	} )
 } )
 
