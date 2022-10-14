@@ -1,6 +1,6 @@
 import React from "react"
-import { Button, Intent } from "@blueprintjs/core"
 import styled from "styled-components"
+import { MultipleChoice } from "./components/multipleChoice"
 
 const StyledApp = styled.div`
 	
@@ -9,7 +9,10 @@ const StyledApp = styled.div`
 function App() {
 	return (
 		<StyledApp>
-			<Button intent={Intent.PRIMARY} text="Hello World!" />
+			<MultipleChoice 
+				questionText="What is the best programming language?"
+				answerChoices={[ "C#", "Java", "TypeScript", "Fortran" ]}
+			/>
 		</StyledApp>
 	)
 }
