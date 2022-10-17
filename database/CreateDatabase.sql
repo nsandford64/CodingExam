@@ -62,7 +62,8 @@ CREATE TABLE "CodingExam".StudentResponse
 	IsTextResponse BOOLEAN NOT NULL,
 	TextResponse VARCHAR(300), 
 	AnswerResponse INT,
-	QuestionID INT NOT NULL REFERENCES "CodingExam".ExamQuestion(QuestionID)
+	QuestionID INT NOT NULL REFERENCES "CodingExam".ExamQuestion(QuestionID),
+	CanvasUserID VARCHAR(60) NOT NULL REFERENCES "CodingExam".User(CanvasUserID)
 );
 
 CREATE USER codingexam WITH PASSWORD 'password';
