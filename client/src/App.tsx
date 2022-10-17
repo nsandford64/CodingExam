@@ -1,7 +1,6 @@
 import { Button, Intent } from "@blueprintjs/core"
 import React from "react"
 import styled from "styled-components"
-import { MultipleAnswer } from "./components/multipleAnswer"
 import { MultipleChoice } from "./components/multipleChoice"
 import { ShortAnswer } from "./components/shortAnswer"
 import { TrueFalse } from "./components/trueFalse"
@@ -18,6 +17,14 @@ const StyledQuestionsContainer = styled.div`
 
 function App() {
 	const [ questions, setQuestions ] = React.useState( [] as Question[] )
+	const [ answersMap, setAnswersMap ] = React.useState( new Map<number, Answer>() )
+
+	const updateAnswer = React.useCallback( ( answer: Answer ) => {
+		const newMap = new Map<number, Answer>( answersMap )
+		newMap.set( answer.questionId, answer )
+
+		setAnswersMap( newMap )
+	}, [ answersMap ] )
 
 	React.useEffect( () => {
 		const initQuestions = async () => {
@@ -29,13 +36,11 @@ function App() {
 
 			const json  = await data.json()
 			const questions: Question[] = json.questions
-			console.log( questions )
 			setQuestions( questions )
 		}
 
 		initQuestions()
 	}, [] )
-
 	
 	return (
 		<StyledApp>
@@ -46,8 +51,11 @@ function App() {
 						return (
 							<MultipleChoice 
 								key={question.id}
+								questionId={question.id}
 								questionText={question.text}
 								answerChoices={question.answers}
+								answer={answersMap.get( question.id )}
+								updateAnswer={updateAnswer}
 							/>
 						)
 					case QuestionType.TrueFalse:
@@ -81,8 +89,14 @@ type Question = {
 	answers: string[] 
 }
 
+export type Answer = {
+	questionId: number
+	value: number | string
+}
+
 enum QuestionType {
 	MultipleChoice = 1,
 	ShortAnswer = 2,
 	TrueFalse = 3
 }
+
