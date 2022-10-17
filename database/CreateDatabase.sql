@@ -1,13 +1,13 @@
 --Copyright 2022 under MIT License
 SET search_path TO 'CodingExam';
 
-DROP TABLE IF EXISTS "CodingExam".StudentResponse;
-DROP TABLE IF EXISTS "CodingExam".QuestionAnswer;
-DROP TABLE IF EXISTS "CodingExam".ExamQuestion;
-DROP TABLE IF EXISTS "CodingExam".QuestionType;
-DROP TABLE IF EXISTS "CodingExam".UserExam;
-DROP TABLE IF EXISTS "CodingExam".Exam;
-DROP TABLE IF EXISTS "CodingExam".Users;
+DROP TABLE IF EXISTS "CodingExam".StudentResponse CASCADE;
+DROP TABLE IF EXISTS "CodingExam".QuestionAnswer CASCADE;
+DROP TABLE IF EXISTS "CodingExam".ExamQuestion CASCADE;
+DROP TABLE IF EXISTS "CodingExam".QuestionType CASCADE;
+DROP TABLE IF EXISTS "CodingExam".UserExam CASCADE;
+DROP TABLE IF EXISTS "CodingExam".Exam CASCADE;
+DROP TABLE IF EXISTS "CodingExam".Users CASCADE;
 
 CREATE TABLE "CodingExam".Users
 (
@@ -63,7 +63,7 @@ CREATE TABLE "CodingExam".StudentResponse
 	TextResponse VARCHAR(300), 
 	AnswerResponse INT,
 	QuestionID INT NOT NULL REFERENCES "CodingExam".ExamQuestion(QuestionID),
-	CanvasUserID VARCHAR(60) NOT NULL REFERENCES "CodingExam".User(CanvasUserID)
+	CanvasUserID VARCHAR(60) NOT NULL REFERENCES "CodingExam".Users(CanvasUserID)
 );
 
 CREATE USER codingexam WITH PASSWORD 'password';
