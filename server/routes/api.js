@@ -21,16 +21,35 @@ router.get( "/questions", async function( req, res ) {
 	const results = await pool.query( `
 		SELECT *
 		FROM "CodingExam".ExamQuestion EQ
-		INNER JOIN "CodingExam".QuestionAnswer QA ON QA.QuestionID = EQ.QuestionID
+		LEFT JOIN "CodingExam".QuestionAnswer QA ON QA.QuestionID = EQ.QuestionID
 		WHERE ExamID = 1
-		ORDER BY QA.AnswerIndex
+		ORDER BY EQ.QuestionID, QA.AnswerIndex
 	` )
 
 	await pool.end()
+	console.log( results.rows )
+
+	const map = new Map()
+	results.rows.forEach( row => map.set( row.questionid, {
+		id: row.questionid,
+		text: row.questiontext,
+		type: row.questiontype,
+		answers: []
+	} ) )
+	results.rows.forEach( row => {
+		const object = map.get( row.questionid )
+		const answers = object.answers
+		
+		const newAnswers = [ ...answers, row.answertext ]
+		map.set( row.questionid, {
+			...object,
+			answers: newAnswers
+		} )
+	} )
 
 	/* Sends a question object to the requester */
 	res.send( {
-		questions: results.rows
+		questions: Array.from( map.values() )
 	} )
 } )
 
