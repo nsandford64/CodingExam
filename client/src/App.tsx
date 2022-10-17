@@ -20,10 +20,7 @@ function App() {
 	const [ answersMap, setAnswersMap ] = React.useState( new Map<number, Answer>() )
 
 	const updateAnswer = React.useCallback( ( answer: Answer ) => {
-		const newMap = new Map<number, Answer>( answersMap )
-		newMap.set( answer.questionId, answer )
-
-		setAnswersMap( newMap )
+		setAnswersMap( new Map<number, Answer>( answersMap.set( answer.questionId, answer ) ) )
 	}, [ answersMap ] )
 
 	React.useEffect( () => {
@@ -62,19 +59,30 @@ function App() {
 						return (
 							<TrueFalse 
 								key={question.id}
+								questionId={question.id}
 								questionText={question.text}
+								answer={answersMap.get( question.id )}
+								updateAnswer={updateAnswer}
 							/>
 						)
 					case QuestionType.ShortAnswer:
 						return (
 							<ShortAnswer 
 								key={question.id}
+								questionId={question.id}
 								questionText={question.text}
+								answer={answersMap.get( question.id )}
+								updateAnswer={updateAnswer}
 							/>
 						)
 					}
 				} )}				
-				<Button intent={Intent.PRIMARY} style={{marginTop: "20px"}} text="Submit" />
+				<Button 
+					intent={Intent.PRIMARY} 
+					style={{marginTop: "20px"}} 
+					text="Submit" 
+					onClick={() => console.log( answersMap )}
+				/>
 			</StyledQuestionsContainer>
 		</StyledApp>
 	)
@@ -92,6 +100,14 @@ type Question = {
 export type Answer = {
 	questionId: number
 	value: number | string
+}
+
+export interface ComponentProps {
+	questionId: number
+	questionText: string
+	answerChoices?: string[]
+	answer?: Answer
+	updateAnswer: ( answer: Answer ) => void
 }
 
 enum QuestionType {

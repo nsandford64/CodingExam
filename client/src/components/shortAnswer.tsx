@@ -1,20 +1,33 @@
 import { Label, TextArea } from "@blueprintjs/core"
 import * as React from "react"
 import styled from "styled-components"
-
-interface ShortAnswerProps {
-	questionText: string
-}
+import { Answer, ComponentProps } from "../App"
 
 const StyledShortAnswer = styled.div`
 	padding: 10px;
 `
 
-export const ShortAnswer = React.memo( ( props: ShortAnswerProps ) => {
+export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
+	const [ answer, setAnswer ] = React.useState( "" )
+
+	const handleBlur = React.useCallback( () => {
+		const newAnswer: Answer = {
+			questionId: props.questionId,
+			value: answer
+		}
+
+		props.updateAnswer( newAnswer )
+	}, [ answer ] )
+
 	return (
 		<StyledShortAnswer>
 			<Label>{props.questionText}</Label>
-			<TextArea large />
+			<TextArea 
+				large 
+				onBlur={handleBlur} 
+				onChange={ e => setAnswer( e.target.value )}
+				value={props.answer?.value} 
+			/>
 		</StyledShortAnswer>
 	)
 } )
