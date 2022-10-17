@@ -59,10 +59,12 @@ router.get( "/questions", async function( req, res ) {
 router.post( "/", async ( req, res ) => {
 	const pool = new Pool( credentials )
 
-	await pool.query( `
-		INSERT INTO "CodingExam".StudentResponse(IsTextResponse, AnswerResponse, QuestionID)
-		VALUES (FALSE, ${req.body.answer}, ${req.body.questionID});
-	` )
+	await req.body.answers.forEach( answer => {
+		pool.query( `
+			INSERT INTO "CodingExam".StudentResponse(IsTextResponse, AnswerResponse, QuestionID, CanvasUserID)
+			VALUES (FALSE, ${answer.answerresponse}, ${answer.questionid}, ${answer.userid});
+		` )
+	} )
 
 	const results = await pool.query( `
 		SELECT *
