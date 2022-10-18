@@ -38,6 +38,28 @@ function App() {
 
 		initQuestions()
 	}, [] )
+
+	const submit = React.useCallback( async () => {
+		const res = await fetch( "http://localhost:9000/api", {
+			// Adding method type
+			method: "POST",
+     
+			// Adding body or contents to send
+			body: JSON.stringify(
+				Array.from( answersMap.entries() )
+			),
+     
+			// Adding headers to the request
+			headers: {
+				"Content-type": "application/json; charset=UTF-8"
+			}
+		} )
+
+		const json = await res.json()
+		console.log( json )
+
+	}, [ answersMap ] )
+
 	
 	return (
 		<StyledApp>
@@ -81,7 +103,7 @@ function App() {
 					intent={Intent.PRIMARY} 
 					style={{marginTop: "20px"}} 
 					text="Submit" 
-					onClick={() => console.log( answersMap )}
+					onClick={submit}
 				/>
 			</StyledQuestionsContainer>
 		</StyledApp>
