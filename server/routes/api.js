@@ -82,7 +82,7 @@ router.post( "/", async ( req, res ) => {
 	/* Respond a success message to the poster */
 	res.send( "success" 
 		//answer: `You requested: ${results.rows[results.rows.length - 1].answerresponse}`
-	 )
+	)
 	
 } )
 

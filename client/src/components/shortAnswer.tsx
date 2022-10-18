@@ -8,7 +8,7 @@ const StyledShortAnswer = styled.div`
 `
 
 export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
-	const [ answer, setAnswer ] = React.useState( "" )
+	const [ answer, setAnswer ] = React.useState( props.answer?.value || "" )
 
 	const handleBlur = React.useCallback( () => {
 		const newAnswer: Answer = {
@@ -26,7 +26,7 @@ export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
 				large 
 				onBlur={handleBlur} 
 				onChange={ e => setAnswer( e.target.value )}
-				value={props.answer?.value} 
+				value={answer} 
 			/>
 		</StyledShortAnswer>
 	)
