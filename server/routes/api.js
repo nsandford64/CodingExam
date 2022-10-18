@@ -19,7 +19,8 @@ router.get( "/questions", async function( req, res ) {
 	const pool = new Pool( credentials )
 
 	const results = await pool.query( `
-		SELECT *
+		SELECT EQ.QuestionID, EQ.QuestionText, EQ.HasCorrectAnswers, EQ.QuestionType, EQ.ExamID,
+			QA.AnswerID, QA.CorrectAnswer, QA.AnswerIndex, QA.AnswerText
 		FROM "CodingExam".ExamQuestion EQ
 		LEFT JOIN "CodingExam".QuestionAnswer QA ON QA.QuestionID = EQ.QuestionID
 		WHERE ExamID = 1
@@ -27,7 +28,6 @@ router.get( "/questions", async function( req, res ) {
 	` )
 
 	await pool.end()
-	console.log( results.rows )
 
 	const map = new Map()
 	results.rows.forEach( row => map.set( row.questionid, {
@@ -57,27 +57,33 @@ router.get( "/questions", async function( req, res ) {
  * Inserts an answer into the StudentResponse table in the database
  */
 router.post( "/", async ( req, res ) => {
+	console.log( req.body )
+	console.log( req.body[0] )
 	const pool = new Pool( credentials )
 
-	await req.body.answers.forEach( answer => {
+	/*
+	await req.body.forEach( req.body => {
 		pool.query( `
 			INSERT INTO "CodingExam".StudentResponse(IsTextResponse, AnswerResponse, QuestionID, CanvasUserID)
 			VALUES (FALSE, ${answer.answerresponse}, ${answer.questionid}, ${answer.userid});
 		` )
 	} )
 
+	/*
 	const results = await pool.query( `
 		SELECT *
 		FROM "CodingExam".StudentResponse
 		WHERE QuestionID = ${req.body.questionID};
 	` )
+	*/
 
 	await pool.end()
 
 	/* Respond a success message to the poster */
-	res.send( {
-		answer: `You requested: ${results.rows[results.rows.length - 1].answerresponse}`
-	} )
+	res.send( "success" 
+		//answer: `You requested: ${results.rows[results.rows.length - 1].answerresponse}`
+	 )
+	
 } )
 
 module.exports = router
