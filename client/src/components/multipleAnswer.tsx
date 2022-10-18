@@ -1,17 +1,13 @@
 import { Checkbox, Label } from "@blueprintjs/core"
 import * as React from "react"
 import styled from "styled-components"
-
-interface MultipleAnswerProps {
-	questionText: string
-	answerChoices: string[]
-}
+import { ComponentProps } from "../App"
 
 const StyledMultipleAnswer = styled.div`
 	padding: 10px;
 `
 
-export const MultipleAnswer = React.memo( ( props: MultipleAnswerProps ) => {
+export const MultipleAnswer = React.memo( ( props: ComponentProps ) => {
 	const [ selectedChoices, setSelectedChoices ] = React.useState( [] as string[] )
 
 	const handleChecked = React.useCallback( ( checkedChoice: string ) => {
@@ -30,7 +26,7 @@ export const MultipleAnswer = React.memo( ( props: MultipleAnswerProps ) => {
 	return (
 		<StyledMultipleAnswer>
 			<Label>{props.questionText}</Label>
-			{props.answerChoices.map( ( choice, index ) => (
+			{props.answerChoices?.map( ( choice, index ) => (
 				<Checkbox 
 					key={index}
 					checked={selectedChoices.includes( choice ) }

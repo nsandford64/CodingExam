@@ -1,6 +1,7 @@
 import { Button, Intent } from "@blueprintjs/core"
 import React from "react"
 import styled from "styled-components"
+import { MultipleAnswer } from "./components/multipleAnswer"
 import { MultipleChoice } from "./components/multipleChoice"
 import { ShortAnswer } from "./components/shortAnswer"
 import { TrueFalse } from "./components/trueFalse"
@@ -75,6 +76,17 @@ function App() {
 								updateAnswer={updateAnswer}
 							/>
 						)
+					case QuestionType.MultipleAnswer:
+						return (
+							<MultipleAnswer 
+								key={question.id}
+								questionId={question.id}
+								questionText={question.text}
+								answerChoices={question.answers}
+								answer={answersMap.get( question.id )}
+								updateAnswer={updateAnswer}
+							/>
+						)
 					}
 				} )}				
 				<Button 
@@ -87,7 +99,6 @@ function App() {
 		</StyledApp>
 	)
 }
-
 export default App
 
 type Question = {
@@ -113,6 +124,7 @@ export interface ComponentProps {
 enum QuestionType {
 	MultipleChoice = 1,
 	ShortAnswer = 2,
-	TrueFalse = 3
+	TrueFalse = 3,
+	MultipleAnswer = 4,
 }
 
