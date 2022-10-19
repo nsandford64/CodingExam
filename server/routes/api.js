@@ -65,9 +65,17 @@ router.get( "/responses", async ( req, res ) => {
 		ORDER BY SR.QuestionID
 	` )
 
-	res.send(
-		JSON.stringify( results.rows )
-	)
+	const responses = results.rows.map( row => {
+		return {
+			questionId: row.questionid,
+			isText: row.istextresponse,
+			value: row.istextresponse ? row.textresponse : row.answerresponse
+		}
+	} )
+
+	res.send( {
+		responses: responses
+	} )
 } )
 
 /**

@@ -1,7 +1,7 @@
 import { Radio, RadioGroup } from "@blueprintjs/core"
 import * as React from "react"
 import styled from "styled-components"
-import { Answer, ComponentProps } from "../App"
+import { Response, ComponentProps } from "../App"
 
 const StyledTrueFalse = styled.div`
 	padding: 10px;
@@ -10,12 +10,12 @@ const StyledTrueFalse = styled.div`
 export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 	const handleChange = React.useCallback( ( e: React.FormEvent<HTMLInputElement> ) => {
 		const value = ( e.target as HTMLInputElement ).value
-		const newAnswer: Answer = {
+		const newResponse: Response = {
 			questionId: props.questionId,
 			value: parseInt( value )
 		}
 
-		props.updateAnswer( newAnswer )
+		props.updateResponse( newResponse )
 	}, [] )
 	
 	return (
@@ -23,7 +23,7 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 			<RadioGroup
 				label={props.questionText}
 				onChange={handleChange}
-				selectedValue={props.answer?.value}
+				selectedValue={props.response?.value}
 			>
 				<Radio label="False" value={0} />
 				<Radio label="True" value={1} />

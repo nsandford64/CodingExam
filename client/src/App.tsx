@@ -18,35 +18,42 @@ const StyledQuestionsContainer = styled.div`
 
 function App() {
 	const [ questions, setQuestions ] = React.useState( [] as Question[] )
-	const [ answersMap, setAnswersMap ] = React.useState( new Map<number, Answer>() )
+	const [ responsesMap, setResponsesMap ] = React.useState( new Map<number, Response>() )
 
-	const updateAnswer = React.useCallback( ( answer: Answer ) => {
-		setAnswersMap( new Map<number, Answer>( answersMap.set( answer.questionId, answer ) ) )
-	}, [ answersMap ] )
+	const updateResponse = React.useCallback( ( response: Response ) => {
+		setResponsesMap( new Map<number, Response>( responsesMap.set( response.questionId, response ) ) )
+	}, [ responsesMap ] )
 
 	React.useEffect( () => {
 		const initQuestions = async () => {
-			const data = await fetch( "http://localhost:9000/api/questions", {
+			/* Fetch exam questions */
+			let data = await fetch( "http://localhost:9000/api/questions", {
 				headers: {
 					"examID": "1"
 				} 
 			} )
 
-			const json  = await data.json()
+			let json  = await data.json()
 			const questions: Question[] = json.questions
-			setQuestions( questions )
-		}
 
-		const initResponses = async () => {
-			const responses = await fetch( "http://localhost:9000/api/responses", {
+			/* Fetch exam responses (if there are any) */
+			data = await fetch( "http://localhost:9000/api/responses", {
 				headers: {
 					"examID": "a94f149b-336c-414f-a05b-8b193322cbd8",
 					"userID": "668ce32912fc74ec7e60cc59f32f304dc4379617"
 				}
 			} )
 
-			const json = await responses.json()
-			console.log( json )
+			json = await data.json()
+			const responses: Response[] = json.responses
+
+			const newResponsesMap = new Map<number, Response>()
+			responses.forEach( response => {
+				newResponsesMap.set( response.questionId, response )
+			} )
+
+			setQuestions( questions )
+			setResponsesMap( newResponsesMap )
 		}
 
 		initQuestions()
@@ -59,7 +66,7 @@ function App() {
      
 			// Adding body or contents to send
 			body: JSON.stringify(
-				Array.from( answersMap.values() )
+				Array.from( responsesMap.values() )
 			),
      
 			// Adding headers to the request
@@ -71,7 +78,7 @@ function App() {
 		const json = await res.json()
 		console.log( json )
 
-	}, [ answersMap ] )
+	}, [ responsesMap ] )
 
 	
 	return (
@@ -86,8 +93,8 @@ function App() {
 								questionId={question.id}
 								questionText={question.text}
 								answerChoices={question.answers}
-								answer={answersMap.get( question.id )}
-								updateAnswer={updateAnswer}
+								response={responsesMap.get( question.id )}
+								updateResponse={updateResponse}
 							/>
 						)
 					case QuestionType.TrueFalse:
@@ -96,8 +103,8 @@ function App() {
 								key={question.id}
 								questionId={question.id}
 								questionText={question.text}
-								answer={answersMap.get( question.id )}
-								updateAnswer={updateAnswer}
+								response={responsesMap.get( question.id )}
+								updateResponse={updateResponse}
 							/>
 						)
 					case QuestionType.ShortAnswer:
@@ -106,8 +113,8 @@ function App() {
 								key={question.id}
 								questionId={question.id}
 								questionText={question.text}
-								answer={answersMap.get( question.id )}
-								updateAnswer={updateAnswer}
+								response={responsesMap.get( question.id )}
+								updateResponse={updateResponse}
 							/>
 						)
 					case QuestionType.MultipleAnswer:
@@ -117,8 +124,8 @@ function App() {
 								questionId={question.id}
 								questionText={question.text}
 								answerChoices={question.answers}
-								answer={answersMap.get( question.id )}
-								updateAnswer={updateAnswer}
+								response={responsesMap.get( question.id )}
+								updateResponse={updateResponse}
 							/>
 						)
 					}
@@ -142,8 +149,9 @@ type Question = {
 	answers: string[] 
 }
 
-export type Answer = {
+export type Response = {
 	questionId: number
+	isText?: boolean
 	value: number | string
 }
 
@@ -151,8 +159,8 @@ export interface ComponentProps {
 	questionId: number
 	questionText: string
 	answerChoices?: string[]
-	answer?: Answer
-	updateAnswer: ( answer: Answer ) => void
+	response?: Response
+	updateResponse: ( response: Response ) => void
 }
 
 enum QuestionType {
