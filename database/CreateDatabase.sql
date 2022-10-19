@@ -63,7 +63,8 @@ CREATE TABLE "CodingExam".StudentResponse
 	TextResponse VARCHAR(300), 
 	AnswerResponse INT,
 	QuestionID INT NOT NULL REFERENCES "CodingExam".ExamQuestion(QuestionID),
-	CanvasUserID VARCHAR(60) NOT NULL REFERENCES "CodingExam".Users(CanvasUserID)
+	CanvasUserID VARCHAR(60) NOT NULL REFERENCES "CodingExam".Users(CanvasUserID),
+	UNIQUE(QuestionID, CanvasUserID)
 );
 
 CREATE USER codingexam WITH PASSWORD 'password';
