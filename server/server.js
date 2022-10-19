@@ -1,4 +1,4 @@
-//Copyright 2022 under MIT License
+// Copyright 2022 under MIT License
 
 // Create the app
 const app = require( "./app" )

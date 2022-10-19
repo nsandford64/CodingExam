@@ -19,7 +19,7 @@
 		"scope": "typescriptreact, javascript",
 		"prefix": "copyright",
 		"body": [
-			"//Copyright 2022 under MIT License"
+			"// Copyright 2022 under MIT License"
 		]
 	},
 	"New File": {

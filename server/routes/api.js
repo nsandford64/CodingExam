@@ -1,4 +1,4 @@
-//Copyright 2022 under MIT License
+// Copyright 2022 under MIT License
 const express = require( "express" )
 const router = express.Router()
 const { Pool } = require( "pg" )
