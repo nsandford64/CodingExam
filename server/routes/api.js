@@ -53,36 +53,53 @@ router.get( "/questions", async function( req, res ) {
 	} )
 } )
 
+router.get( "/responses", async ( req, res ) => {
+	const pool = new Pool( credentials )
+
+	const results = await pool.query( `
+		SELECT SR.QuestionID, SR.IsTextResponse, SR.TextResponse, SR.AnswerResponse
+		FROM "CodingExam".StudentResponse SR 
+		INNER JOIN "CodingExam".ExamQuestion EQ ON EQ.QuestionID = SR.QuestionID
+		INNER JOIN "CodingExam".Exam E ON E.ExamID = EQ.ExamID
+		WHERE E.CanvasExamID = 'a94f149b-336c-414f-a05b-8b193322cbd8' AND SR.CanvasUserID = '668ce32912fc74ec7e60cc59f32f304dc4379617'
+		ORDER BY SR.QuestionID
+	` )
+
+	res.send(
+		JSON.stringify( results.rows )
+	)
+} )
+
 /**
  * Inserts an answer into the StudentResponse table in the database
  */
 router.post( "/", async ( req, res ) => {
 	console.log( req.body )
-	console.log( req.body[0] )
 	const pool = new Pool( credentials )
-
-	/*
-	await req.body.forEach( req.body => {
-		pool.query( `
-			INSERT INTO "CodingExam".StudentResponse(IsTextResponse, AnswerResponse, QuestionID, CanvasUserID)
-			VALUES (FALSE, ${answer.answerresponse}, ${answer.questionid}, ${answer.userid});
-		` )
+	
+	await req.body.forEach( answer => {
+		if ( typeof answer.value === "string" ) {
+			console.log( "was a string" )
+			pool.query( `
+				INSERT INTO "CodingExam".StudentResponse(IsTextResponse, TextResponse, QuestionID, CanvasUserID)
+				VALUES (TRUE, '${answer.value}', ${answer.questionId}, '668ce32912fc74ec7e60cc59f32f304dc4379617');
+			` )
+		}
+		else {
+			console.log ( "was an int" )
+			pool.query( `
+				INSERT INTO "CodingExam".StudentResponse(IsTextResponse, AnswerResponse, QuestionID, CanvasUserID)
+				VALUES (FALSE, ${answer.value}, ${answer.questionId}, '668ce32912fc74ec7e60cc59f32f304dc4379617');
+			` )
+		}
 	} )
-
-	/*
-	const results = await pool.query( `
-		SELECT *
-		FROM "CodingExam".StudentResponse
-		WHERE QuestionID = ${req.body.questionID};
-	` )
-	*/
 
 	await pool.end()
 
 	/* Respond a success message to the poster */
-	res.send( "success" 
-		//answer: `You requested: ${results.rows[results.rows.length - 1].answerresponse}`
-	)
+	res.send( {
+		"response": "Valid submission"
+	} )
 	
 } )
 

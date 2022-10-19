@@ -37,6 +37,18 @@ function App() {
 			setQuestions( questions )
 		}
 
+		const initResponses = async () => {
+			const responses = await fetch( "http://localhost:9000/api/responses", {
+				headers: {
+					"examID": "a94f149b-336c-414f-a05b-8b193322cbd8",
+					"userID": "668ce32912fc74ec7e60cc59f32f304dc4379617"
+				}
+			} )
+
+			const json = await responses.json()
+			console.log( json )
+		}
+
 		initQuestions()
 	}, [] )
 
@@ -47,7 +59,7 @@ function App() {
      
 			// Adding body or contents to send
 			body: JSON.stringify(
-				Array.from( answersMap.entries() )
+				Array.from( answersMap.values() )
 			),
      
 			// Adding headers to the request
