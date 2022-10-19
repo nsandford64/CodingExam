@@ -15,10 +15,18 @@
 	// 	],
 	// 	"description": "Log output to console"
 	// }
+	"Copyright": {
+		"scope": "typescriptreact, javascript",
+		"prefix": "copyright",
+		"body": [
+			"//Copyright 2022 under MIT License"
+		]
+	},
 	"New File": {
 		"scope": "typescriptreact",
 		"prefix": "newfile",
 		"body": [
+			"// Copyright 2022 under MIT License",
 			"import * as React from \"react\"",
 			"import styled from \"styled-components\""
 		]

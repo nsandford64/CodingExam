@@ -1,12 +1,16 @@
+// Copyright 2022 under MIT License
 import React from "react"
 import ReactDOM from "react-dom/client"
 import "./index.css"
-import App from "./App"
+import { App } from "./App"
 import reportWebVitals from "./reportWebVitals"
 
+// Find root element
 const root = ReactDOM.createRoot(
 	document.getElementById( "root" ) as HTMLElement
 )
+
+// Render the App component on the root element
 root.render(
 	<App />
 )

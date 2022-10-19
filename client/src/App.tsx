@@ -1,3 +1,4 @@
+// Copyright 2022 under MIT License
 import { Button, Intent } from "@blueprintjs/core"
 import React from "react"
 import styled from "styled-components"
@@ -6,27 +7,49 @@ import { MultipleChoice } from "./components/multipleChoice"
 import { ShortAnswer } from "./components/shortAnswer"
 import { TrueFalse } from "./components/trueFalse"
 
+/**
+ * Style for the App
+ */
 const StyledApp = styled.div`
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 `
 
+/**
+ * Container to hold the exam questions
+ */
 const StyledQuestionsContainer = styled.div`
 `
 
+/**
+ * App Component
+ * 
+ * Main entry to the application - this renders an exam and displays
+ * each question to the user. It also handles submission of the exam
+ * to the database.
+ */
+export const App = React.memo( () => {
 
-function App() {
+	// Holds an array of questions for the given exam
 	const [ questions, setQuestions ] = React.useState( [] as Question[] )
+	// Holds a map that maps each response to its questionId
 	const [ responsesMap, setResponsesMap ] = React.useState( new Map<number, Response>() )
 
+	// Updates the responsesMap to contain a new response for a given questionId
 	const updateResponse = React.useCallback( ( response: Response ) => {
 		setResponsesMap( new Map<number, Response>( responsesMap.set( response.questionId, response ) ) )
 	}, [ responsesMap ] )
 
+	/**
+	 * Runs on render - it pulls in the questions for a given examID (this will
+	 * eventually be dynamic). It also pulls in responses from the database,
+	 * populating the app if the user has progress in the exam.
+	 */
 	React.useEffect( () => {
+		// Initialize questions and responses to those questions
 		const initQuestions = async () => {
-			/* Fetch exam questions */
+			// Fetch exam questions
 			let data = await fetch( "http://localhost:9000/api/questions", {
 				headers: {
 					"examID": "1"
@@ -36,7 +59,7 @@ function App() {
 			let json  = await data.json()
 			const questions: Question[] = json.questions
 
-			/* Fetch exam responses (if there are any) */
+			// Fetch exam responses (if there are any)
 			data = await fetch( "http://localhost:9000/api/responses", {
 				headers: {
 					"examID": "a94f149b-336c-414f-a05b-8b193322cbd8",
@@ -47,40 +70,48 @@ function App() {
 			json = await data.json()
 			const responses: Response[] = json.responses
 
+			// Initialize the responsesMap
 			const newResponsesMap = new Map<number, Response>()
 			responses.forEach( response => {
 				newResponsesMap.set( response.questionId, response )
 			} )
 
+			// Update the state
 			setQuestions( questions )
 			setResponsesMap( newResponsesMap )
 		}
 
+		// Call the async function
 		initQuestions()
 	}, [] )
 
+	/**
+	 * Runs when the submit button is pressed - posts each
+	 * response in the responsesMap to update the database
+	 */
 	const submit = React.useCallback( async () => {
-		const res = await fetch( "http://localhost:9000/api", {
-			// Adding method type
-			method: "POST",
+		try {
+			await fetch( "http://localhost:9000/api", {
+				// Adding method type
+				method: "POST",
      
-			// Adding body or contents to send
-			body: JSON.stringify(
-				Array.from( responsesMap.values() )
-			),
+				// Adding body or contents to send
+				body: JSON.stringify(
+					Array.from( responsesMap.values() )
+				),
      
-			// Adding headers to the request
-			headers: {
-				"Content-type": "application/json; charset=UTF-8"
-			}
-		} )
-
-		const json = await res.json()
-		console.log( json )
-
+				// Adding headers to the request
+				headers: {
+					"Content-type": "application/json; charset=UTF-8"
+				}
+			} )
+		} 
+		catch( e ) {
+			console.error( e )
+		}
 	}, [ responsesMap ] )
 
-	
+	// Render the component
 	return (
 		<StyledApp>
 			<StyledQuestionsContainer>
@@ -139,30 +170,56 @@ function App() {
 			</StyledQuestionsContainer>
 		</StyledApp>
 	)
-}
-export default App
+} )
+App.displayName = "App"
 
+/**
+ * Question Type
+ * 
+ * This type defines what an exam question should look like.
+ * Each question has a unique id, text, type, and an array of answers
+ */
 type Question = {
-	id: number
-	text: string
-	type: QuestionType
-	answers: string[] 
+	id: number // Unique id for identification in the database
+	text: string // Question text to display to user
+	type: QuestionType // Type of the Question
+	answers: string[] // Array of answers choices to present to the user
 }
 
+/**
+ * Response Type
+ * 
+ * This type defines what a response from the user should look like.
+ * Each response has a questionId, isText flag, and a value
+ */
 export type Response = {
-	questionId: number
-	isText?: boolean
-	value: number | string
+	questionId: number // Specific questionId that this Response relates to
+	isText?: boolean // Whether this is a text Response
+	value: number | string // The actual value of the Response 
 }
 
+/**
+ * ComponentProps Interface
+ * 
+ * This interface establishes a common point between each question
+ * component.
+ * Each component has a questionId, questionText, array of answerChoices,
+ * a Response object, and a way to update that Response object
+ */
 export interface ComponentProps {
-	questionId: number
-	questionText: string
-	answerChoices?: string[]
-	response?: Response
-	updateResponse: ( response: Response ) => void
+	questionId: number // Specific questionId of the given question
+	questionText: string // Question text to display to the user
+	answerChoices?: string[] // Array of answer choices to present to the user
+	response?: Response // Response object that the user has inputted
+	updateResponse: ( response: Response ) => void // Delegate to update the given Response
 }
 
+/**
+ * QuestionType Enum
+ * 
+ * This enum maps a database QuestionType to a more readable
+ * format for development.
+ */
 enum QuestionType {
 	MultipleChoice = 1,
 	ShortAnswer = 2,
