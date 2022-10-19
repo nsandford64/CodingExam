@@ -82,7 +82,7 @@ router.post( "/", async ( req, res ) => {
 			console.log( "was a string" )
 			pool.query( `
 				INSERT INTO "CodingExam".StudentResponse(IsTextResponse, TextResponse, QuestionID, CanvasUserID)
-				VALUES (TRUE, 'good', 3, '668ce32912fc74ec7e60cc59f32f304dc4379617')
+				VALUES (TRUE, '${answer.value}', ${answer.questionid}, '668ce32912fc74ec7e60cc59f32f304dc4379617')
 				ON CONFLICT (QuestionID, CanvasUserID) DO UPDATE
 					SET TextResponse = '${answer.value}';
 			` )
