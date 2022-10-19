@@ -82,21 +82,18 @@ router.get( "/responses", async ( req, res ) => {
  * Inserts an answer into the StudentResponse table in the database
  */
 router.post( "/", async ( req, res ) => {
-	console.log( req.body )
 	const pool = new Pool( credentials )
 	
 	await req.body.forEach( answer => {
 		if ( typeof answer.value === "string" ) {
-			console.log( "was a string" )
 			pool.query( `
 				INSERT INTO "CodingExam".StudentResponse(IsTextResponse, TextResponse, QuestionID, CanvasUserID)
-				VALUES (TRUE, '${answer.value}', ${answer.questionid}, '668ce32912fc74ec7e60cc59f32f304dc4379617')
+				VALUES (TRUE, '${answer.value}', ${answer.questionId}, '668ce32912fc74ec7e60cc59f32f304dc4379617')
 				ON CONFLICT (QuestionID, CanvasUserID) DO UPDATE
 					SET TextResponse = '${answer.value}';
 			` )
 		}
 		else {
-			console.log ( "was an int" )
 			pool.query( `
 				INSERT INTO "CodingExam".StudentResponse(IsTextResponse, AnswerResponse, QuestionID, CanvasUserID)
 				VALUES (FALSE, ${answer.value}, ${answer.questionId}, '668ce32912fc74ec7e60cc59f32f304dc4379617')
@@ -112,7 +109,6 @@ router.post( "/", async ( req, res ) => {
 	res.send( {
 		"response": "Valid submission"
 	} )
-	
 } )
 
 module.exports = router
