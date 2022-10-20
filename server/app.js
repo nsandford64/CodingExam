@@ -9,10 +9,11 @@ const cors = require( "cors" )
 const app = express()
 app.use( express.static( path.join( __dirname, "../client/build/" ) ) )
 
+// Require routers
 const apiRouter = require( "./routes/api" )
 const ltiRouter = require( "./routes/lti" )
 
-// view engine setup
+// View engine setup
 app.set( "views", path.join( __dirname, "views" ) )
 app.set( "view engine", "jade" )
 
@@ -23,15 +24,16 @@ app.use( express.urlencoded( { extended: false } ) )
 app.use( bodyParser.urlencoded( {extended: false} ) )
 app.use( cookieParser() )
 
+// Setup routers for the app
 app.use( ltiRouter )
 app.use( "/api", apiRouter )
 
-// catch 404 and forward to error handler
+// Catch 404 and forward to error handler
 app.use( function( req, res, next ) {
 	next( createError( 404 ) )
 } )
 
-// error handler
+// Error handler
 app.use( function( err, req, res ) {
 	// set locals, only providing error in development
 	res.locals.message = err.message
@@ -41,5 +43,4 @@ app.use( function( err, req, res ) {
 	res.status( err.status || 500 )
 	res.render( "error" )
 } )
-
 module.exports = app

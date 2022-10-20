@@ -1,7 +1,8 @@
+// Copyright 2022 under MIT License
 const express = require( "express" )
 const router = express.Router()
 
-/* GET home page. */
+// Get homepage for the Express app
 router.get( "/", function( req, res ) {
 	res.render( "index", { title: "Express" } )
 } )

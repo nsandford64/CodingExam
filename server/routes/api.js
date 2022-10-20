@@ -3,7 +3,7 @@ const express = require( "express" )
 const router = express.Router()
 const { Pool } = require( "pg" )
 
-/* Sample credentials for PostGres database */
+// Sample credentials for PostGres database
 const credentials = {
 	user: "codingexam",
 	host: "localhost",
@@ -12,12 +12,11 @@ const credentials = {
 	port: 5432
 }
 
-/**
- * Get a list of questions from the requested examid
- */
+// Get a list of questions from the requested examid
 router.get( "/questions", async function( req, res ) {
 	const pool = new Pool( credentials )
 
+	// Query the database for a list of questions with a given ExamID
 	const results = await pool.query( `
 		SELECT EQ.QuestionID, EQ.QuestionText, EQ.HasCorrectAnswers, EQ.QuestionType, EQ.ExamID,
 			QA.AnswerID, QA.CorrectAnswer, QA.AnswerIndex, QA.AnswerText
@@ -29,6 +28,7 @@ router.get( "/questions", async function( req, res ) {
 
 	await pool.end()
 
+	// Map each row in results to a new Question object that can be parsed by the Client
 	const map = new Map()
 	results.rows.forEach( row => map.set( row.questionid, {
 		id: row.questionid,
@@ -47,12 +47,13 @@ router.get( "/questions", async function( req, res ) {
 		} )
 	} )
 
-	/* Sends a question object to the requester */
+	// Sends an array of questions to the Client
 	res.send( {
 		questions: Array.from( map.values() )
 	} )
 } )
 
+// Get a list of responses for a given ExamID and CanvasUserID
 router.get( "/responses", async ( req, res ) => {
 	const pool = new Pool( credentials )
 
@@ -65,6 +66,7 @@ router.get( "/responses", async ( req, res ) => {
 		ORDER BY SR.QuestionID
 	` )
 
+	// Map all result rows into an array of Response objects
 	const responses = results.rows.map( row => {
 		return {
 			questionId: row.questionid,
@@ -73,42 +75,41 @@ router.get( "/responses", async ( req, res ) => {
 		}
 	} )
 
+	// Send an array of Responses to the Client
 	res.send( {
 		responses: responses
 	} )
 } )
 
-/**
- * Inserts an answer into the StudentResponse table in the database
- */
+// Inserts an answer into the StudentResponse table in the database
 router.post( "/", async ( req, res ) => {
 	const pool = new Pool( credentials )
 	
-	await req.body.forEach( answer => {
-		if ( typeof answer.value === "string" ) {
+	// Insert each response into the StudentResponse table
+	await req.body.forEach( response => {
+		if ( typeof response.value === "string" ) {
 			pool.query( `
 				INSERT INTO "CodingExam".StudentResponse(IsTextResponse, TextResponse, QuestionID, CanvasUserID)
-				VALUES (TRUE, '${answer.value}', ${answer.questionId}, '668ce32912fc74ec7e60cc59f32f304dc4379617')
+				VALUES (TRUE, '${response.value}', ${response.questionId}, '668ce32912fc74ec7e60cc59f32f304dc4379617')
 				ON CONFLICT (QuestionID, CanvasUserID) DO UPDATE
-					SET TextResponse = '${answer.value}';
+					SET TextResponse = '${response.value}';
 			` )
 		}
 		else {
 			pool.query( `
 				INSERT INTO "CodingExam".StudentResponse(IsTextResponse, AnswerResponse, QuestionID, CanvasUserID)
-				VALUES (FALSE, ${answer.value}, ${answer.questionId}, '668ce32912fc74ec7e60cc59f32f304dc4379617')
+				VALUES (FALSE, ${response.value}, ${response.questionId}, '668ce32912fc74ec7e60cc59f32f304dc4379617')
 				ON CONFLICT (QuestionID, CanvasUserID) DO UPDATE
-					SET AnswerResponse = ${answer.value};
+					SET AnswerResponse = ${response.value};
 			` )
 		}
 	} )
 
 	await pool.end()
 
-	/* Respond a success message to the poster */
+	// Respond a success message to the poster
 	res.send( {
 		"response": "Valid submission"
 	} )
 } )
-
 module.exports = router
