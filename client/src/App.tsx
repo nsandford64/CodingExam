@@ -55,7 +55,7 @@ export const App = React.memo( () => {
 			// Fetch exam questions
 			let data = await fetch( "http://localhost:9000/api/questions", {
 				headers: {
-					"examID": "1"
+					"examID": "a94f149b-336c-414f-a05b-8b193322cbd8"
 				} 
 			} )
 

@@ -14,15 +14,17 @@ const credentials = {
 
 // Get a list of questions from the requested examid
 router.get( "/questions", async function( req, res ) {
+	var examID = req.headers.examid
 	const pool = new Pool( credentials )
 
 	// Query the database for a list of questions with a given ExamID
 	const results = await pool.query( `
 		SELECT EQ.QuestionID, EQ.QuestionText, EQ.HasCorrectAnswers, EQ.QuestionType, EQ.ExamID,
 			QA.AnswerID, QA.CorrectAnswer, QA.AnswerIndex, QA.AnswerText
-		FROM "CodingExam".ExamQuestion EQ
+		FROM "CodingExam".Exam E
+		INNER JOIN "CodingExam".ExamQuestion EQ ON EQ.ExamID = E.ExamID
 		LEFT JOIN "CodingExam".QuestionAnswer QA ON QA.QuestionID = EQ.QuestionID
-		WHERE ExamID = 1
+		WHERE E.CanvasExamID = '${examID}'
 		ORDER BY EQ.QuestionID, QA.AnswerIndex
 	` )
 
@@ -55,6 +57,8 @@ router.get( "/questions", async function( req, res ) {
 
 // Get a list of responses for a given ExamID and CanvasUserID
 router.get( "/responses", async ( req, res ) => {
+	var examID = req.headers.examid
+	var userID = req.headers.userid
 	const pool = new Pool( credentials )
 
 	const results = await pool.query( `
@@ -62,7 +66,7 @@ router.get( "/responses", async ( req, res ) => {
 		FROM "CodingExam".StudentResponse SR 
 		INNER JOIN "CodingExam".ExamQuestion EQ ON EQ.QuestionID = SR.QuestionID
 		INNER JOIN "CodingExam".Exam E ON E.ExamID = EQ.ExamID
-		WHERE E.CanvasExamID = 'a94f149b-336c-414f-a05b-8b193322cbd8' AND SR.CanvasUserID = '668ce32912fc74ec7e60cc59f32f304dc4379617'
+		WHERE E.CanvasExamID = '${examID}' AND SR.CanvasUserID = '${userID}'
 		ORDER BY SR.QuestionID
 	` )
 
