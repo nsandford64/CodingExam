@@ -83,33 +83,42 @@ router.get( "/responses", async ( req, res ) => {
 
 // Inserts an answer into the StudentResponse table in the database
 router.post( "/", async ( req, res ) => {
-	const pool = new Pool( credentials )
+	//TODO: implement sending of userID from client
+	if( req.headers.userid == undefined ) {
+		res.send( {
+			"response": "Invalid submission"
+		} )
+	}
+	else {
+		var userID = req.headers.userid
+		const pool = new Pool( credentials )
 	
-	// Insert each response into the StudentResponse table
-	await req.body.forEach( response => {
-		if ( typeof response.value === "string" ) {
-			pool.query( `
+		// Insert each response into the StudentResponse table
+		await req.body.forEach( response => {
+			if ( typeof response.value === "string" ) {
+				pool.query( `
 				INSERT INTO "CodingExam".StudentResponse(IsTextResponse, TextResponse, QuestionID, CanvasUserID)
-				VALUES (TRUE, '${response.value}', ${response.questionId}, '668ce32912fc74ec7e60cc59f32f304dc4379617')
+				VALUES (TRUE, '${response.value}', ${response.questionId}, '${userID}')
 				ON CONFLICT (QuestionID, CanvasUserID) DO UPDATE
 					SET TextResponse = '${response.value}';
 			` )
-		}
-		else {
-			pool.query( `
+			}
+			else {
+				pool.query( `
 				INSERT INTO "CodingExam".StudentResponse(IsTextResponse, AnswerResponse, QuestionID, CanvasUserID)
-				VALUES (FALSE, ${response.value}, ${response.questionId}, '668ce32912fc74ec7e60cc59f32f304dc4379617')
+				VALUES (FALSE, ${response.value}, ${response.questionId}, '${userID}')
 				ON CONFLICT (QuestionID, CanvasUserID) DO UPDATE
 					SET AnswerResponse = ${response.value};
 			` )
-		}
-	} )
+			}
+		} )
 
-	await pool.end()
+		await pool.end()
 
-	// Respond a success message to the poster
-	res.send( {
-		"response": "Valid submission"
-	} )
+		// Respond a success message to the poster
+		res.send( {
+			"response": "Valid submission"
+		} )
+	}
 } )
 module.exports = router

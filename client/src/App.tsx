@@ -90,11 +90,12 @@ export const App = React.memo( () => {
 	 * response in the responsesMap to update the database
 	 */
 	const submit = React.useCallback( async () => {
+		console.log( JSON.stringify( Array.from( responsesMap.values() ) ) )
 		try {
 			await fetch( "http://localhost:9000/api", {
 				// Adding method type
 				method: "POST",
-     
+
 				// Adding body or contents to send
 				body: JSON.stringify(
 					Array.from( responsesMap.values() )
@@ -102,7 +103,8 @@ export const App = React.memo( () => {
      
 				// Adding headers to the request
 				headers: {
-					"Content-type": "application/json; charset=UTF-8"
+					"Content-type": "application/json; charset=UTF-8",
+					"userID": "668ce32912fc74ec7e60cc59f32f304dc4379617"
 				}
 			} )
 		} 
