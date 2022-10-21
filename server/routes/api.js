@@ -15,10 +15,16 @@ const credentials = {
 // Get a list of questions from the requested examid
 router.get( "/questions", async function( req, res ) {
 	var examID = req.headers.examid
-	const pool = new Pool( credentials )
+	if ( !examID ) {
+		res.send( {
+			"response": "Invalid request"
+		} )
+	}
+	else {
+		const pool = new Pool( credentials )
 
-	// Query the database for a list of questions with a given ExamID
-	const results = await pool.query( `
+		// Query the database for a list of questions with a given ExamID
+		const results = await pool.query( `
 		SELECT EQ.QuestionID, EQ.QuestionText, EQ.HasCorrectAnswers, EQ.QuestionType, EQ.ExamID,
 			QA.AnswerID, QA.CorrectAnswer, QA.AnswerIndex, QA.AnswerText
 		FROM "CodingExam".Exam E
@@ -28,40 +34,47 @@ router.get( "/questions", async function( req, res ) {
 		ORDER BY EQ.QuestionID, QA.AnswerIndex
 	` )
 
-	await pool.end()
+		await pool.end()
 
-	// Map each row in results to a new Question object that can be parsed by the Client
-	const map = new Map()
-	results.rows.forEach( row => map.set( row.questionid, {
-		id: row.questionid,
-		text: row.questiontext,
-		type: row.questiontype,
-		answers: []
-	} ) )
-	results.rows.forEach( row => {
-		const object = map.get( row.questionid )
-		const answers = object.answers
+		// Map each row in results to a new Question object that can be parsed by the Client
+		const map = new Map()
+		results.rows.forEach( row => map.set( row.questionid, {
+			id: row.questionid,
+			text: row.questiontext,
+			type: row.questiontype,
+			answers: []
+		} ) )
+		results.rows.forEach( row => {
+			const object = map.get( row.questionid )
+			const answers = object.answers
 		
-		const newAnswers = [ ...answers, row.answertext ]
-		map.set( row.questionid, {
-			...object,
-			answers: newAnswers
+			const newAnswers = [ ...answers, row.answertext ]
+			map.set( row.questionid, {
+				...object,
+				answers: newAnswers
+			} )
 		} )
-	} )
 
-	// Sends an array of questions to the Client
-	res.send( {
-		questions: Array.from( map.values() )
-	} )
+		// Sends an array of questions to the Client
+		res.send( {
+			questions: Array.from( map.values() )
+		} )
+	}
 } )
 
 // Get a list of responses for a given ExamID and CanvasUserID
 router.get( "/responses", async ( req, res ) => {
 	var examID = req.headers.examid
 	var userID = req.headers.userid
-	const pool = new Pool( credentials )
+	if ( !examID || !userID ) {
+		res.send( {
+			"response": "Invalid request"
+		} )
+	}
+	else {
+		const pool = new Pool( credentials )
 
-	const results = await pool.query( `
+		const results = await pool.query( `
 		SELECT SR.QuestionID, SR.IsTextResponse, SR.TextResponse, SR.AnswerResponse
 		FROM "CodingExam".StudentResponse SR 
 		INNER JOIN "CodingExam".ExamQuestion EQ ON EQ.QuestionID = SR.QuestionID
@@ -70,19 +83,20 @@ router.get( "/responses", async ( req, res ) => {
 		ORDER BY SR.QuestionID
 	` )
 
-	// Map all result rows into an array of Response objects
-	const responses = results.rows.map( row => {
-		return {
-			questionId: row.questionid,
-			isText: row.istextresponse,
-			value: row.istextresponse ? row.textresponse : row.answerresponse
-		}
-	} )
+		// Map all result rows into an array of Response objects
+		const responses = results.rows.map( row => {
+			return {
+				questionId: row.questionid,
+				isText: row.istextresponse,
+				value: row.istextresponse ? row.textresponse : row.answerresponse
+			}
+		} )
 
-	// Send an array of Responses to the Client
-	res.send( {
-		responses: responses
-	} )
+		// Send an array of Responses to the Client
+		res.send( {
+			responses: responses
+		} )
+	}
 } )
 
 // Inserts an answer into the StudentResponse table in the database
