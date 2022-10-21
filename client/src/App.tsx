@@ -219,6 +219,5 @@ enum QuestionType {
 	MultipleChoice = 1,
 	ShortAnswer = 2,
 	TrueFalse = 3,
-	MultipleAnswer = 4,
 }
 
