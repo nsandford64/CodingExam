@@ -2,7 +2,6 @@
 import { Button, Intent } from "@blueprintjs/core"
 import React from "react"
 import styled from "styled-components"
-import { MultipleAnswer } from "./components/multipleAnswer"
 import { MultipleChoice } from "./components/multipleChoice"
 import { ShortAnswer } from "./components/shortAnswer"
 import { TrueFalse } from "./components/trueFalse"
@@ -42,7 +41,7 @@ export const App = React.memo( () => {
 	}, [ responsesMap ] )
 
 	//displays that answers have been submitted when "Submit" is clicked
-	const [ state, setState ] = React.useState( "" )
+	const [ responseState, setState ] = React.useState( "" )
 
 	/**
 	 * Runs on render - it pulls in the questions for a given examID (this will
@@ -121,7 +120,7 @@ export const App = React.memo( () => {
 	// Render the component
 	return (
 		<StyledApp>
-			<h1>{state}</h1>
+			<h1>{responseState}</h1>
 			<StyledQuestionsContainer>
 				{questions.map( question => {
 					switch( question.type ) {
@@ -152,17 +151,6 @@ export const App = React.memo( () => {
 								key={question.id}
 								questionId={question.id}
 								questionText={question.text}
-								response={responsesMap.get( question.id )}
-								updateResponse={updateResponse}
-							/>
-						)
-					case QuestionType.MultipleAnswer:
-						return (
-							<MultipleAnswer 
-								key={question.id}
-								questionId={question.id}
-								questionText={question.text}
-								answerChoices={question.answers}
 								response={responsesMap.get( question.id )}
 								updateResponse={updateResponse}
 							/>
