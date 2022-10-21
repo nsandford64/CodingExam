@@ -41,6 +41,9 @@ export const App = React.memo( () => {
 		setResponsesMap( new Map<number, Response>( responsesMap.set( response.questionId, response ) ) )
 	}, [ responsesMap ] )
 
+	//displays that answers have been submitted when "Submit" is clicked
+	const [ state, setState ] = React.useState( "" )
+
 	/**
 	 * Runs on render - it pulls in the questions for a given examID (this will
 	 * eventually be dynamic). It also pulls in responses from the database,
@@ -92,7 +95,7 @@ export const App = React.memo( () => {
 	const submit = React.useCallback( async () => {
 		console.log( JSON.stringify( Array.from( responsesMap.values() ) ) )
 		try {
-			await fetch( "http://localhost:9000/api", {
+			const res = await fetch( "http://localhost:9000/api", {
 				// Adding method type
 				method: "POST",
 
@@ -107,6 +110,8 @@ export const App = React.memo( () => {
 					"userID": "668ce32912fc74ec7e60cc59f32f304dc4379617"
 				}
 			} )
+			const json = await res.json()
+			setState( json.response )
 		} 
 		catch( e ) {
 			console.error( e )
@@ -116,6 +121,7 @@ export const App = React.memo( () => {
 	// Render the component
 	return (
 		<StyledApp>
+			<h1>{state}</h1>
 			<StyledQuestionsContainer>
 				{questions.map( question => {
 					switch( question.type ) {
