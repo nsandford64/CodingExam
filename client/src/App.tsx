@@ -34,14 +34,13 @@ export const App = React.memo( () => {
 	const [ questions, setQuestions ] = React.useState( [] as Question[] )
 	// Holds a map that maps each response to its questionId
 	const [ responsesMap, setResponsesMap ] = React.useState( new Map<number, Response>() )
+	// Displays that answers have been submitted when "Submit" is clicked
+	const [ responseState, setState ] = React.useState( "" )
 
 	// Updates the responsesMap to contain a new response for a given questionId
 	const updateResponse = React.useCallback( ( response: Response ) => {
 		setResponsesMap( new Map<number, Response>( responsesMap.set( response.questionId, response ) ) )
 	}, [ responsesMap ] )
-
-	//displays that answers have been submitted when "Submit" is clicked
-	const [ responseState, setState ] = React.useState( "" )
 
 	/**
 	 * Runs on render - it pulls in the questions for a given examID (this will
