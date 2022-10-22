@@ -1,5 +1,5 @@
 # CodingExam
-Instructions for setting up the development environment can be found in the "Developer Documentation" file in the "documentation-testing" folder.
+In this release, the app is still early in development, so it has been marked as pre-release. Instructions for setting up the development environment can be found in the "Developer Documentation" file in the "documentation-testing" folder.
 
 # Documentation
 User and developer documentation for this sprint can be found in the "documentation-testing" folder as well.
