@@ -3,6 +3,8 @@ import { Radio, RadioGroup } from "@blueprintjs/core"
 import * as React from "react"
 import styled from "styled-components"
 import { Response, ComponentProps } from "../App"
+import { useAppDispatch, useAppSelector } from "../app/hooks"
+import { examActions, selectQuestionById, selectResponseById } from "../slices/examSlice"
 
 /**
  * Style for the MultipleChoice component
@@ -19,6 +21,14 @@ const StyledMultipleChoice = styled.div`
  */
 export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 
+	// Dispatches an event to the store
+	const dispatch = useAppDispatch()
+
+	// Question from the store
+	const question = useAppSelector( state => selectQuestionById( state, props.questionId ) )
+	// Response from the store
+	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
+
 	/**
 	 * Called when the user selects one of the radio buttons - it
 	 * calls the updateResponse delegate to update the state in the App
@@ -32,19 +42,19 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 			value: parseInt( value )
 		}
 
-		// Update the responsesMap in the App
-		props.updateResponse( newResponse )
+		// Update the response in the store
+		dispatch( examActions.updateResponse( newResponse ) )
 	}, [] )
 
 	// Render the component
 	return (
 		<StyledMultipleChoice>
 			<RadioGroup
-				label={props.questionText}
+				label={question?.text}
 				onChange={handleChange}
-				selectedValue={props.response?.value}
+				selectedValue={response?.value}
 			>
-				{props.answerChoices?.map( ( choice, index ) => (
+				{question?.answers.map( ( choice, index ) => (
 					<Radio key={index} label={choice} value={index} />
 				) )}
 			</RadioGroup>

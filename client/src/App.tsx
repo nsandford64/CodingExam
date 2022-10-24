@@ -1,10 +1,13 @@
 // Copyright 2022 under MIT License
 import { Button, Intent } from "@blueprintjs/core"
 import React from "react"
+import { batch } from "react-redux"
 import styled from "styled-components"
+import { useAppDispatch, useAppSelector } from "./app/hooks"
 import { MultipleChoice } from "./components/multipleChoice"
 import { ShortAnswer } from "./components/shortAnswer"
 import { TrueFalse } from "./components/trueFalse"
+import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap } from "./slices/examSlice"
 
 /**
  * QuestionType Enum
@@ -43,17 +46,16 @@ const StyledQuestionsContainer = styled.div`
  */
 export const App = React.memo( () => {
 
-	// Holds an array of questions for the given exam
-	const [ questions, setQuestions ] = React.useState( [] as Question[] )
-	// Holds a map that maps each response to its questionId
-	const [ responsesMap, setResponsesMap ] = React.useState( new Map<number, Response>() )
+	// Dispatches an action to the Redux store
+	const dispatch = useAppDispatch()
+
+	// Array of questionIds from the Redux store
+	const questionIds = useAppSelector( selectQuestionIds )
+	// Map of responses from the store
+	const responsesMap = useAppSelector( selectResponsesMap )
+
 	// Displays that answers have been submitted when "Submit" is clicked
 	const [ responseState, setState ] = React.useState( "" )
-
-	// Updates the responsesMap to contain a new response for a given questionId
-	const updateResponse = React.useCallback( ( response: Response ) => {
-		setResponsesMap( new Map<number, Response>( responsesMap.set( response.questionId, response ) ) )
-	}, [ responsesMap ] )
 
 	/**
 	 * Runs on render - it pulls in the questions for a given examID (this will
@@ -73,6 +75,14 @@ export const App = React.memo( () => {
 			let json  = await data.json()
 			const questions: Question[] = json.questions
 
+			// Loop through questions and create ids and a map
+			const newQuestionIds: number[] = []
+			const newQuestionsMap = new Map<number, Question>()
+			questions.forEach( question => {
+				newQuestionIds.push( question.id )
+				newQuestionsMap.set( question.id, question )
+			} )
+
 			// Fetch exam responses (if there are any)
 			data = await fetch( "http://localhost:9000/api/responses", {
 				headers: {
@@ -84,15 +94,21 @@ export const App = React.memo( () => {
 			json = await data.json()
 			const responses: Response[] = json.responses
 
-			// Initialize the responsesMap
+			// Loop through responses and create ids and a map
+			const newResponseIds: number[] = []
 			const newResponsesMap = new Map<number, Response>()
 			responses.forEach( response => {
+				newResponseIds.push( response.questionId )
 				newResponsesMap.set( response.questionId, response )
 			} )
 
-			// Update the state
-			setQuestions( questions )
-			setResponsesMap( newResponsesMap )
+			// Update the store
+			batch( () => {
+				dispatch( examActions.setQuestionIds( newQuestionIds ) )
+				dispatch( examActions.setQuestionsMap( newQuestionsMap ) )
+				dispatch( examActions.setResponseIds( newResponseIds ) )
+				dispatch( examActions.setResponsesMap( newResponsesMap ) )
+			} )
 		}
 
 		// Call the async function
@@ -104,7 +120,6 @@ export const App = React.memo( () => {
 	 * response in the responsesMap to update the database
 	 */
 	const submit = React.useCallback( async () => {
-		console.log( JSON.stringify( Array.from( responsesMap.values() ) ) )
 		try {
 			const res = await fetch( "http://localhost:9000/api", {
 				// Adding method type
@@ -134,43 +149,12 @@ export const App = React.memo( () => {
 		<StyledApp>
 			<h1>{responseState}</h1>
 			<StyledQuestionsContainer>
-				{questions.map( question => {
-					switch( question.type ) {
-					case QuestionType.MultipleChoice:
-						return (
-							<MultipleChoice 
-								key={question.id}
-								questionId={question.id}
-								questionText={question.text}
-								answerChoices={question.answers}
-								response={responsesMap.get( question.id )}
-								updateResponse={updateResponse}
-							/>
-						)
-					case QuestionType.TrueFalse:
-						return (
-							<TrueFalse 
-								key={question.id}
-								questionId={question.id}
-								questionText={question.text}
-								response={responsesMap.get( question.id )}
-								updateResponse={updateResponse}
-							/>
-						)
-					case QuestionType.ShortAnswer:
-						return (
-							<ShortAnswer 
-								key={question.id}
-								questionId={question.id}
-								questionText={question.text}
-								response={responsesMap.get( question.id )}
-								updateResponse={updateResponse}
-							/>
-						)
-					default:
-						return null
-					}
-				} )}				
+				{questionIds.map( id => (
+					<QuestionSwitch 
+						key={id}
+						questionId={id}
+					/>
+				) )}
 				<Button 
 					intent={Intent.PRIMARY} 
 					style={{marginTop: "20px"}} 
@@ -182,6 +166,53 @@ export const App = React.memo( () => {
 	)
 } )
 App.displayName = "App"
+
+interface QuestionSwitchProps {
+	questionId: number
+}
+
+/**
+ * QuestionSwitch Component
+ * 
+ * This component determines the type of a given question and 
+ * returns a component of its corresponding type
+ */
+const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
+
+	// Question from the store
+	const question = useAppSelector( state => selectQuestionById( 
+		state, 
+		props.questionId 
+	) )
+
+	// Render the right component
+	switch ( question?.type ) {
+	case QuestionType.MultipleChoice:
+		return (
+			<MultipleChoice 
+				key={question.id}
+				questionId={question.id}
+			/>
+		)
+	case QuestionType.TrueFalse:
+		return (
+			<TrueFalse 
+				key={question.id}
+				questionId={question.id}
+			/>
+		)
+	case QuestionType.ShortAnswer:
+		return (
+			<ShortAnswer 
+				key={question.id}
+				questionId={question.id}
+			/>
+		)
+	default:
+		return null
+	}
+} )
+QuestionSwitch.displayName = "QuestionSwitch"
 
 /**
  * Question Type
@@ -218,8 +249,4 @@ export type Response = {
  */
 export interface ComponentProps {
 	questionId: number // Specific questionId of the given question
-	questionText: string // Question text to display to the user
-	answerChoices?: string[] // Array of answer choices to present to the user
-	response?: Response // Response object that the user has inputted
-	updateResponse: ( response: Response ) => void // Delegate to update the given Response
 }
