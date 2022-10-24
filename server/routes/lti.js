@@ -8,6 +8,8 @@ const router = express.Router()
 
 // Get the main entry point to the Client app
 router.get( "/", ( req, res ) => {
+	console.log( "Here" )
+	/*
 	const token = generateAccessToken( { 
 		assignmentID: req.body.ext_lti_assignment_id,
 		username: req.body.user_id
@@ -20,11 +22,13 @@ router.get( "/", ( req, res ) => {
 
 	//res.set( { "content-type": "text/html", "token": token.toString() } )
 	//res.sendFile( path.join( __dirname, "../../client/build/index.html" ) )
+	*/
 	
 } )
 
 // Handles a POST request from the LTI consumer, in this case Canvas
 router.post( "/", ( req, res ) => {
+	console.log( "THERE" )
 	// Creates an LTI provider object with the hardcoded key and secret
 	const provider = new lti.Provider( "Codekey", "Keysecret" )
 

@@ -7,7 +7,6 @@ const logger = require( "morgan" )
 const cors = require( "cors" )
 
 const app = express()
-app.use( express.static( path.join( __dirname, "../client/build/" ) ) )
 
 // Require routers
 const apiRouter = require( "./routes/api" )
@@ -27,6 +26,7 @@ app.use( cookieParser() )
 // Setup routers for the app
 app.use( ltiRouter )
 app.use( "/api", apiRouter )
+app.use( express.static( path.join( __dirname, "../client/build/" ) ) )
 
 // Catch 404 and forward to error handler
 app.use( function( req, res, next ) {
