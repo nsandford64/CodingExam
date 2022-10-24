@@ -7,6 +7,19 @@ import { ShortAnswer } from "./components/shortAnswer"
 import { TrueFalse } from "./components/trueFalse"
 
 /**
+ * QuestionType Enum
+ * 
+ * This enum maps a database QuestionType to a more readable
+ * format for development.
+ */
+enum QuestionType {
+	MultipleChoice = 1,
+	ShortAnswer = 2,
+	TrueFalse = 3,
+	MultipleAnswer = 4,
+}
+
+/**
  * Style for the App
  */
 const StyledApp = styled.div`
@@ -154,6 +167,8 @@ export const App = React.memo( () => {
 								updateResponse={updateResponse}
 							/>
 						)
+					default:
+						return null
 					}
 				} )}				
 				<Button 
@@ -174,7 +189,7 @@ App.displayName = "App"
  * This type defines what an exam question should look like.
  * Each question has a unique id, text, type, and an array of answers
  */
-type Question = {
+export type Question = {
 	id: number // Unique id for identification in the database
 	text: string // Question text to display to user
 	type: QuestionType // Type of the Question
@@ -208,16 +223,3 @@ export interface ComponentProps {
 	response?: Response // Response object that the user has inputted
 	updateResponse: ( response: Response ) => void // Delegate to update the given Response
 }
-
-/**
- * QuestionType Enum
- * 
- * This enum maps a database QuestionType to a more readable
- * format for development.
- */
-enum QuestionType {
-	MultipleChoice = 1,
-	ShortAnswer = 2,
-	TrueFalse = 3,
-}
-

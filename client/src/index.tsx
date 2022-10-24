@@ -1,18 +1,19 @@
-// Copyright 2022 under MIT License
 import React from "react"
-import ReactDOM from "react-dom/client"
-import "./index.css"
+import { createRoot } from "react-dom/client"
+import { Provider } from "react-redux"
+import { store } from "./app/store"
 import { App } from "./App"
 import reportWebVitals from "./reportWebVitals"
+import "./index.css"
 
-// Find root element
-const root = ReactDOM.createRoot(
-	document.getElementById( "root" ) as HTMLElement
-)
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const container = document.getElementById( "root" )!
+const root = createRoot( container )
 
-// Render the App component on the root element
 root.render(
-	<App />
+	<Provider store={store}>
+		<App />
+	</Provider>
 )
 
 // If you want to start measuring performance in your app, pass a function
