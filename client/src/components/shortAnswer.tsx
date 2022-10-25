@@ -3,6 +3,8 @@ import { Label, TextArea } from "@blueprintjs/core"
 import * as React from "react"
 import styled from "styled-components"
 import { Response, ComponentProps } from "../App"
+import { useAppDispatch, useAppSelector } from "../app/hooks"
+import { examActions, selectQuestionById, selectResponseById } from "../slices/examSlice"
 
 /**
  * Style for the ShortAnswer component
@@ -19,29 +21,35 @@ const StyledShortAnswer = styled.div`
  */
 export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
 
-	// State to hold the components current response
-	const [ response, setResponse ] = React.useState( props.response?.value || "" )
+	// Dispatches an event to the store
+	const dispatch = useAppDispatch()
 
-	// When the text box loses focus, this triggers and updates the App's responsesMap
-	const handleBlur = React.useCallback( () => {
+	// Question from the store
+	const question = useAppSelector( state => selectQuestionById( state, props.questionId ) )
+	// Response from the Store
+	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
+
+	/**
+	 * Called when a new bubble is selected - updates the store with a new Response object
+	 */
+	const handleChange = React.useCallback( ( e: React.ChangeEvent<HTMLTextAreaElement> ) => {
 		const newResponse: Response = {
 			questionId: props.questionId,
 			isText: true,
-			value: response
+			value: e.target.value
 		}
 
-		props.updateResponse( newResponse )
-	}, [ response ] )
+		dispatch( examActions.updateResponse( newResponse ) )
+	}, [] )
 
 	// Render the component
 	return (
 		<StyledShortAnswer>
-			<Label>{props.questionText}</Label>
+			<Label>{question?.text}</Label>
 			<TextArea 
-				large 
-				onBlur={handleBlur} 
-				onChange={ e => setResponse( e.target.value )}
-				value={response} 
+				large
+				onChange={handleChange}
+				value={response?.value} 
 			/>
 		</StyledShortAnswer>
 	)
