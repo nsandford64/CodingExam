@@ -3,32 +3,43 @@ const express = require( "express" )
 const lti = require( "ims-lti" )
 const path = require( "path" )
 const jwt = require( "jsonwebtoken" )
+const fs = require( "fs" )
 
 const router = express.Router()
 
 // Get the main entry point to the Client app
-router.get( "/", ( req, res ) => {
-	console.log( "Here" )
-	/*
+router.get( "/", ( req, res ) => {	
 	const token = generateAccessToken( { 
-		assignmentID: req.body.ext_lti_assignment_id,
-		username: req.body.user_id
+		assignmentID: "a94f149b-336c-414f-a05b-8b193322cbd8",
+		username: "668ce32912fc74ec7e60cc59f32f304dc4379617"
+	} )
+
+	fs.readFile( path.resolve( "../client/build/index.html" ), "utf8", ( err, data ) => {
+		if ( err ) {
+			console.error( err )
+			return res.status( 500 ).send( "An error occurred" )
+		}
+		res.send( data.replace(
+			"<div id=\"replace\"></div>",
+			`window.__INITIAL_DATA__ = '${token}'`
+		) )
 	} )
 	
-	jwt.verify( token, "token_secret", ( assignmentID, username ) => {
-		console.log( assignmentID )
-		console.log( username )        
+	/*
+	jwt.verify( token, "token_secret", ( err, object ) => {
+		console.log( object )
+		console.log( `assignmentID: ${object.assignmentID}` )
+		console.log( object.username )        
 	} )
+	*/
 
 	//res.set( { "content-type": "text/html", "token": token.toString() } )
 	//res.sendFile( path.join( __dirname, "../../client/build/index.html" ) )
-	*/
 	
 } )
 
 // Handles a POST request from the LTI consumer, in this case Canvas
 router.post( "/", ( req, res ) => {
-	console.log( "THERE" )
 	// Creates an LTI provider object with the hardcoded key and secret
 	const provider = new lti.Provider( "Codekey", "Keysecret" )
 

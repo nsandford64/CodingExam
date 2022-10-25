@@ -35,7 +35,9 @@ export const App = React.memo( () => {
 	// Holds a map that maps each response to its questionId
 	const [ responsesMap, setResponsesMap ] = React.useState( new Map<number, Response>() )
 	// Displays that answers have been submitted when "Submit" is clicked
-	const [ responseState, setState ] = React.useState( "" )
+	const [ responseState, setResponseState ] = React.useState( "" )
+	// Keeps track of the token containing the interla Canvas UserID and AssignmentID sent from the server
+	const [ token, setToken ] = React.useState( "" )
 
 	// Updates the responsesMap to contain a new response for a given questionId
 	const updateResponse = React.useCallback( ( response: Response ) => {
@@ -49,11 +51,12 @@ export const App = React.memo( () => {
 	 */
 	React.useEffect( () => {
 		// Initialize questions and responses to those questions
-		const initQuestions = async () => {
+		const initQuestions = async () => {			
+			const tokenValue = String( window.__INITIAL_DATA__ )
 			// Fetch exam questions
 			let data = await fetch( "http://localhost:9000/api/questions", {
 				headers: {
-					"examID": "a94f149b-336c-414f-a05b-8b193322cbd8"
+					"token": tokenValue
 				} 
 			} )
 
@@ -63,8 +66,7 @@ export const App = React.memo( () => {
 			// Fetch exam responses (if there are any)
 			data = await fetch( "http://localhost:9000/api/responses", {
 				headers: {
-					"examID": "a94f149b-336c-414f-a05b-8b193322cbd8",
-					"userID": "668ce32912fc74ec7e60cc59f32f304dc4379617"
+					"token": tokenValue
 				}
 			} )
 
@@ -78,11 +80,12 @@ export const App = React.memo( () => {
 			} )
 
 			// Update the state
+			setToken( tokenValue )
 			setQuestions( questions )
 			setResponsesMap( newResponsesMap )
 		}
 
-		// Call the async function
+		// Calls the async function
 		initQuestions()
 	}, [] )
 
@@ -105,11 +108,11 @@ export const App = React.memo( () => {
 				// Adding headers to the request
 				headers: {
 					"Content-type": "application/json; charset=UTF-8",
-					"userID": "668ce32912fc74ec7e60cc59f32f304dc4379617"
+					"token": token
 				}
 			} )
 			const json = await res.json()
-			setState( json.response )
+			setResponseState( json.response )
 		} 
 		catch( e ) {
 			console.error( e )
@@ -167,6 +170,12 @@ export const App = React.memo( () => {
 	)
 } )
 App.displayName = "App"
+
+declare global {
+    interface Window {
+        __INITIAL_DATA__:unknown
+    }
+}
 
 /**
  * Question Type

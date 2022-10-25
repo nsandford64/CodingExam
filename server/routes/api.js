@@ -2,6 +2,7 @@
 const express = require( "express" )
 const router = express.Router()
 const { Pool } = require( "pg" )
+const jwt = require( "jsonwebtoken" )
 
 // Sample credentials for PostGres database
 const credentials = {
@@ -14,13 +15,18 @@ const credentials = {
 
 // Get a list of questions from the requested examid
 router.get( "/questions", async function( req, res ) {
-	var examID = req.headers.examid
-	if ( !examID ) {
+
+	if ( !req.headers.token ) {
 		res.send( {
 			"response": "Invalid request"
 		} )
 	}
 	else {
+		var token = req.headers.token
+		var examID
+		jwt.verify( token, "token_secret", ( err, object ) => {
+			examID = object.assignmentID 
+		} )
 		const pool = new Pool( credentials )
 
 		// Query the database for a list of questions with a given ExamID
@@ -64,14 +70,20 @@ router.get( "/questions", async function( req, res ) {
 
 // Get a list of responses for a given ExamID and CanvasUserID
 router.get( "/responses", async ( req, res ) => {
-	var examID = req.headers.examid
-	var userID = req.headers.userid
-	if ( !examID || !userID ) {
+	if ( !req.headers.token ) {
 		res.send( {
 			"response": "Invalid request"
 		} )
 	}
 	else {
+		var token = req.headers.token
+		var examID
+		var userID
+
+		jwt.verify( token, "token_secret", ( err, object ) => {
+			examID = object.assignmentID 
+			userID = object.username        
+		} )
 		const pool = new Pool( credentials )
 
 		const results = await pool.query( `
@@ -101,14 +113,18 @@ router.get( "/responses", async ( req, res ) => {
 
 // Inserts an answer into the StudentResponse table in the database
 router.post( "/", async ( req, res ) => {
-	//TODO: implement sending of userID from client
-	if( req.headers.userid == undefined ) {
+	if( !req.headers.token ) {
 		res.send( {
 			"response": "Invalid submission"
 		} )
 	}
 	else {
-		var userID = req.headers.userid
+		
+		var token = req.headers.token
+		var userID
+		jwt.verify( token, "token_secret", ( err, object ) => {
+			userID = object.username
+		} )
 		const pool = new Pool( credentials )
 	
 		// Insert each response into the StudentResponse table
