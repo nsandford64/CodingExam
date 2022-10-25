@@ -25,6 +25,10 @@ const updateResponse = ( state: ExamState, action: PayloadAction<Response> ) => 
 	state.responsesMap.set( action.payload.questionId, action.payload )
 }
 
+const setResponseState = ( state: ExamState, action: PayloadAction<string> ) => {
+	state.responseState = action.payload
+}
+
 /**
  * Selectors
  */
@@ -49,6 +53,10 @@ export const selectResponseById = createSelector(
 	( responsesMap, id ) => responsesMap.get( id )
 )
 
+export const selectResponseState = ( state: RootState ) => (
+	state.exam.responseState
+)
+
 /**
  * Slice
  */
@@ -57,13 +65,15 @@ export interface ExamState {
 	questionsMap: Map<number, Question>
 	responseIds: number[]
 	responsesMap: Map<number, Response>
+	responseState: string
 }
 
 const initialState: ExamState = {
 	questionIds: [],
 	questionsMap: new Map<number, Question>(),
 	responseIds: [],
-	responsesMap: new Map<number, Response>()
+	responsesMap: new Map<number, Response>(),
+	responseState: ""
 }
 
 export const examSlice = createSlice( {
@@ -74,7 +84,8 @@ export const examSlice = createSlice( {
 		setQuestionsMap,
 		setResponseIds,
 		setResponsesMap,
-		updateResponse
+		updateResponse,
+		setResponseState
 	}
 } )
 

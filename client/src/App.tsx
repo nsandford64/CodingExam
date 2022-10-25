@@ -7,7 +7,7 @@ import { useAppDispatch, useAppSelector } from "./app/hooks"
 import { MultipleChoice } from "./components/multipleChoice"
 import { ShortAnswer } from "./components/shortAnswer"
 import { TrueFalse } from "./components/trueFalse"
-import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap } from "./slices/examSlice"
+import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap, selectResponseState } from "./slices/examSlice"
 
 /**
  * QuestionType Enum
@@ -54,8 +54,10 @@ export const App = React.memo( () => {
 	// Map of responses from the store
 	const responsesMap = useAppSelector( selectResponsesMap )
 
-	// Displays that answers have been submitted when "Submit" is clicked
-	const [ responseState, setState ] = React.useState( "" )
+	const responseState = useAppSelector( selectResponseState )
+
+	// Stores the JWT token
+	const [ token, setToken ] = React.useState( "" )
 
 	/**
 	 * Runs on render - it pulls in the questions for a given examID (this will
@@ -138,7 +140,7 @@ export const App = React.memo( () => {
 				}
 			} )
 			const json = await res.json()
-			setResponseState( json.response )
+			examActions.setResponseState( json.response )
 		} 
 		catch( e ) {
 			console.error( e )
