@@ -15,11 +15,13 @@ router.get( "/", ( req, res ) => {
 		roles: "Learner"
 	} )
 
+	/*
 	const token2 = generateAccessToken( {
 		assignmentID: "e81f6b6e-8755-4fec-b2d5-c471d34f2e62",
 		userID: "2b7a2ea9f28bc312753640b0c1cc537fa85c5a49",
 		roles: "Learner"
 	} )
+	*/
 
 	fs.readFile( path.resolve( "../client/build/index.html" ), "utf8", ( err, data ) => {
 		if ( err ) {
@@ -28,21 +30,9 @@ router.get( "/", ( req, res ) => {
 		}
 		res.send( data.replace(
 			"<div id=\"replace\"></div>",
-			`window.__INITIAL_DATA__ = '${token}'`
+			`window.__INITIAL_DATA__ = '${token1}'`
 		) )
 	} )
-	
-	/*
-	jwt.verify( token, "token_secret", ( err, object ) => {
-		console.log( object )
-		console.log( `assignmentID: ${object.assignmentID}` )
-		console.log( object.username )        
-	} )
-	*/
-
-	//res.set( { "content-type": "text/html", "token": token.toString() } )
-	//res.sendFile( path.join( __dirname, "../../client/build/index.html" ) )
-	
 } )
 
 // Handles a POST request from the LTI consumer, in this case Canvas
@@ -59,7 +49,6 @@ router.post( "/", ( req, res ) => {
 			res.status( 401 ).send( "Unauthorized" )
 		}
 		else {
-			console.log( req.body )
 			console.log( "valid request" )
 
 			const token = generateAccessToken( { 
@@ -68,8 +57,16 @@ router.post( "/", ( req, res ) => {
 				roles: req.body.roles
 			} )
 
-			//res.setHeader( "content-type", "text/html" )
-			//res.sendFile( path.join( __dirname, "../../client/build/index.html" ) )
+			fs.readFile( path.resolve( "../client/build/index.html" ), "utf8", ( err, data ) => {
+				if ( err ) {
+					console.error( err )
+					return res.status( 500 ).send( "An error occurred" )
+				}
+				res.send( data.replace(
+					"<div id=\"replace\"></div>",
+					`window.__INITIAL_DATA__ = '${token}'`
+				) )
+			} )
 
 		}
 	} )

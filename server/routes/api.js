@@ -25,7 +25,7 @@ router.get( "/role", async function ( req, res ) {
 		jwt.verify( token, "token_secret", ( err, object ) => {
 			role = object.roles 
 		} )
-		
+
 		res.send( {
 			role: role
 		} )
