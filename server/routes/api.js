@@ -13,6 +13,25 @@ const credentials = {
 	port: 5432
 }
 
+router.get( "/role", async function ( req, res ) {
+	if ( !req.headers.token ) {
+		res.send( {
+			"response": "Invalid request"
+		} )
+	}
+	else {
+		var token = req.headers.token
+		var role
+		jwt.verify( token, "token_secret", ( err, object ) => {
+			role = object.roles 
+		} )
+		
+		res.send( {
+			role: role
+		} )
+	}
+} )
+
 // Get a list of questions from the requested examid
 router.get( "/questions", async function( req, res ) {
 
@@ -82,7 +101,7 @@ router.get( "/responses", async ( req, res ) => {
 
 		jwt.verify( token, "token_secret", ( err, object ) => {
 			examID = object.assignmentID 
-			userID = object.username        
+			userID = object.userID        
 		} )
 		const pool = new Pool( credentials )
 
@@ -123,7 +142,7 @@ router.post( "/", async ( req, res ) => {
 		var token = req.headers.token
 		var userID
 		jwt.verify( token, "token_secret", ( err, object ) => {
-			userID = object.username
+			userID = object.userID
 		} )
 		const pool = new Pool( credentials )
 	

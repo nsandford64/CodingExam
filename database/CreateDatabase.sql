@@ -73,10 +73,10 @@ GRANT USAGE ON SCHEMA "CodingExam" TO codingexam;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA "CodingExam" TO codingexam;
 
 INSERT INTO "CodingExam".Users(CanvasUserID)
-VALUES ('668ce32912fc74ec7e60cc59f32f304dc4379617');
+VALUES ('2b7a2ea9f28bc312753640b0c1cc537fa85c5a49');
 
 INSERT INTO "CodingExam".Exam(CanvasExamID, TotalPoints)
-VALUES ('a94f149b-336c-414f-a05b-8b193322cbd8', 1);
+VALUES ('a94f149b-336c-414f-a05b-8b193322cbd8', 1), ('e81f6b6e-8755-4fec-b2d5-c471d34f2e62', 0);
 
 INSERT INTO "CodingExam".UserExam(UserID, ExamID)
 VALUES (1, 1);
@@ -87,9 +87,15 @@ VALUES ('MultipleChoice'), ('ShortAnswer'), ('TrueFalse');
 INSERT INTO "CodingExam".ExamQuestion(QuestionText, HasCorrectAnswers, QuestionType, ExamID)
 VALUES ('What''s the best programming language?', TRUE, 1, 1),
 ('Computer Science is dope.', TRUE, 3, 1),
-('How do you feel today?', FALSE, 2, 1);
+('How do you feel today?', FALSE, 2, 1),
+('What''s your favorite color', FALSE, 2, 2),
+('Which number is the biggest', TRUE, 1, 2),
+('Which number is the smallest', TRUE, 1, 2),
+('Select true for full points', TRUE, 3, 2);
 
 INSERT INTO "CodingExam".QuestionAnswer(QuestionID, CorrectAnswer, AnswerIndex, AnswerText)
 VALUES (1, TRUE, 0, 'C#'), (1, TRUE, 1, 'Java'), (1, TRUE, 2, 'TypeScript'), (1, TRUE, 3, 'Fortran'), 
-(2, TRUE, 1, 'True'), (2, FALSE, 2, 'False');
+(2, TRUE, 1, 'True'), (2, FALSE, 2, 'False'),
+(5, TRUE, 0, '6'), (5, TRUE, 1, '7'), (5, TRUE, 2, '8'), (5, TRUE, 3, '9'),
+(6, );
 
