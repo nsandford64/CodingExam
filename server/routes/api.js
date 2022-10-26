@@ -44,7 +44,6 @@ router.get( "/questions", async function( req, res ) {
 		var token = req.headers.token
 		var examID
 		jwt.verify( token, "token_secret", ( err, object ) => {
-			console.log( object )
 			examID = object.assignmentID 
 		} )
 		const pool = new Pool( credentials )
