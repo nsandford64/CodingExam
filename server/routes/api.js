@@ -20,8 +20,8 @@ router.get( "/role", async function ( req, res ) {
 		} )
 	}
 	else {
-		var token = req.headers.token
-		var role
+		const token = req.headers.token
+		let role
 		jwt.verify( token, "token_secret", ( err, object ) => {
 			role = object.roles 
 		} )
@@ -41,8 +41,8 @@ router.get( "/questions", async function( req, res ) {
 		} )
 	}
 	else {
-		var token = req.headers.token
-		var examID
+		const token = req.headers.token
+		let examID
 		jwt.verify( token, "token_secret", ( err, object ) => {
 			examID = object.assignmentID 
 		} )
@@ -95,9 +95,9 @@ router.get( "/responses", async ( req, res ) => {
 		} )
 	}
 	else {
-		var token = req.headers.token
-		var examID
-		var userID
+		const token = req.headers.token
+		let examID
+		let userID
 
 		jwt.verify( token, "token_secret", ( err, object ) => {
 			examID = object.assignmentID 
@@ -139,8 +139,8 @@ router.post( "/", async ( req, res ) => {
 	}
 	else {
 		
-		var token = req.headers.token
-		var userID
+		const token = req.headers.token
+		let userID
 		jwt.verify( token, "token_secret", ( err, object ) => {
 			userID = object.userID
 		} )
