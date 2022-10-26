@@ -20,8 +20,8 @@ router.get( "/role", async function ( req, res ) {
 		} )
 	}
 	else {
-		var token = req.headers.token
-		var role
+		const token = req.headers.token
+		let role
 		jwt.verify( token, "token_secret", ( err, object ) => {
 			role = object.roles 
 		} )
