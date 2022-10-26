@@ -1,6 +1,7 @@
 --Copyright 2022 under MIT License
 SET search_path TO 'CodingExam';
 
+DROP TABLE IF EXISTS "CodingExam".UserSessions CASCADE;
 DROP TABLE IF EXISTS "CodingExam".StudentResponse CASCADE;
 DROP TABLE IF EXISTS "CodingExam".QuestionAnswer CASCADE;
 DROP TABLE IF EXISTS "CodingExam".ExamQuestion CASCADE;
@@ -13,7 +14,16 @@ CREATE TABLE "CodingExam".Users
 (
 	UserID INT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	CanvasUserID VARCHAR(60) NOT NULL,
+	FullName VARCHAR(60) NOT NULL,
 	UNIQUE(CanvasUserID)
+);
+
+CREATE TABLE "CodingExam".UserSessions
+(
+	SessionID INT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	UserID INT NOT NULL REFERENCES "CodingExam".Users(UserID),
+	Token VARCHAR(300) NOT NULL,
+	UNIQUE(Token)
 );
 
 CREATE TABLE "CodingExam".Exam
@@ -72,8 +82,8 @@ GRANT ALL PRIVILEGES ON DATABASE "CodingExam" to codingexam;
 GRANT USAGE ON SCHEMA "CodingExam" TO codingexam;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA "CodingExam" TO codingexam;
 
-INSERT INTO "CodingExam".Users(CanvasUserID)
-VALUES ('2b7a2ea9f28bc312753640b0c1cc537fa85c5a49');
+INSERT INTO "CodingExam".Users(CanvasUserID, FullName)
+VALUES ('2b7a2ea9f28bc312753640b0c1cc537fa85c5a49', 'John User');
 
 INSERT INTO "CodingExam".Exam(CanvasExamID, TotalPoints)
 VALUES ('01cf10c5-f5d3-466e-b716-53f2b0bcd3b4', 1), ('e81f6b6e-8755-4fec-b2d5-c471d34f2e62', 0);

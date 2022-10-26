@@ -15,11 +15,13 @@ router.get( "/", ( req, res ) => {
 		roles: "Learner"
 	} )
 
+	/*
 	const token2 = generateAccessToken( {
 		assignmentID: "e81f6b6e-8755-4fec-b2d5-c471d34f2e62",
 		userID: "2b7a2ea9f28bc312753640b0c1cc537fa85c5a49",
 		roles: "Learner"
 	} )
+	*/
 
 	fs.readFile( path.resolve( "../client/build/index.html" ), "utf8", ( err, data ) => {
 		if ( err ) {
