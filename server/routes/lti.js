@@ -11,7 +11,8 @@ const router = express.Router()
 router.get( "/", ( req, res ) => {	
 	const token = generateAccessToken( { 
 		assignmentID: "a94f149b-336c-414f-a05b-8b193322cbd8",
-		username: "668ce32912fc74ec7e60cc59f32f304dc4379617"
+		userID: "668ce32912fc74ec7e60cc59f32f304dc4379617",
+		roles: "Learner"
 	} )
 
 	fs.readFile( path.resolve( "../client/build/index.html" ), "utf8", ( err, data ) => {
@@ -52,16 +53,13 @@ router.post( "/", ( req, res ) => {
 			res.status( 401 ).send( "Unauthorized" )
 		}
 		else {
+			console.log( req.body )
 			console.log( "valid request" )
 
 			const token = generateAccessToken( { 
 				assignmentID: req.body.ext_lti_assignment_id,
-				username: req.body.user_id
-			} )
-            
-			jwt.verify( token, "token_secret", ( assignmentID, username ) => {
-				console.log( assignmentID )
-				console.log( username )        
+				userID: req.body.user_id,
+				roles: req.body.roles
 			} )
 
 			//res.setHeader( "content-type", "text/html" )

@@ -140,7 +140,7 @@ export const App = React.memo( () => {
 				}
 			} )
 			const json = await res.json()
-			examActions.setResponseState( json.response )
+			dispatch( examActions.setResponseState( json.response ) )
 		} 
 		catch( e ) {
 			console.error( e )
