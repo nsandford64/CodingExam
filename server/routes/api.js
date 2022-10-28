@@ -98,11 +98,18 @@ router.get( "/responses", async ( req, res ) => {
 		const token = req.headers.token
 		let examID
 		let userID
+		let role
 
 		jwt.verify( token, "token_secret", ( err, object ) => {
 			examID = object.assignmentID 
-			userID = object.userID        
+			userID = object.userID 
+			role = object.roles       
 		} )
+
+		if ( role === "Instructor" ) {
+			userID = req.headers.userID
+		}
+		
 		const pool = new Pool( credentials )
 
 		const results = await pool.query( `
@@ -176,7 +183,7 @@ router.post( "/", async ( req, res ) => {
 } )
 
 //instructor endpoints start
-router.get( "/examquestions", async( req, res ) => {
+router.get( "/examtakers", async( req, res ) => {
 	if ( !req.headers.token ) {
 		res.send( {
 			"response": "Invalid request"
@@ -189,21 +196,33 @@ router.get( "/examquestions", async( req, res ) => {
 
 		jwt.verify( token, "token_secret", ( err, object ) => {
 			examID = object.assignmentID 
-			role = object.role        
+			role = object.roles     
 		} )
 		if ( role != "Instructor" ) {
 			res.send( {
-				response: "Invalid request"
+				response: "Invalid request: not an instructor"
 			} )
 		}
 		else {
 			const pool = new Pool( credentials )
 
 			const results = await pool.query( `
-			SELECT 
+			SELECT U.CanvasUserID, U.FullName
 			FROM "CodingExam".Exam E
-			INNER JOIN "CodingExam"
+			INNER JOIN "CodingExam".UserExam UE ON UE.ExamID = E.ExamID
+			INNER JOIN "CodingExam".Users U ON U.UserID = UE.UserID
+			WHERE E.CanvasExamID = '${examID}'
+			ORDER BY U.FullName
 			` )
+
+			await pool.end()
+
+			res.send( {
+				users: results.rows.map( row => ( {
+					canvasuserid: row.canvasuserid,
+					fullname: row.fullname
+				} ) )
+			} )
 		}
 	}
 } )
