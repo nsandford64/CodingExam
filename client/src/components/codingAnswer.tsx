@@ -3,10 +3,6 @@ import { Label } from "@blueprintjs/core"
 import * as React from "react"
 import AceEditor from "react-ace"
 
-import "ace-builds/src-noconflict/mode-java"
-import "ace-builds/src-noconflict/theme-github"
-import "ace-builds/src-noconflict/ext-language_tools"
-
 import styled from "styled-components"
 import { Response, ComponentProps } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
@@ -16,11 +12,10 @@ import { examActions, selectQuestionById, selectResponseById } from "../slices/e
  * Style for the CodingAnswer component
  */
 const StyledCodingAnswer = styled.div`
- padding: 10px;
+	padding: 10px;
 `
 
 export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
-
 
 	const dispatch = useAppDispatch()
 
@@ -29,30 +24,27 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 	// Response from the Store
 	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
 
-	/*const handleChange = React.useCallback( ( e: React.ChangeEvent<HTMLTextAreaElement> ) => {
-
+	const handleChange = React.useCallback( ( value: string ) => {
 		const newResponse: Response = {
 			questionId: props.questionId,
 			isText: true,
-			value: response?.value
+			value: value
 		}
 
 		dispatch( examActions.updateResponse( newResponse ) )
-	}, [] )*/
-
-	function onChange( value: string ){
-		console.log( value )
-	}
+	}, [] )
 
 	//render the component
 	return (
 		<StyledCodingAnswer>
-			<Label>{"hello"}</Label>
+			<Label>{question?.text}</Label>
 			<AceEditor
+				readOnly={props.disabled}
 				mode="java"
 				theme="github"
-				onChange={onChange}
+				onChange={handleChange}
 				name="editor"
+				defaultValue={`${response?.value}`}
 			/>
 		</StyledCodingAnswer>
 	)

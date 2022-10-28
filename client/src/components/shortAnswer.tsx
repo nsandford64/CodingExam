@@ -47,6 +47,7 @@ export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
 		<StyledShortAnswer>
 			<Label>{question?.text}</Label>
 			<TextArea 
+				disabled={props.disabled}
 				large
 				onChange={handleChange}
 				value={response?.value} 

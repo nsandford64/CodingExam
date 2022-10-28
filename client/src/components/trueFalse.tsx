@@ -44,6 +44,7 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 	return (
 		<StyledTrueFalse>
 			<RadioGroup
+				disabled={props.disabled}
 				label={question?.text}
 				onChange={handleChange}
 				selectedValue={response?.value}

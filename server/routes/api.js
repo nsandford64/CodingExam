@@ -107,7 +107,7 @@ router.get( "/responses", async ( req, res ) => {
 		} )
 
 		if ( role === "Instructor" ) {
-			userID = req.headers.userID
+			userID = req.headers.userid
 		}
 
 		const pool = new Pool( credentials )
@@ -219,8 +219,8 @@ router.get( "/examtakers", async( req, res ) => {
 
 			res.send( {
 				users: results.rows.map( row => ( {
-					canvasuserid: row.canvasuserid,
-					fullname: row.fullname
+					canvasUserId: row.canvasuserid,
+					fullName: row.fullname
 				} ) )
 			} )
 		}

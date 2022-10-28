@@ -21,10 +21,10 @@ export const App = React.memo( () => {
 	const [ showInstructorView, setShowInstructorView ] = React.useState( false ) 
 
 	// Stores the JWT token
-	const token = String( window.__INITIAL_DATA__ )
+	//const token = String( window.__INITIAL_DATA__ )
 
 	// Debug learner token
-	// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJhOTRmMTQ5Yi0zMzZjLTQxNGYtYTA1Yi04YjE5MzMyMmNiZDgiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJMZWFybmVyIiwiaWF0IjoxNjY2Nzk5MTg1fQ.JhJXrlhuWgLWOiANtkXECb8YMKwWLk9ZsVkG3_Br5cA"
+	const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJJbnN0cnVjdG9yIiwiaWF0IjoxNjY2OTcyODM4fQ.n9qkthHs0HhonpjD4yFNA7RLRqrzK1lavWzvBIGn_y8"
 	/**
 	 * Runs on render - determines the user's role based on their JWT token
 	 */
@@ -96,15 +96,20 @@ export type Response = {
 	value: number | string // The actual value of the Response 
 }
 
+export type User = {
+	canvasUserId: string
+	fullName: string
+}
+
 /**
  * ComponentProps Interface
  * 
  * This interface establishes a common point between each question
  * component.
- * Each component has a questionId, questionText, array of answerChoices,
- * a Response object, and a way to update that Response object
+ * Each component can be disabled and has a questionId
  */
 export interface ComponentProps {
+	disabled?: boolean
 	questionId: number // Specific questionId of the given question
 }
 
@@ -119,4 +124,5 @@ export enum QuestionType {
 	ShortAnswer = 2,
 	TrueFalse = 3,
 	MultipleAnswer = 4,
+	CodingAnswer = 5
 }
