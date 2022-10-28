@@ -73,15 +73,15 @@ describe( "/api endpoint tests", () => {
 	it( "POST /api with new data should change responses", async () => {
 		await requestWithSupertest.post( "/api" )
 			.send( [ {"questionId":1,"isText":false,"value":2},{"questionId":2,"isText":false,"value":0},{"questionId":3,"isText":true,"value":"ok"} ] )
-			.set( { userID: "668ce32912fc74ec7e60cc59f32f304dc4379617", Accept: "application/json" } )
+			.set( { token: learnerToken } )
 		const old =await requestWithSupertest.get( "/api/responses" )
-			.set( { examID: "a94f149b-336c-414f-a05b-8b193322cbd8", userID: "668ce32912fc74ec7e60cc59f32f304dc4379617" } )
+			.set( { token: learnerToken } )
 
 		await requestWithSupertest.post( "/api" )
 			.send( [ {"questionId":1,"isText":false,"value":1},{"questionId":2,"isText":false,"value":1},{"questionId":3,"isText":true,"value":"changed"} ] )
-			.set( { userID: "668ce32912fc74ec7e60cc59f32f304dc4379617", Accept: "application/json" } )
+			.set( { token: learnerToken } )
 		const res = await requestWithSupertest.get( "/api/responses" )
-			.set( { examID: "a94f149b-336c-414f-a05b-8b193322cbd8", userID: "668ce32912fc74ec7e60cc59f32f304dc4379617" } )
+			.set( { token: learnerToken } )
 		
 		for( let i = 0; i < res.body.responses.length; i++ ) {
 			expect( res.body.responses[i].value ).not.toEqual( old.body.responses[i] )
@@ -156,8 +156,8 @@ describe( "/api/examtakers endpoint tests", () => {
 		expect( res.body ).toHaveProperty( "users" )
 		expect( res.body.users ).not.toEqual( [] )
 		res.body.users.forEach( user => {
-			expect( user ).toHaveProperty( "canvasuserid" )
-			expect( user ).toHaveProperty( "fullname" )
+			expect( user ).toHaveProperty( "canvasUserId" )
+			expect( user ).toHaveProperty( "fullName" )
 		} )
 	} )
 
@@ -179,6 +179,38 @@ describe( "/api/examtakers endpoint tests", () => {
 	} )
 } )
 
-describe ( "/api/examtakers endpoint tests", () => {
+describe ( "/api/role endpoint tests", () => {
+	it( "GET /api/role should return a role", async () => {
+		const res = await requestWithSupertest.get( "/api/role" )
+			.set( { token: learnerToken} )
+		expect( res.status ).toEqual( 200 )
+		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
+		expect( res.body ).toHaveProperty( "role" )
+	} )
 
+	it( "GET /api/role should return an invalid response if sent with no token", async () => {
+		const res = await requestWithSupertest.get( "/api/role" )
+		expect( res.status ).toEqual( 200 )
+		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
+		expect( res.body ).toHaveProperty( "response" )
+		expect( res.body.response ).toEqual( "Invalid request" )
+	} )
+
+	it( "GET /api/role with a learner token should return the correct role", async () => {
+		const res = await requestWithSupertest.get( "/api/role" )
+			.set( { token: learnerToken} )
+		expect( res.status ).toEqual( 200 )
+		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
+		expect( res.body ).toHaveProperty( "role" )
+		expect( res.body.role ).toEqual( "Learner" )
+	} )
+
+	it( "GET /api/role with an instructor token should return the correct role", async () => {
+		const res = await requestWithSupertest.get( "/api/role" )
+			.set( { token: instructorToken} )
+		expect( res.status ).toEqual( 200 )
+		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
+		expect( res.body ).toHaveProperty( "role" )
+		expect( res.body.role ).toEqual( "Instructor" )
+	} )
 } )
