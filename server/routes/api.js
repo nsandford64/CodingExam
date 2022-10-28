@@ -174,4 +174,38 @@ router.post( "/", async ( req, res ) => {
 		} )
 	}
 } )
+
+//instructor endpoints start
+router.get( "/examquestions", async( req, res ) => {
+	if ( !req.headers.token ) {
+		res.send( {
+			"response": "Invalid request"
+		} )
+	}
+	else {
+		const token = req.headers.token
+		let examID
+		let role
+
+		jwt.verify( token, "token_secret", ( err, object ) => {
+			examID = object.assignmentID 
+			role = object.role        
+		} )
+		if ( role != "Instructor" ) {
+			res.send( {
+				response: "Invalid request"
+			} )
+		}
+		else {
+			const pool = new Pool( credentials )
+
+			const results = await pool.query( `
+			SELECT 
+			FROM "CodingExam".Exam E
+			INNER JOIN "CodingExam"
+			` )
+		}
+	}
+} )
+
 module.exports = router
