@@ -51,11 +51,16 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 		<StyledMultipleChoice>
 			<RadioGroup
 				label={question?.text}
+				disabled={props.disabled}
 				onChange={handleChange}
 				selectedValue={response?.value}
 			>
 				{question?.answers.map( ( choice, index ) => (
-					<Radio key={index} label={choice} value={index} />
+					<Radio 
+						key={index} 
+						label={choice} 
+						value={index} 
+					/>
 				) )}
 			</RadioGroup>
 		</StyledMultipleChoice>

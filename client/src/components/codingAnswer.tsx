@@ -39,6 +39,7 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 		<StyledCodingAnswer>
 			<Label>{question?.text}</Label>
 			<AceEditor
+				readOnly={props.disabled}
 				mode="java"
 				theme="github"
 				onChange={handleChange}
