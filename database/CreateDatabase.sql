@@ -92,7 +92,7 @@ INSERT INTO "CodingExam".Exam(CanvasExamID, TotalPoints)
 VALUES ('01cf10c5-f5d3-466e-b716-53f2b0bcd3b4', 1), ('e81f6b6e-8755-4fec-b2d5-c471d34f2e62', 0);
 
 INSERT INTO "CodingExam".UserExam(UserID, ExamID)
-VALUES (1, 1);
+VALUES (1, 1), (2, 1), (3, 1), (4, 1);
 
 INSERT INTO "CodingExam".QuestionType(QuestionType)
 VALUES ('MultipleChoice'), ('ShortAnswer'), ('TrueFalse');
