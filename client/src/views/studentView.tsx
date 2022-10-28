@@ -6,6 +6,7 @@ import { batch } from "react-redux"
 import styled from "styled-components"
 import { Question, QuestionType, Response } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
+import { CodingAnswer } from "../components/codingAnswer"
 import { MultipleChoice } from "../components/multipleChoice"
 import { ShortAnswer } from "../components/shortAnswer"
 import { TrueFalse } from "../components/trueFalse"
@@ -160,22 +161,25 @@ const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 	switch ( question?.type ) {
 	case QuestionType.MultipleChoice:
 		return (
-			<MultipleChoice 
-				key={question.id}
+			<MultipleChoice
 				questionId={question.id}
 			/>
 		)
 	case QuestionType.TrueFalse:
 		return (
-			<TrueFalse 
-				key={question.id}
+			<TrueFalse
 				questionId={question.id}
 			/>
 		)
 	case QuestionType.ShortAnswer:
 		return (
-			<ShortAnswer 
-				key={question.id}
+			<ShortAnswer
+				questionId={question.id}
+			/>
+		)
+	case QuestionType.CodingAnswer:
+		return (
+			<CodingAnswer
 				questionId={question.id}
 			/>
 		)

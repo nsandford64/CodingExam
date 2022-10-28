@@ -21,10 +21,10 @@ export const App = React.memo( () => {
 	const [ showInstructorView, setShowInstructorView ] = React.useState( false ) 
 
 	// Stores the JWT token
-	const token = String( window.__INITIAL_DATA__ )
+	//const token = String( window.__INITIAL_DATA__ )
 
 	// Debug learner token
-	// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJhOTRmMTQ5Yi0zMzZjLTQxNGYtYTA1Yi04YjE5MzMyMmNiZDgiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJMZWFybmVyIiwiaWF0IjoxNjY2Nzk5MTg1fQ.JhJXrlhuWgLWOiANtkXECb8YMKwWLk9ZsVkG3_Br5cA"
+	const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJhOTRmMTQ5Yi0zMzZjLTQxNGYtYTA1Yi04YjE5MzMyMmNiZDgiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJMZWFybmVyIiwiaWF0IjoxNjY2Nzk5MTg1fQ.JhJXrlhuWgLWOiANtkXECb8YMKwWLk9ZsVkG3_Br5cA"
 	/**
 	 * Runs on render - determines the user's role based on their JWT token
 	 */
@@ -119,4 +119,5 @@ export enum QuestionType {
 	ShortAnswer = 2,
 	TrueFalse = 3,
 	MultipleAnswer = 4,
+	CodingAnswer = 5
 }
