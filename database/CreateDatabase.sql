@@ -72,6 +72,7 @@ CREATE TABLE "CodingExam".StudentResponse
 	IsTextResponse BOOLEAN NOT NULL,
 	TextResponse VARCHAR(300), 
 	AnswerResponse INT,
+	InstructorFeedback VARCHAR(300),
 	QuestionID INT NOT NULL REFERENCES "CodingExam".ExamQuestion(QuestionID),
 	CanvasUserID VARCHAR(60) NOT NULL REFERENCES "CodingExam".Users(CanvasUserID),
 	UNIQUE(QuestionID, CanvasUserID)

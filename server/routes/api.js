@@ -145,7 +145,6 @@ router.post( "/", async ( req, res ) => {
 		} )
 	}
 	else {
-		
 		const token = req.headers.token
 		let userID
 		jwt.verify( token, "token_secret", ( err, object ) => {
@@ -156,11 +155,13 @@ router.post( "/", async ( req, res ) => {
 		// Insert each response into the StudentResponse table
 		await req.body.forEach( response => {
 			if ( typeof response.value === "string" ) {
+				// eslint-disable-next-line no-useless-escape
+				const stringValue = `${response.value}`.replace( "'", "''" )
 				pool.query( `
 				INSERT INTO "CodingExam".StudentResponse(IsTextResponse, TextResponse, QuestionID, CanvasUserID)
-				VALUES (TRUE, '${response.value}', ${response.questionId}, '${userID}')
+				VALUES (TRUE, '${stringValue}', ${response.questionId}, '${userID}')
 				ON CONFLICT (QuestionID, CanvasUserID) DO UPDATE
-					SET TextResponse = '${response.value}';
+					SET TextResponse = '${stringValue}';
 			` )
 			}
 			else {
@@ -222,6 +223,41 @@ router.get( "/examtakers", async( req, res ) => {
 					canvasUserId: row.canvasuserid,
 					fullName: row.fullname
 				} ) )
+			} )
+		}
+	}
+} )
+
+router.post( "/instructorfeedback", async( req, res ) => {
+	if ( !req.headers.token ) {
+		res.send( {
+			"response": "Invalid request"
+		} )
+	}
+	else {
+		const token = req.headers.token
+		let role
+
+		jwt.verify( token, "token_secret", ( err, object ) => {
+			role = object.roles     
+		} )
+		if ( role != "Instructor" ) {
+			res.send( {
+				response: "Invalid request: not an instructor"
+			} )
+		}
+		else {
+			const userID = req.headers.userid
+			const pool = new Pool( credentials )
+			await req.body.forEach( question => {
+				pool.query( `
+					UPDATE "CodingExam".StudentResponse
+					SET InstructorFeedback = '${question.feedback}'
+					WHERE QuestionID = ${question.questionid} AND CanvasUserID = '${userID}'
+				` )
+			} )
+			res.send( {
+				"response": "Valid submission"
 			} )
 		}
 	}

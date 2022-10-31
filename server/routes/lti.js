@@ -81,6 +81,7 @@ router.post( "/", async ( req, res ) => {
 				userID: req.body.user_id,
 				roles: req.body.roles
 			} )
+			console.log( req.body.roles )
 
 			const pool = new Pool( credentials )
 
