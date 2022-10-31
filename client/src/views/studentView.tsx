@@ -1,6 +1,6 @@
 // Copyright 2022 under MIT License
 // Copyright 2022 under MIT License
-import { Button, Intent } from "@blueprintjs/core"
+import { Button, Intent, TextArea } from "@blueprintjs/core"
 import * as React from "react"
 import { batch } from "react-redux"
 import styled from "styled-components"
@@ -144,6 +144,7 @@ StudentView.displayName = "StudentView"
 
 interface QuestionSwitchProps {
 	disabled?: boolean
+	feedback?: boolean
 	questionId: number
 }
 
@@ -172,24 +173,39 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 		)
 	case QuestionType.TrueFalse:
 		return (
-			<TrueFalse
-				disabled={props.disabled}
-				questionId={question.id}
-			/>
+			<>
+				<TrueFalse
+					disabled={props.disabled}
+					questionId={question.id}
+				/>
+				{props.feedback && (
+					<TextArea/>
+				)}
+			</>
 		)
 	case QuestionType.ShortAnswer:
 		return (
-			<ShortAnswer
-				disabled={props.disabled}
-				questionId={question.id}
-			/>
+			<>
+				<ShortAnswer
+					disabled={props.disabled}
+					questionId={question.id}
+				/>
+				{props.feedback && (
+					<TextArea/>
+				)}
+			</>
 		)
 	case QuestionType.CodingAnswer:
 		return (
-			<CodingAnswer
-				disabled={props.disabled}
-				questionId={question.id}
-			/>
+			<>
+				<CodingAnswer
+					disabled={props.disabled}
+					questionId={question.id}
+				/>
+				{props.feedback && (
+					<TextArea/>
+				)}
+			</>
 		)
 	default:
 		return null
