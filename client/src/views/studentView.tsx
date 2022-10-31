@@ -10,7 +10,7 @@ import { CodingAnswer } from "../components/codingAnswer"
 import { MultipleChoice } from "../components/multipleChoice"
 import { ShortAnswer } from "../components/shortAnswer"
 import { TrueFalse } from "../components/trueFalse"
-import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap } from "../slices/examSlice"
+import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap, selectResponseState } from "../slices/examSlice"
 
 interface StudentViewProps {
 	token: string
@@ -36,6 +36,8 @@ export const StudentView = React.memo( ( props: StudentViewProps ) => {
 	const questionIds = useAppSelector( selectQuestionIds )
 	// Map of responses from the store
 	const responsesMap = useAppSelector( selectResponsesMap )
+	// State to let the user know their submission was successful
+	const responseState = useAppSelector( selectResponseState )
 
 	React.useEffect( () => {
 		const initQuestions = async () => {
@@ -119,6 +121,7 @@ export const StudentView = React.memo( ( props: StudentViewProps ) => {
 
 	return (
 		<StyledStudentView>
+			<h1>{responseState}</h1>
 			<StyledQuestionsContainer>
 				{questionIds.map( id => (
 					<QuestionSwitch 

@@ -145,7 +145,6 @@ router.post( "/", async ( req, res ) => {
 		} )
 	}
 	else {
-		
 		const token = req.headers.token
 		let userID
 		jwt.verify( token, "token_secret", ( err, object ) => {
@@ -156,11 +155,13 @@ router.post( "/", async ( req, res ) => {
 		// Insert each response into the StudentResponse table
 		await req.body.forEach( response => {
 			if ( typeof response.value === "string" ) {
+				// eslint-disable-next-line no-useless-escape
+				const stringValue = `${response.value}`.replace( "'", "''" )
 				pool.query( `
 				INSERT INTO "CodingExam".StudentResponse(IsTextResponse, TextResponse, QuestionID, CanvasUserID)
-				VALUES (TRUE, '${response.value}', ${response.questionId}, '${userID}')
+				VALUES (TRUE, '${stringValue}', ${response.questionId}, '${userID}')
 				ON CONFLICT (QuestionID, CanvasUserID) DO UPDATE
-					SET TextResponse = '${response.value}';
+					SET TextResponse = '${stringValue}';
 			` )
 			}
 			else {
