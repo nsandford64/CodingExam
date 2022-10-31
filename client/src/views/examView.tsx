@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Button, Intent, Spinner } from "@blueprintjs/core"
+import { Button, Intent, Spinner, TextArea } from "@blueprintjs/core"
 import * as React from "react"
 import { batch } from "react-redux"
 import styled from "styled-components"
@@ -146,6 +146,7 @@ ExamView.displayName = "ExamView"
 
 interface QuestionSwitchProps {
 	disabled?: boolean
+	feedback?: boolean
 	questionId: number
 }
 
@@ -155,7 +156,7 @@ interface QuestionSwitchProps {
  * This component determines the type of a given question and 
  * returns a component of its corresponding type
  */
-const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
+export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 
 	// Question from the store
 	const question = useAppSelector( state => selectQuestionById( 
@@ -174,24 +175,39 @@ const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 		)
 	case QuestionType.TrueFalse:
 		return (
-			<TrueFalse
-				disabled={props.disabled}
-				questionId={question.id}
-			/>
+			<>
+				<TrueFalse
+					disabled={props.disabled}
+					questionId={question.id}
+				/>
+				{props.feedback && (
+					<TextArea/>
+				)}
+			</>
 		)
 	case QuestionType.ShortAnswer:
 		return (
-			<ShortAnswer
-				disabled={props.disabled}
-				questionId={question.id}
-			/>
+			<>
+				<ShortAnswer
+					disabled={props.disabled}
+					questionId={question.id}
+				/>
+				{props.feedback && (
+					<TextArea/>
+				)}
+			</>
 		)
 	case QuestionType.CodingAnswer:
 		return (
-			<CodingAnswer
-				disabled={props.disabled}
-				questionId={question.id}
-			/>
+			<>
+				<CodingAnswer
+					disabled={props.disabled}
+					questionId={question.id}
+				/>
+				{props.feedback && (
+					<TextArea/>
+				)}
+			</>
 		)
 	default:
 		return null

@@ -29,3 +29,4 @@ export const StudentView = React.memo( ( props: StudentViewProps ) => {
 	)
 } )
 StudentView.displayName = "StudentView"
+
