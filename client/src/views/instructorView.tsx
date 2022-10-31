@@ -17,9 +17,6 @@ const StyledInstructorView = styled.div`
 `
 
 const StyledHeaderContainer = styled.div`
-	display: flex;
-	flex-direction: row;
-	align-items: center;
 	padding: 10px;
 `
 
@@ -60,12 +57,13 @@ export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 		<StyledInstructorView>
 			<StyledHeaderContainer>
 				<Button 
+					disabled={showStudentList}
 					text="Back"
 					minimal
 					intent={Intent.PRIMARY}
 					onClick={() => setShowStudentList( true )}
 				/>
-				<p>InstructorView</p>
+				<h3>Student List</h3>
 			</StyledHeaderContainer>
 			{showStudentList && (
 				<StyledStudentListContainer>
@@ -76,6 +74,7 @@ export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 							minimal
 							intent={Intent.NONE}
 							onClick={() => handleStudentClick( user.canvasUserId )}
+							alignText="left"
 						/>
 					) )}
 				</StyledStudentListContainer>

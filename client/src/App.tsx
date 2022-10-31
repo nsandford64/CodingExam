@@ -1,4 +1,5 @@
 // Copyright 2022 under MIT License
+import { Spinner } from "@blueprintjs/core"
 import React from "react"
 import { InstructorView } from "./views/instructorView"
 import { StudentView } from "./views/studentView"
@@ -24,7 +25,7 @@ export const App = React.memo( () => {
 	//const token = String( window.__INITIAL_DATA__ )
 
 	// Debug learner token
-	const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJJbnN0cnVjdG9yIiwiaWF0IjoxNjY2OTcyODM4fQ.n9qkthHs0HhonpjD4yFNA7RLRqrzK1lavWzvBIGn_y8"
+	const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJJbnN0cnVjdG9yIiwiaWF0IjoxNjY2OTc1NDk1fQ.j2mNBXgnEopxhahdO0xIGcK4N-AECbXfd0d_VGjQv1Y"
 	/**
 	 * Runs on render - determines the user's role based on their JWT token
 	 */
@@ -54,7 +55,9 @@ export const App = React.memo( () => {
 	return (
 		<>
 			{loading && (
-				<h1>Loading</h1>
+				<Spinner 
+					size={50}
+				/>
 			)}
 			{!loading && (
 				<>
