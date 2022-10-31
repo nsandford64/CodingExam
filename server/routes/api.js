@@ -228,4 +228,39 @@ router.get( "/examtakers", async( req, res ) => {
 	}
 } )
 
+router.post( "/instructorfeedback", async( req, res ) => {
+	if ( !req.headers.token ) {
+		res.send( {
+			"response": "Invalid request"
+		} )
+	}
+	else {
+		const token = req.headers.token
+		let role
+
+		jwt.verify( token, "token_secret", ( err, object ) => {
+			role = object.roles     
+		} )
+		if ( role != "Instructor" ) {
+			res.send( {
+				response: "Invalid request: not an instructor"
+			} )
+		}
+		else {
+			const userID = req.headers.userid
+			const pool = new Pool( credentials )
+			await req.body.forEach( question => {
+				pool.query( `
+					UPDATE "CodingExam".StudentResponse
+					SET InstructorFeedback = '${question.feedback}'
+					WHERE QuestionID = ${question.questionid} AND CanvasUserID = '${userID}'
+				` )
+			} )
+			res.send( {
+				"response": "Valid submission"
+			} )
+		}
+	}
+} )
+
 module.exports = router
