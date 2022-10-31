@@ -1,12 +1,15 @@
 // Copyright 2022 under MIT License
-import { Button, Intent } from "@blueprintjs/core"
+import { Button, Intent, Spinner, TextArea } from "@blueprintjs/core"
 import * as React from "react"
 import { batch } from "react-redux"
 import styled from "styled-components"
-import { Question, Response } from "../App"
+import { Question, QuestionType, Response } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
-import { examActions, selectQuestionIds, selectResponsesMap } from "../slices/examSlice"
-import { QuestionSwitch } from "./studentView"
+import { CodingAnswer } from "../components/codingAnswer"
+import { MultipleChoice } from "../components/multipleChoice"
+import { ShortAnswer } from "../components/shortAnswer"
+import { TrueFalse } from "../components/trueFalse"
+import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap } from "../slices/examSlice"
 
 interface ExamViewProps {
 	disabled?: boolean
@@ -16,7 +19,6 @@ interface ExamViewProps {
 }
 
 const StyledExamView = styled.div`
-
 `
 
 export const ExamView = React.memo( ( props: ExamViewProps ) => {
@@ -116,7 +118,9 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 	return (
 		<StyledExamView>
 			{loading && (
-				<h1>Loading</h1>
+				<Spinner 
+					size={50}
+				/>
 			)}
 			{!loading && (
 				<> 
@@ -141,3 +145,74 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 	)
 } )
 ExamView.displayName = "ExamView"
+
+interface QuestionSwitchProps {
+	disabled?: boolean
+	feedback?: boolean
+	questionId: number
+}
+
+/**
+ * QuestionSwitch Component
+ * 
+ * This component determines the type of a given question and 
+ * returns a component of its corresponding type
+ */
+export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
+
+	// Question from the store
+	const question = useAppSelector( state => selectQuestionById( 
+		state, 
+		props.questionId 
+	) )
+
+	// Render the right component
+	switch ( question?.type ) {
+	case QuestionType.MultipleChoice:
+		return (
+			<MultipleChoice
+				disabled={props.disabled}
+				questionId={question.id}
+			/>
+		)
+	case QuestionType.TrueFalse:
+		return (
+			<>
+				<TrueFalse
+					disabled={props.disabled}
+					questionId={question.id}
+				/>
+				{props.feedback && (
+					<TextArea/>
+				)}
+			</>
+		)
+	case QuestionType.ShortAnswer:
+		return (
+			<>
+				<ShortAnswer
+					disabled={props.disabled}
+					questionId={question.id}
+				/>
+				{props.feedback && (
+					<TextArea/>
+				)}
+			</>
+		)
+	case QuestionType.CodingAnswer:
+		return (
+			<>
+				<CodingAnswer
+					disabled={props.disabled}
+					questionId={question.id}
+				/>
+				{props.feedback && (
+					<TextArea/>
+				)}
+			</>
+		)
+	default:
+		return null
+	}
+} )
+QuestionSwitch.displayName = "QuestionSwitch"

@@ -1,4 +1,5 @@
 // Copyright 2022 under MIT License
+import { Spinner } from "@blueprintjs/core"
 import React from "react"
 import { InstructorView } from "./views/instructorView"
 import { StudentView } from "./views/studentView"
@@ -54,7 +55,9 @@ export const App = React.memo( () => {
 	return (
 		<>
 			{loading && (
-				<h1>Loading</h1>
+				<Spinner 
+					size={50}
+				/>
 			)}
 			{!loading && (
 				<>
