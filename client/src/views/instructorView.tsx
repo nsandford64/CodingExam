@@ -83,6 +83,7 @@ export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 			{!showStudentList && (
 				<ExamView 
 					disabled
+					feedback={true}
 					canvasUserId={canvasUserId}
 					token={props.token}
 				/>

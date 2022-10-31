@@ -10,6 +10,7 @@ import { QuestionSwitch } from "./studentView"
 
 interface ExamViewProps {
 	disabled?: boolean
+	feedback?: boolean
 	canvasUserId?: string
 	token: string
 }
@@ -123,6 +124,7 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 						<QuestionSwitch 
 							key={id}
 							disabled={props.disabled}
+							feedback={props.feedback}
 							questionId={id}
 						/>
 					) )}

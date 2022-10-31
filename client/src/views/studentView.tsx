@@ -166,10 +166,15 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 	switch ( question?.type ) {
 	case QuestionType.MultipleChoice:
 		return (
-			<MultipleChoice
-				disabled={props.disabled}
-				questionId={question.id}
-			/>
+			<>
+				<MultipleChoice
+					disabled={props.disabled}
+					questionId={question.id}
+				/>
+				{props.feedback && (
+					<TextArea/>
+				)}
+			</>
 		)
 	case QuestionType.TrueFalse:
 		return (

@@ -22,7 +22,7 @@ router.get( "/", async ( req, res ) => {
 	const token1 = generateAccessToken( { 
 		assignmentID: "01cf10c5-f5d3-466e-b716-53f2b0bcd3b4",
 		userID: "2b7a2ea9f28bc312753640b0c1cc537fa85c5a49",
-		roles: "Instructor"
+		roles: "Learner"
 	} )
 
 	const pool = new Pool( credentials )
