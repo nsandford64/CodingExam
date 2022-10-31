@@ -109,7 +109,7 @@ router.get( "/responses", async ( req, res ) => {
 		if ( role === "Instructor" ) {
 			userID = req.headers.userid
 		}
-		
+
 		const pool = new Pool( credentials )
 
 		const results = await pool.query( `
