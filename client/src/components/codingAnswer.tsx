@@ -13,6 +13,7 @@ import { examActions, selectQuestionById, selectResponseById } from "../slices/e
  */
 const StyledCodingAnswer = styled.div`
 	padding: 10px;
+	width: 40%;
 `
 
 export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
@@ -24,6 +25,9 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 	// Response from the Store
 	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
 
+	/** 
+	 * Called whenever code editor text is changed -- Updates the store with a new Response object
+	 */
 	const handleChange = React.useCallback( ( value: string ) => {
 		const newResponse: Response = {
 			questionId: props.questionId,
@@ -31,6 +35,7 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 			value: value
 		}
 
+		// Updates the response in the store
 		dispatch( examActions.updateResponse( newResponse ) )
 	}, [] )
 
