@@ -5,6 +5,7 @@ import { Question, QuestionType } from "../../App"
 import { act } from "react-dom/test-utils"
 import ReactDOM from "react-dom/client"
 import { createMockStore } from "./mockStore"
+import { EnhancedStore } from "@reduxjs/toolkit"
 
 const mockQuestion: Question = {
 	answers: [ "test1", "test2", "test3", "test4" ],
@@ -15,16 +16,18 @@ const mockQuestion: Question = {
 
 describe( "multipleChoice component", () => {
 	let container: HTMLDivElement
+	let store: EnhancedStore
 
 	beforeEach( () => {
 		container = document.createElement( "div" )
 		document.body.appendChild( container )
+		store = createMockStore( mockQuestion )
 	} )
 
 	it( "renders the correct label and answer choices", () => {
 		act( () => {
 			ReactDOM.createRoot( container ).render(
-				<Provider store={createMockStore( mockQuestion )}>
+				<Provider store={store}>
 					<MultipleChoice 
 						questionId={mockQuestion.id}
 					/>
