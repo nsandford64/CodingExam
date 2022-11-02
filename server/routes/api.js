@@ -228,6 +228,54 @@ router.get( "/examtakers", async( req, res ) => {
 	}
 } )
 
+router.get( "/feedback", async ( req, res ) => {
+	if ( !req.headers.token ) {
+		res.send( {
+			"response": "Invalid request"
+		} )
+	}
+	else {
+		const token = req.headers.token
+		let examID
+		let userID
+		let role
+
+		jwt.verify( token, "token_secret", ( err, object ) => {
+			examID = object.assignmentID 
+			userID = object.userID 
+			role = object.roles       
+		} )
+
+		if ( role === "Instructor" ) {
+			userID = req.headers.userid
+		}
+
+		const pool = new Pool( credentials )
+
+		const results = await pool.query( `
+		SELECT SR.QuestionID, SR.InstructorFeedback
+		FROM "CodingExam".StudentResponse SR 
+		INNER JOIN "CodingExam".ExamQuestion EQ ON EQ.QuestionID = SR.QuestionID
+		INNER JOIN "CodingExam".Exam E ON E.ExamID = EQ.ExamID
+		WHERE E.CanvasExamID = '${examID}' AND SR.CanvasUserID = '${userID}'
+		ORDER BY SR.QuestionID
+	` )
+
+		// Map all result rows into an array of Feedback objects
+		const feedback = results.rows.map( row => {
+			return {
+				questionId: row.questionid,
+				value: row.instructorfeedback
+			}
+		} )
+
+		// Send an array of Responses to the Client
+		res.send( {
+			feedback: feedback
+		} )
+	}
+} )
+
 router.post( "/instructorfeedback", async( req, res ) => {
 	if ( !req.headers.token ) {
 		res.send( {
@@ -249,11 +297,12 @@ router.post( "/instructorfeedback", async( req, res ) => {
 		else {
 			const userID = req.headers.userid
 			const pool = new Pool( credentials )
+
 			await req.body.forEach( question => {
 				pool.query( `
 					UPDATE "CodingExam".StudentResponse
-					SET InstructorFeedback = '${question.feedback}'
-					WHERE QuestionID = ${question.questionid} AND CanvasUserID = '${userID}'
+					SET InstructorFeedback = '${question.value}'
+					WHERE QuestionID = ${question.questionId} AND CanvasUserID = '${userID}'
 				` )
 			} )
 			res.send( {

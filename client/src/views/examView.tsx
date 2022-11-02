@@ -3,13 +3,14 @@ import { Button, Intent, Spinner, TextArea } from "@blueprintjs/core"
 import * as React from "react"
 import { batch } from "react-redux"
 import styled from "styled-components"
-import { Question, QuestionType, Response } from "../App"
+import { Feedback, Question, QuestionType, Response } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { CodingAnswer } from "../components/codingAnswer"
+import { FeedbackBox } from "../components/feedbackBox"
 import { MultipleChoice } from "../components/multipleChoice"
 import { ShortAnswer } from "../components/shortAnswer"
 import { TrueFalse } from "../components/trueFalse"
-import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap } from "../slices/examSlice"
+import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap, selectFeedbackMap, selectFeedbackById } from "../slices/examSlice"
 
 interface ExamViewProps {
 	disabled?: boolean
@@ -29,6 +30,8 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 	const questionIds = useAppSelector( selectQuestionIds )
 	// Map of responses from the store
 	const responsesMap = useAppSelector( selectResponsesMap )
+	// Map of feedback from the Redux store
+	//const feedbackMap = useAppSelector( selectFeedbackMap )
 
 	const [ loading, setLoading ] = React.useState( true )
 
@@ -71,8 +74,28 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 				newResponsesMap.set( response.questionId, response )
 			} )
 
+			
+			data = await fetch( "http://localhost:9000/api/feedback", {
+				headers: {
+					"token": props.token,
+					"userID": props.canvasUserId || ""
+				}
+			} )
+			json = await data.json()
+			const feedback: Feedback[] = json.feedback
+
+			// Loop through the feedback and create ids and a map
+			//const newFeedbackIds: number[] = []
+			const newFeedbackMap = new Map<number, Feedback>()
+			feedback.forEach( feedback => {
+				//newFeedbackIds.push( feedback.questionId )
+				newFeedbackMap.set( feedback.questionId, feedback )
+			} )
+
 			// Update the store
 			batch( () => {
+				//dispatch( examActions.setFeedbackIds( newFeedbackIds ) )
+				dispatch( examActions.setFeedbackMap( newFeedbackMap ) )
 				dispatch( examActions.setQuestionIds( newQuestionIds ) )
 				dispatch( examActions.setQuestionsMap( newQuestionsMap ) )
 				dispatch( examActions.setResponseIds( newResponseIds ) )
@@ -176,7 +199,9 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 					questionId={question.id}
 				/>
 				{props.feedback && (
-					<TextArea/>
+					<FeedbackBox
+						questionId={question.id}
+					/>
 				)}
 			</>
 		)
@@ -188,7 +213,9 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 					questionId={question.id}
 				/>
 				{props.feedback && (
-					<TextArea/>
+					<FeedbackBox
+						questionId={question.id}
+					/>
 				)}
 			</>
 		)
@@ -200,7 +227,9 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 					questionId={question.id}
 				/>
 				{props.feedback && (
-					<TextArea/>
+					<FeedbackBox
+						questionId={question.id}
+					/>
 				)}
 			</>
 		)
@@ -212,7 +241,9 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 					questionId={question.id}
 				/>
 				{props.feedback && (
-					<TextArea/>
+					<FeedbackBox
+						questionId={question.id}
+					/>
 				)}
 			</>
 		)

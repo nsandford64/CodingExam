@@ -1,7 +1,7 @@
 // Copyright 2022 under MIT License
 
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { Question, Response } from "../App"
+import { Feedback, Question, Response } from "../App"
 import { RootState } from "../app/store"
 
 /**
@@ -27,6 +27,18 @@ const updateResponse = ( state: ExamState, action: PayloadAction<Response> ) => 
 
 const setResponseState = ( state: ExamState, action: PayloadAction<string> ) => {
 	state.responseState = action.payload
+}
+
+const setFeedbackIds = ( state: ExamState, action: PayloadAction<number[]> ) => {
+	state.feedbackIds = action.payload
+}
+
+const setFeedbackMap = ( state:ExamState, action: PayloadAction<Map<number, Feedback>> ) => {
+	state.feedbackMap = action.payload
+}
+
+const updateFeedback = ( state: ExamState, action: PayloadAction<Feedback> ) => {
+	state.feedbackMap.set( action.payload.questionId, action.payload )
 }
 
 /**
@@ -57,6 +69,16 @@ export const selectResponseState = ( state: RootState ) => (
 	state.exam.responseState
 )
 
+export const selectFeedbackMap = ( state: RootState ) => (
+	state.exam.feedbackMap
+)
+
+export const selectFeedbackById = createSelector(
+	selectFeedbackMap,
+	( state: RootState, id: number ) => id,
+	( feedbackMap, id ) => feedbackMap.get( id )
+)
+
 /**
  * Slice
  */
@@ -65,7 +87,9 @@ export interface ExamState {
 	questionsMap: Map<number, Question>
 	responseIds: number[]
 	responsesMap: Map<number, Response>
-	responseState: string
+	responseState: string,
+	feedbackIds: number[],
+	feedbackMap: Map<number, Feedback>
 }
 
 const initialState: ExamState = {
@@ -73,7 +97,9 @@ const initialState: ExamState = {
 	questionsMap: new Map<number, Question>(),
 	responseIds: [],
 	responsesMap: new Map<number, Response>(),
-	responseState: ""
+	responseState: "",
+	feedbackIds: [],
+	feedbackMap: new Map<number, Feedback>()
 }
 
 export const examSlice = createSlice( {
@@ -85,7 +111,10 @@ export const examSlice = createSlice( {
 		setResponseIds,
 		setResponsesMap,
 		updateResponse,
-		setResponseState
+		setResponseState,
+		setFeedbackIds,
+		setFeedbackMap,
+		updateFeedback
 	}
 } )
 
