@@ -13,6 +13,7 @@ import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap 
 
 interface ExamViewProps {
 	disabled?: boolean
+	feedback?: boolean
 	canvasUserId?: string
 	token: string
 }
@@ -127,6 +128,7 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 						<QuestionSwitch 
 							key={id}
 							disabled={props.disabled}
+							feedback={props.feedback}
 							questionId={id}
 						/>
 					) )}
@@ -168,10 +170,15 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 	switch ( question?.type ) {
 	case QuestionType.MultipleChoice:
 		return (
-			<MultipleChoice
-				disabled={props.disabled}
-				questionId={question.id}
-			/>
+			<>
+				<MultipleChoice
+					disabled={props.disabled}
+					questionId={question.id}
+				/>
+				{props.feedback && (
+					<TextArea/>
+				)}
+			</>
 		)
 	case QuestionType.TrueFalse:
 		return (
