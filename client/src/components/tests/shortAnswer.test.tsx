@@ -1,19 +1,19 @@
 import React from "react"
 import { Provider } from "react-redux"
-import { MultipleChoice } from "../multipleChoice"
-import { Question, QuestionType } from "../../App"
 import { act } from "react-dom/test-utils"
 import ReactDOM from "react-dom/client"
 import { createMockStore } from "./mockStore"
+import { Question, QuestionType } from "../../App"
+import { ShortAnswer } from "../shortAnswer"
 
 const mockQuestion: Question = {
-	answers: [ "test1", "test2", "test3", "test4" ],
+	answers: [],
 	id: 0,
 	text: "test",
-	type: QuestionType.MultipleChoice
+	type: QuestionType.ShortAnswer
 }
 
-describe( "multipleChoice component", () => {
+describe( "shortAnswer component", () => {
 	let container: HTMLDivElement
 
 	beforeEach( () => {
@@ -21,11 +21,11 @@ describe( "multipleChoice component", () => {
 		document.body.appendChild( container )
 	} )
 
-	it( "renders the correct label and answer choices", () => {
+	it( "renders the correct label and an empty text box", () => {
 		act( () => {
 			ReactDOM.createRoot( container ).render(
 				<Provider store={createMockStore( mockQuestion )}>
-					<MultipleChoice 
+					<ShortAnswer 
 						questionId={mockQuestion.id}
 					/>
 				</Provider>
@@ -33,12 +33,10 @@ describe( "multipleChoice component", () => {
 		} )
 
 		const label = container.querySelector( ".bp4-label" )
-		const choices = container.querySelectorAll( ".bp4-radio" )
+		const textArea = container.querySelector( "textarea" )
 
 		expect( label?.textContent ).toEqual( "test" )
-		expect( choices[0]?.textContent ).toEqual( "test1" )
-		expect( choices[1]?.textContent ).toEqual( "test2" )
-		expect( choices[2]?.textContent ).toEqual( "test3" )
-		expect( choices[3]?.textContent ).toEqual( "test4" )
+		expect( textArea ).toBeTruthy()
+		expect( textArea?.textContent ).toBe( "" )
 	} )
 } )
