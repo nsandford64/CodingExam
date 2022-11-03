@@ -18,6 +18,7 @@ const credentials = {
 
 // Get the main entry point to the Client app
 router.get( "/", async ( req, res ) => {	
+	// Some hard coded tokens for use in testing outside of canvas
 	const testCanvasUserID = "2b7a2ea9f28bc312753640b0c1cc537fa85c5a49"
 	const token1 = generateAccessToken( { 
 		assignmentID: "01cf10c5-f5d3-466e-b716-53f2b0bcd3b4",
@@ -27,6 +28,12 @@ router.get( "/", async ( req, res ) => {
 
 	const pool = new Pool( credentials )
 
+	/* Inserts the generated token into the sessions table in the database.
+		This currently just puts a row in the database and nothing else, as tokens
+		 are just used so the client can keep track of their userID, role and what 
+		 assignment they are on. As we continue development, it will eventually
+		be expanded to allow for checking if someone's session is valid or not
+	*/
 	const results = await pool.query( `
 		SELECT U.UserID
 		FROM "CodingExam".Users U
@@ -50,6 +57,7 @@ router.get( "/", async ( req, res ) => {
 	} )
 	*/
 
+	// Modifies the index.html file that is returned to the client to contain the JWT token and sends it
 	fs.readFile( path.resolve( "../client/build/index.html" ), "utf8", ( err, data ) => {
 		if ( err ) {
 			console.error( err )
@@ -76,6 +84,7 @@ router.post( "/", async ( req, res ) => {
 			res.status( 401 ).send( "Unauthorized" )
 		}
 		else {
+			//Generates a token for the user
 			const token = generateAccessToken( { 
 				assignmentID: req.body.ext_lti_assignment_id,
 				userID: req.body.user_id,
@@ -85,6 +94,12 @@ router.post( "/", async ( req, res ) => {
 
 			const pool = new Pool( credentials )
 
+			/*Inserts the token into the sessions table of the database.
+				This currently just puts a row in the database and nothing else, as tokens
+				are just used so the client can keep track of their userID, role and what 
+				assignment they are on. As we continue development, it will eventually
+				be expanded to allow for checking if someone's session is valid or not
+			*/
 			const results = await pool.query( `
 				SELECT U.UserID
 				FROM "CodingExam".Users U
@@ -100,6 +115,7 @@ router.post( "/", async ( req, res ) => {
 					SET Token = '${token}'
 			` )
 
+			// Modifies the index.html file that is returned to the client to contain the JWT token and sends it
 			fs.readFile( path.resolve( "../client/build/index.html" ), "utf8", ( err, data ) => {
 				if ( err ) {
 					console.error( err )
@@ -115,6 +131,7 @@ router.post( "/", async ( req, res ) => {
 	} )
 } )
 
+//Generates an access token using an object containing the encoded properties as the key
 function generateAccessToken( object ) {
 	return jwt.sign( object, "token_secret" )
 }

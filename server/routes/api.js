@@ -13,13 +13,16 @@ const credentials = {
 	port: 5432
 }
 
+// Endpoint of the API router that returns the role within the token
 router.get( "/role", async function ( req, res ) {
+	// Send an invalid request response if the reqeust doesn't have a token
 	if ( !req.headers.token ) {
 		res.send( {
 			"response": "Invalid request"
 		} )
 	}
 	else {
+		// Decodes the token and returns the role contained within it
 		const token = req.headers.token
 		let role
 		jwt.verify( token, "token_secret", ( err, object ) => {
@@ -34,18 +37,20 @@ router.get( "/role", async function ( req, res ) {
 
 // Get a list of questions from the requested examid
 router.get( "/questions", async function( req, res ) {
-
+	// Sends an invalid request response if the request doesn't have a token
 	if ( !req.headers.token ) {
 		res.send( {
 			"response": "Invalid request"
 		} )
 	}
 	else {
+		// Decodes the token and gets the examID from it
 		const token = req.headers.token
 		let examID
 		jwt.verify( token, "token_secret", ( err, object ) => {
 			examID = object.assignmentID 
 		} )
+
 		const pool = new Pool( credentials )
 
 		// Query the database for a list of questions with a given ExamID
@@ -80,7 +85,6 @@ router.get( "/questions", async function( req, res ) {
 			} )
 		} )
 
-		console.log( Array.from( map.values() ) )
 		// Sends an array of questions to the Client
 		res.send( {
 			questions: Array.from( map.values() )
@@ -90,12 +94,14 @@ router.get( "/questions", async function( req, res ) {
 
 // Get a list of responses for a given ExamID and CanvasUserID
 router.get( "/responses", async ( req, res ) => {
+	// Sends an invalid request response if the request doesn't have a token
 	if ( !req.headers.token ) {
 		res.send( {
 			"response": "Invalid request"
 		} )
 	}
 	else {
+		// Decodes the token to get the sender's userID, examID, and role
 		const token = req.headers.token
 		let examID
 		let userID
@@ -107,12 +113,17 @@ router.get( "/responses", async ( req, res ) => {
 			role = object.roles       
 		} )
 
+		/* If the sender's role is an instructor, they are on the instructor view and the userID in the token won't match
+			the responses they are trying to get. Because of this, a userID header is used to denote the student whose
+			responses need to be fetched
+		*/
 		if ( role === "Instructor" ) {
 			userID = req.headers.userid
 		}
 
 		const pool = new Pool( credentials )
 
+		// Query the database for a particular student's responses for a particular exam
 		const results = await pool.query( `
 		SELECT SR.QuestionID, SR.IsTextResponse, SR.TextResponse, SR.AnswerResponse
 		FROM "CodingExam".StudentResponse SR 
@@ -140,12 +151,14 @@ router.get( "/responses", async ( req, res ) => {
 
 // Inserts an answer into the StudentResponse table in the database
 router.post( "/", async ( req, res ) => {
+	// Sends an invalid submission response if the request doesn't have a token
 	if( !req.headers.token ) {
 		res.send( {
 			"response": "Invalid submission"
 		} )
 	}
 	else {
+		// Decodes the token to get the userID of the student
 		const token = req.headers.token
 		let userID
 		jwt.verify( token, "token_secret", ( err, object ) => {
@@ -155,6 +168,7 @@ router.post( "/", async ( req, res ) => {
 	
 		// Insert each response into the StudentResponse table
 		await req.body.forEach( response => {
+			// Query to insert a text response into the database
 			if ( typeof response.value === "string" ) {
 				// eslint-disable-next-line no-useless-escape
 				const stringValue = `${response.value}`.replace( "'", "''" )
@@ -165,6 +179,7 @@ router.post( "/", async ( req, res ) => {
 					SET TextResponse = '${stringValue}';
 			` )
 			}
+			// Query to insert a non-text response into the database
 			else {
 				pool.query( `
 				INSERT INTO "CodingExam".StudentResponse(IsTextResponse, AnswerResponse, QuestionID, CanvasUserID)
@@ -184,58 +199,17 @@ router.post( "/", async ( req, res ) => {
 	}
 } )
 
-//instructor endpoints start
-router.get( "/examtakers", async( req, res ) => {
-	if ( !req.headers.token ) {
-		res.send( {
-			"response": "Invalid request"
-		} )
-	}
-	else {
-		const token = req.headers.token
-		let examID
-		let role
-
-		jwt.verify( token, "token_secret", ( err, object ) => {
-			examID = object.assignmentID 
-			role = object.roles     
-		} )
-		if ( role != "Instructor" ) {
-			res.send( {
-				response: "Invalid request: not an instructor"
-			} )
-		}
-		else {
-			const pool = new Pool( credentials )
-
-			const results = await pool.query( `
-			SELECT U.CanvasUserID, U.FullName
-			FROM "CodingExam".Exam E
-			INNER JOIN "CodingExam".UserExam UE ON UE.ExamID = E.ExamID
-			INNER JOIN "CodingExam".Users U ON U.UserID = UE.UserID
-			WHERE E.CanvasExamID = '${examID}'
-			ORDER BY U.FullName
-			` )
-
-			await pool.end()
-
-			res.send( {
-				users: results.rows.map( row => ( {
-					canvasUserId: row.canvasuserid,
-					fullName: row.fullname
-				} ) )
-			} )
-		}
-	}
-} )
-
+// Gets the instructor feedback for questions, used by both instructor and student view
 router.get( "/feedback", async ( req, res ) => {
+	// Sends an invalid request response if the request doesn't have a token
 	if ( !req.headers.token ) {
 		res.send( {
 			"response": "Invalid request"
 		} )
 	}
 	else {
+
+		// Decode the token to get the examID, userID, and role from the sender
 		const token = req.headers.token
 		let examID
 		let userID
@@ -247,12 +221,17 @@ router.get( "/feedback", async ( req, res ) => {
 			role = object.roles       
 		} )
 
+		/* When in the instructor view, the userID from the token will be the instructors, but the feedback
+			will need to be the student whose feedback they are getting. Because of this, a userID header is
+			sent with the userID of the student they are viewing
+		*/
 		if ( role === "Instructor" ) {
 			userID = req.headers.userid
 		}
 
 		const pool = new Pool( credentials )
 
+		// Queries the database for feedback for a particular user and exam
 		const results = await pool.query( `
 		SELECT SR.QuestionID, SR.InstructorFeedback
 		FROM "CodingExam".StudentResponse SR 
@@ -277,19 +256,77 @@ router.get( "/feedback", async ( req, res ) => {
 	}
 } )
 
-router.post( "/instructorfeedback", async( req, res ) => {
+// Instructor endpoints start
+
+// Gets the users who have taken a particular exam for the instructor view
+router.get( "/examtakers", async( req, res ) => {
+	// Sends an invalid request response if the request doesn't have a token
 	if ( !req.headers.token ) {
 		res.send( {
 			"response": "Invalid request"
 		} )
 	}
 	else {
+		// Decodes the token and gets the examID and role of the sender
+		const token = req.headers.token
+		let examID
+		let role
+
+		jwt.verify( token, "token_secret", ( err, object ) => {
+			examID = object.assignmentID 
+			role = object.roles     
+		} )
+
+		// Sends an invalid request message if the sender is not an instructor
+		if ( role != "Instructor" ) {
+			res.send( {
+				response: "Invalid request: not an instructor"
+			} )
+		}
+		else {
+			
+			const pool = new Pool( credentials )
+
+			//Query's the database for the students that have taken a particular exam
+			const results = await pool.query( `
+			SELECT U.CanvasUserID, U.FullName
+			FROM "CodingExam".Exam E
+			INNER JOIN "CodingExam".UserExam UE ON UE.ExamID = E.ExamID
+			INNER JOIN "CodingExam".Users U ON U.UserID = UE.UserID
+			WHERE E.CanvasExamID = '${examID}'
+			ORDER BY U.FullName
+			` )
+
+			await pool.end()
+
+			// Sends the list of users from the database
+			res.send( {
+				users: results.rows.map( row => ( {
+					canvasUserId: row.canvasuserid,
+					fullName: row.fullname
+				} ) )
+			} )
+		}
+	}
+} )
+
+// Enters instructor feedback into the database
+router.post( "/instructorfeedback", async( req, res ) => {
+	// Returns an invalid request response if the request doesn't have a token
+	if ( !req.headers.token ) {
+		res.send( {
+			"response": "Invalid request"
+		} )
+	}
+	else {
+		// Decode the token to get the sender's role
 		const token = req.headers.token
 		let role
 
 		jwt.verify( token, "token_secret", ( err, object ) => {
 			role = object.roles     
 		} )
+		// if the sender isn't an instructor, return an invalid request response
 		if ( role != "Instructor" ) {
 			res.send( {
 				response: "Invalid request: not an instructor"
@@ -299,6 +336,7 @@ router.post( "/instructorfeedback", async( req, res ) => {
 			const userID = req.headers.userid
 			const pool = new Pool( credentials )
 
+			// Insert the feedback from the instructor into the database
 			await req.body.forEach( question => {
 				pool.query( `
 					UPDATE "CodingExam".StudentResponse
@@ -306,6 +344,7 @@ router.post( "/instructorfeedback", async( req, res ) => {
 					WHERE QuestionID = ${question.questionId} AND CanvasUserID = '${userID}'
 				` )
 			} )
+			// Send a valid submission response to the user
 			res.send( {
 				"response": "Valid submission"
 			} )
