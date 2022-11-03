@@ -1,5 +1,5 @@
 import { enableMapSet } from "immer"
-import { Question, QuestionType, Response } from "../../App"
+import { Feedback, Question, QuestionType, Response } from "../../App"
 import examReducer, {
 	examActions,
 	ExamState
@@ -12,7 +12,9 @@ describe( "exam reducer", () => {
 		questionsMap: new Map<number, Question>(),
 		responseIds: [],
 		responsesMap: new Map<number, Response>(),
-		responseState: ""
+		responseState: "",
+		feedbackIds: [],
+		feedbackMap: new Map<number, Feedback>()
 	}
 
 	it( "should handle initial state", () => {
