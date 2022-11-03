@@ -80,6 +80,7 @@ router.get( "/questions", async function( req, res ) {
 			} )
 		} )
 
+		console.log( Array.from( map.values() ) )
 		// Sends an array of questions to the Client
 		res.send( {
 			questions: Array.from( map.values() )
