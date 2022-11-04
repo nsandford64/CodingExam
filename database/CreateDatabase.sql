@@ -87,13 +87,14 @@ INSERT INTO "CodingExam".Users(CanvasUserID, FullName)
 VALUES ('2b7a2ea9f28bc312753640b0c1cc537fa85c5a49', 'John User'),
 ('a3alsdf9cjasq713h4jwld9c8galsdf94', 'Noah Sandford'),
 ('aasdja45ojaf2nvpnoaejoirtjj9eq0jf', 'Jacob Williams'),
-('a4sdlkj99oqneig9bspdakfmdj19384kk', 'Jack Walter');
+('a4sdlkj99oqneig9bspdakfmdj19384kk', 'Jack Walter'),
+('aocigpqdjfi18340t8g0vajald99fa03a', 'Test User');
 
 INSERT INTO "CodingExam".Exam(CanvasExamID, TotalPoints)
 VALUES ('01cf10c5-f5d3-466e-b716-53f2b0bcd3b4', 1), ('e81f6b6e-8755-4fec-b2d5-c471d34f2e62', 0);
 
 INSERT INTO "CodingExam".UserExam(UserID, ExamID)
-VALUES (1, 1), (2, 1), (3, 1), (4, 1);
+VALUES (1, 1), (2, 1), (3, 1), (4, 1), (5, 1);
 
 INSERT INTO "CodingExam".QuestionType(QuestionType)
 VALUES ('MultipleChoice'), ('ShortAnswer'), ('TrueFalse'), ('CodingAnswer');
@@ -118,9 +119,12 @@ VALUES (1, TRUE, 0, 'C#'), (1, TRUE, 1, 'Java'), (1, TRUE, 2, 'TypeScript'), (1,
 INSERT INTO "CodingExam".StudentResponse(IsTextResponse, AnswerResponse, QuestionID, CanvasUserID)
 VALUES (FALSE, 0, 1, 'a3alsdf9cjasq713h4jwld9c8galsdf94'), (FALSE, 1, 2, 'a3alsdf9cjasq713h4jwld9c8galsdf94'),
 (FALSE, 1, 1, 'aasdja45ojaf2nvpnoaejoirtjj9eq0jf'), (FALSE, 0, 2, 'aasdja45ojaf2nvpnoaejoirtjj9eq0jf'),
-(FALSE, 2, 1, 'a4sdlkj99oqneig9bspdakfmdj19384kk'), (FALSE, 0, 2, 'a4sdlkj99oqneig9bspdakfmdj19384kk');
+(FALSE, 2, 1, 'a4sdlkj99oqneig9bspdakfmdj19384kk'), (FALSE, 0, 2, 'a4sdlkj99oqneig9bspdakfmdj19384kk'),
+(FALSE, 2, 1, 'aocigpqdjfi18340t8g0vajald99fa03a'), (FALSE, 0, 2, 'aocigpqdjfi18340t8g0vajald99fa03a');
 
 INSERT INTO "CodingExam".StudentResponse(IsTextResponse, TextResponse, QuestionID, CanvasUserID)
 VALUES (TRUE, 'Good', 3, 'a3alsdf9cjasq713h4jwld9c8galsdf94'),
 (TRUE, 'Great', 3, 'aasdja45ojaf2nvpnoaejoirtjj9eq0jf'),
-(TRUE, 'Pretty good', 3, 'a4sdlkj99oqneig9bspdakfmdj19384kk');
+(TRUE, 'Pretty good', 3, 'a4sdlkj99oqneig9bspdakfmdj19384kk'),
+(TRUE, 'test', 3, 'aocigpqdjfi18340t8g0vajald99fa03a'),
+(TRUE, 'print(hello world)', 4, 'aocigpqdjfi18340t8g0vajald99fa03a');
