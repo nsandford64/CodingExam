@@ -2,6 +2,10 @@
 import { Label } from "@blueprintjs/core"
 import * as React from "react"
 import AceEditor from "react-ace"
+import brace from "brace"
+
+import "brace/mode/java"
+import "brace/theme/github"
 
 import styled from "styled-components"
 import { Response, ComponentProps } from "../App"
