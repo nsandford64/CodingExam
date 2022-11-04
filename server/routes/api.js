@@ -319,8 +319,6 @@ router.post( "/instructorfeedback", async( req, res ) => {
 		} )
 	}
 	else {
-		console.log( req.headers )
-		console.log( req.body )
 		// Decode the token to get the sender's role
 		const token = req.headers.token
 		let role
