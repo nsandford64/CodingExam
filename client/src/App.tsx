@@ -18,17 +18,19 @@ declare global {
  */
 export const App = React.memo( () => {
 
+	// State that determines if the App is in a loading state
 	const [ loading, setLoading ] = React.useState( true )
+	// State that holds whethere the InstructorView or the StudentView should be rendered
 	const [ showInstructorView, setShowInstructorView ] = React.useState( false ) 
 
 	// Stores the JWT token
 	// const token = String( window.__INITIAL_DATA__ )
 
 	// Debug instructor token
-	// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJJbnN0cnVjdG9yIiwiaWF0IjoxNjY2OTcyODM4fQ.n9qkthHs0HhonpjD4yFNA7RLRqrzK1lavWzvBIGn_y8"
+	const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJJbnN0cnVjdG9yIiwiaWF0IjoxNjY2OTcyODM4fQ.n9qkthHs0HhonpjD4yFNA7RLRqrzK1lavWzvBIGn_y8"
 	
 	// Debug learner token
-	const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJMZWFybmVyIiwiaWF0IjoxNjY3NTA3ODM0fQ.SIpwxp9p6SXHfjDcDHkYO8cp0jLAEOnEVCxEeDrvCWs"
+	// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJMZWFybmVyIiwiaWF0IjoxNjY3NTA3ODM0fQ.SIpwxp9p6SXHfjDcDHkYO8cp0jLAEOnEVCxEeDrvCWs"
 	
 	/**
 	 * Runs on render - determines the user's role based on their JWT token
@@ -103,11 +105,24 @@ export type Response = {
 	value: number | string // The actual value of the Response 
 }
 
+/**
+ * Feedback Type
+ * 
+ * This type defines what feedback from the instruction should look like.
+ * Each feedback has a questionId and a value.
+ */
 export type Feedback = {
 	questionId: number
 	value: string
 }
 
+/**
+ * User Type
+ * 
+ * This type allows a user's name to be associated with it canvasUserId that is stored
+ * in the database.
+ * Each user has a canvasUserId and a fullName
+ */
 export type User = {
 	canvasUserId: string
 	fullName: string

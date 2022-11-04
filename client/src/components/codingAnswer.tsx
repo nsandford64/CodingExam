@@ -19,8 +19,15 @@ const StyledCodingAnswer = styled.div`
 	width: 40%;
 `
 
+/**
+ * CodingAnswer Component
+ * 
+ * This component renders a text-editor for the user to write
+ * code in
+ */
 export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 
+	// Dispatches an event to the store
 	const dispatch = useAppDispatch()
 
 	// Question from the store
@@ -29,7 +36,7 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
 
 	/** 
-	 * Called whenever code editor text is changed -- Updates the store with a new Response object
+	 * Called whenever the code editor text is changed -- Updates the store with a new Response object
 	 */
 	const handleChange = React.useCallback( ( value: string ) => {
 		const newResponse: Response = {
@@ -42,7 +49,7 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 		dispatch( examActions.updateResponse( newResponse ) )
 	}, [] )
 
-	//render the component
+	// Render the component
 	return (
 		<StyledCodingAnswer>
 			<Label>{question?.text}</Label>

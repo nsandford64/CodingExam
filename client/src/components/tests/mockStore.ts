@@ -3,6 +3,13 @@ import { Feedback, Question, Response } from "../../App"
 import { RootState } from "../../app/store"
 import examReducer, { ExamState } from "../../slices/examSlice"
 
+/**
+ * CreateMockStore()
+ * 
+ * This method creates a mock store, initiallizing it with the 
+ * mockQuestion that is passed. This is explicitly used for testing
+ * and nowhere else.
+ */
 export const createMockStore = ( ( mockQuestion: Question ) => {
 	const examState: ExamState = {
 		questionIds: [ 0 ],
