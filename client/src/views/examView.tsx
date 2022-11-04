@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Button, Intent, Spinner, TextArea } from "@blueprintjs/core"
+import { Button, Intent, Spinner } from "@blueprintjs/core"
 import * as React from "react"
 import { batch } from "react-redux"
 import styled from "styled-components"
@@ -10,8 +10,9 @@ import { FeedbackBox } from "../components/feedbackBox"
 import { MultipleChoice } from "../components/multipleChoice"
 import { ShortAnswer } from "../components/shortAnswer"
 import { TrueFalse } from "../components/trueFalse"
-import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap, selectFeedbackMap, selectFeedbackById } from "../slices/examSlice"
+import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap } from "../slices/examSlice"
 
+// Props for the ExamView comoponent
 interface ExamViewProps {
 	disabled?: boolean
 	feedback?: boolean
@@ -19,22 +20,37 @@ interface ExamViewProps {
 	token: string
 }
 
+/**
+ * Style for the ExamView
+ */
 const StyledExamView = styled.div`
 `
 
+/**
+ * ExamView Component
+ * 
+ * This component renders an exam and all of its questions for the user.
+ * Depending on the type of user (Instructor or Learner), it will present a different
+ * form the exam. The Instructor can only view student responses and leave feedback, and the
+ * Learner can only take the exam and submit their responses.
+ */
 export const ExamView = React.memo( ( props: ExamViewProps ) => {
 
+	// Dispatch an event to the store
 	const dispatch = useAppDispatch()
 
 	// Array of questionIds from the Redux store
 	const questionIds = useAppSelector( selectQuestionIds )
 	// Map of responses from the store
 	const responsesMap = useAppSelector( selectResponsesMap )
-	// Map of feedback from the Redux store
-	//const feedbackMap = useAppSelector( selectFeedbackMap )
 
+	// State that determines if the ExamView is in a loading state
 	const [ loading, setLoading ] = React.useState( true )
 
+	/**
+	 * Called on render - initializes the questions and responses
+	 * in the store
+	 */
 	React.useEffect( () => {
 		const initQuestions = async () => {
 			// Fetch exam questions
@@ -74,27 +90,28 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 				newResponsesMap.set( response.questionId, response )
 			} )
 
-			
+			// Fetch exam feedback
 			data = await fetch( "http://localhost:9000/api/feedback", {
 				headers: {
 					"token": props.token,
 					"userID": props.canvasUserId || ""
 				}
 			} )
+
 			json = await data.json()
 			const feedback: Feedback[] = json.feedback
 
 			// Loop through the feedback and create ids and a map
-			//const newFeedbackIds: number[] = []
+			const newFeedbackIds: number[] = []
 			const newFeedbackMap = new Map<number, Feedback>()
 			feedback.forEach( feedback => {
-				//newFeedbackIds.push( feedback.questionId )
+				newFeedbackIds.push( feedback.questionId )
 				newFeedbackMap.set( feedback.questionId, feedback )
 			} )
 
 			// Update the store
 			batch( () => {
-				//dispatch( examActions.setFeedbackIds( newFeedbackIds ) )
+				dispatch( examActions.setFeedbackIds( newFeedbackIds ) )
 				dispatch( examActions.setFeedbackMap( newFeedbackMap ) )
 				dispatch( examActions.setQuestionIds( newQuestionIds ) )
 				dispatch( examActions.setQuestionsMap( newQuestionsMap ) )
@@ -169,6 +186,9 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 } )
 ExamView.displayName = "ExamView"
 
+/**
+ * Props for the QuestionSwitch Component
+ */
 interface QuestionSwitchProps {
 	disabled?: boolean
 	feedback?: boolean

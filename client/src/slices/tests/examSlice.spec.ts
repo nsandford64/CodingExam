@@ -23,7 +23,9 @@ describe( "exam reducer", () => {
 			questionsMap: new Map<number, Question>(),
 			responseIds: [],
 			responsesMap: new Map<number, Response>(),
-			responseState: ""
+			responseState: "",
+			feedbackIds: [],
+			feedbackMap: new Map<number, Feedback>()
 		} )
 	} )
 
@@ -73,12 +75,42 @@ describe( "exam reducer", () => {
 	it( "should handle updateResponse", () => {
 		const response: Response = {
 			questionId: 1,
-			value: "test",
+			value: "update",
 			isText: true
 		}
 
 		const actual = examReducer( initialState, examActions.updateResponse( response ) )
 		expect( actual.responsesMap.get( response.questionId ) ).toEqual( response )
+	} )
+
+	it( "should handle setFeedbackIds", () => {
+		const feedbackIds = [ 1, 2, 3 ]
+
+		const actual = examReducer( initialState, examActions.setFeedbackIds( feedbackIds ) )
+		expect( actual.feedbackIds ).toEqual( feedbackIds )
+	} )
+
+	it( "should handle setFeedbackMap", () => {
+		const feedBack: Feedback = {
+			questionId: 1,
+			value: "test",
+		}
+		const feedbackMap = new Map<number, Feedback>( [
+			[ 1, feedBack ]
+		] )
+
+		const actual = examReducer( initialState, examActions.setFeedbackMap( feedbackMap ) )
+		expect( actual.feedbackMap ).toEqual( feedbackMap )
+	} )
+
+	it( "should handle updateFeedback", () => {
+		const feedback: Feedback = {
+			questionId: 1,
+			value: "update",
+		}
+
+		const actual = examReducer( initialState, examActions.updateFeedback( feedback ) )
+		expect( actual.feedbackMap.get( feedback.questionId ) ).toEqual( feedback )
 	} )
 
 	it( "should handle setResponseState", () => {
