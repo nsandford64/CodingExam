@@ -4,7 +4,7 @@ const router = express.Router()
 const { Pool } = require( "pg" )
 const jwt = require( "jsonwebtoken" )
 
-// Sample credentials for PostGres database
+// Credentials for PostGres database
 const credentials = {
 	user: "codingexam",
 	host: "localhost",
