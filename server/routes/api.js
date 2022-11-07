@@ -192,11 +192,13 @@ router.post( "/", async ( req, res ) => {
 		} )
 
 		pool.query( `
-				UPDATE "CodingExam".UserExam
+				UPDATE "CodingExam".UserExam UEO
 				SET HasTaken = TRUE
-				FROM "CodingExam".UserExam UE INNER JOIN "CodingExam".Users U ON U.UserID = UE.UserID
-					INNER JOIN "CodingExam".Exam E ON E.ExamID = UE.ExamID
+				FROM "CodingExam".UserExam AS UE
+					INNER JOIN "CodingExam".Exam AS E ON UE.ExamID = E.ExamID
+					INNER JOIN "CodingExam".Users AS U ON UE.UserID = U.UserID
 				WHERE E.CanvasExamID = '${examID}' AND U.CanvasUserID = '${userID}'
+					AND UE.UserID = UEO.UserID AND UE.ExamID = UEO.ExamID
 			` )
 			
 		await pool.end()
