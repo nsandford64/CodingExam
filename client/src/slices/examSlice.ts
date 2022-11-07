@@ -1,7 +1,8 @@
 // Copyright 2022 under MIT License
 
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { Feedback, Question, Response } from "../App"
+import { Column } from "postgres"
+import { ColumnProps, Feedback, Question, Response } from "../App"
 import { RootState } from "../app/store"
 
 /**
@@ -46,6 +47,14 @@ const setFeedbackMap = ( state:ExamState, action: PayloadAction<Map<number, Feed
 // Update the feedbackMap in the store to have the new Feedback
 const updateFeedback = ( state: ExamState, action: PayloadAction<Feedback> ) => {
 	state.feedbackMap.set( action.payload.questionId, action.payload )
+}
+// Set the Column array in the store
+const setColumnsResponse = ( state:ExamState, action: PayloadAction<Map<number, ColumnProps>> ) => {
+	state.columnsResponse = action.payload
+}
+// Update the Column state in the store to have new Feedback
+const updateColumnsResponse = ( state: ExamState, action: PayloadAction<ColumnProps> ) => {
+	state.columnsResponse.set( action.payload.questionId, action.payload )
 }
 
 /**
@@ -105,6 +114,7 @@ export interface ExamState {
 	responseState: string,
 	feedbackIds: number[],
 	feedbackMap: Map<number, Feedback>
+	columnsResponse: Map<number, ColumnProps>
 }
 
 const initialState: ExamState = {
@@ -114,7 +124,8 @@ const initialState: ExamState = {
 	responsesMap: new Map<number, Response>(),
 	responseState: "",
 	feedbackIds: [],
-	feedbackMap: new Map<number, Feedback>()
+	feedbackMap: new Map<number, Feedback>(),
+	columnsResponse: new Map<number, ColumnProps>()
 }
 
 export const examSlice = createSlice( {
@@ -129,7 +140,9 @@ export const examSlice = createSlice( {
 		setResponseState,
 		setFeedbackIds,
 		setFeedbackMap,
-		updateFeedback
+		updateFeedback,
+		setColumnsResponse,
+		updateColumnsResponse
 	}
 } )
 
