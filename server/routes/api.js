@@ -160,9 +160,10 @@ router.post( "/", async ( req, res ) => {
 	else {
 		// Decodes the token to get the userID of the student
 		const token = req.headers.token
-		let userID
+		let userID, examID
 		jwt.verify( token, "token_secret", ( err, object ) => {
 			userID = object.userID
+			examID = object.assignmentID
 		} )
 		const pool = new Pool( credentials )
 	
@@ -190,6 +191,14 @@ router.post( "/", async ( req, res ) => {
 			}
 		} )
 
+		pool.query( `
+				UPDATE "CodingExam".UserExam
+				SET HasTaken = TRUE
+				FROM "CodingExam".UserExam UE INNER JOIN "CodingExam".Users U ON U.UserID = UE.UserID
+					INNER JOIN "CodingExam".Exam E ON E.ExamID = UE.ExamID
+				WHERE E.CanvasExamID = '${examID}' AND U.CanvasUserID = '${userID}'
+			` )
+			
 		await pool.end()
 
 		// Respond a success message to the poster

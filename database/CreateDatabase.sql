@@ -30,6 +30,7 @@ CREATE TABLE "CodingExam".UserExam
 	UserID INT NOT NULL REFERENCES "CodingExam".Users(UserID),
 	ExamID INT NOT NULL REFERENCES "CodingExam".Exam(ExamID),
 	ScoredPoints INT,
+	HasTaken BOOLEAN NOT NULL DEFAULT FALSE,
 	PRIMARY KEY(ExamID, UserID)
 );
 
