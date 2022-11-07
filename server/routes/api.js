@@ -24,13 +24,31 @@ router.get( "/role", async function ( req, res ) {
 	else {
 		// Decodes the token and returns the role contained within it
 		const token = req.headers.token
-		let role
+		let role, userID, examID
 		jwt.verify( token, "token_secret", ( err, object ) => {
-			role = object.roles 
+			role = object.roles
+			examID = object.assignmentID
+			userID = object.userID
 		} )
 
+		const pool = new Pool( credentials )
+
+		// Query the database for a list of questions with a given ExamID
+		const results = await pool.query( `
+			SELECT UE.HasTaken
+			FROM "CodingExam".UserExam UE
+				INNER JOIN "CodingExam".Exam E ON E.ExamID = UE.ExamID
+				INNER JOIN "CodingExam".Users U ON U.UserID = UE.UserID
+			WHERE E.CanvasExamID = '${examID}' AND U.CanvasUserID = '${userID}'
+		` )
+
+		await pool.end()
+
+		let taken = results.rows[0].hastaken
+
 		res.send( {
-			role: role
+			role: role,
+			taken: taken
 		} )
 	}
 } )

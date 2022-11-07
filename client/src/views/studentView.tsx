@@ -10,6 +10,7 @@ import { ExamView } from "./examView"
  */
 interface StudentViewProps {
 	token: string
+	disabled: boolean
 }
 
 /**
@@ -37,6 +38,8 @@ export const StudentView = React.memo( ( props: StudentViewProps ) => {
 		<StyledStudentView>
 			<h1>{responseState}</h1>
 			<ExamView 
+				disabled={props.disabled}
+				feedback={props.disabled}
 				token={props.token}
 			/>
 		</StyledStudentView>

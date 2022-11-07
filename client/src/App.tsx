@@ -21,7 +21,10 @@ export const App = React.memo( () => {
 	// State that determines if the App is in a loading state
 	const [ loading, setLoading ] = React.useState( true )
 	// State that holds whethere the InstructorView or the StudentView should be rendered
-	const [ showInstructorView, setShowInstructorView ] = React.useState( false ) 
+	const [ showInstructorView, setShowInstructorView ] = React.useState( false )
+	// State that holds whether the exam has already been taken
+	const [ taken, setTaken ] = React.useState( false )
+
 
 	// Stores the JWT token
 	const token = String( window.__INITIAL_DATA__ )
@@ -46,6 +49,9 @@ export const App = React.memo( () => {
 			} )
 			
 			const json = await data.json()
+			
+			setTaken( json.taken )
+
 			if( json.role === "Instructor" ) {
 				setShowInstructorView( true )
 			}
@@ -71,7 +77,7 @@ export const App = React.memo( () => {
 						<InstructorView token={token} />
 					)}
 					{!showInstructorView && (
-						<StudentView token={token} />
+						<StudentView disabled={taken} token={token} />
 					)}
 				</>
 			)}
