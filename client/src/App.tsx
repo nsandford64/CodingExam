@@ -147,6 +147,20 @@ export interface ComponentProps {
 }
 
 /**
+ * ColumnProps Interface
+ * 
+ * This interface establishes a common point between each Parsons
+ * Problem column component.
+ * Each column component has a header and a list of strings of code
+ */
+export interface ColumnProps{
+	col:{
+		id: string,
+		list: string[]
+	}
+}
+
+/**
  * QuestionType Enum
  * 
  * This enum maps a database QuestionType to a more readable
