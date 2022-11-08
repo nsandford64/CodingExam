@@ -122,7 +122,9 @@ export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 					intent={Intent.PRIMARY}
 					onClick={() => setShowStudentList( true )}
 				/>
-				<h3>Student List</h3>
+				{showStudentList && (
+					<h3>Student List</h3>
+				)}
 			</StyledHeaderContainer>
 			{showStudentList && (
 				<StyledStudentListContainer>
