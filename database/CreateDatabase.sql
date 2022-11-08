@@ -1,7 +1,6 @@
 --Copyright 2022 under MIT License
 SET search_path TO 'CodingExam';
 
-DROP TABLE IF EXISTS "CodingExam".UserSessions CASCADE;
 DROP TABLE IF EXISTS "CodingExam".StudentResponse CASCADE;
 DROP TABLE IF EXISTS "CodingExam".QuestionAnswer CASCADE;
 DROP TABLE IF EXISTS "CodingExam".ExamQuestion CASCADE;
@@ -16,14 +15,6 @@ CREATE TABLE "CodingExam".Users
 	CanvasUserID VARCHAR(60) NOT NULL,
 	FullName VARCHAR(60) NOT NULL,
 	UNIQUE(CanvasUserID)
-);
-
-CREATE TABLE "CodingExam".UserSessions
-(
-	SessionID INT NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	UserID INT NOT NULL REFERENCES "CodingExam".Users(UserID),
-	Token VARCHAR(300) NOT NULL,
-	UNIQUE(UserID)
 );
 
 CREATE TABLE "CodingExam".Exam
