@@ -4,8 +4,18 @@ const lti = require( "ims-lti" )
 const path = require( "path" )
 const jwt = require( "jsonwebtoken" )
 const fs = require( "fs" )
+const { Pool } = require( "pg" )
 
 const router = express.Router()
+
+// Credentials for PostGres database
+const credentials = {
+	user: "codingexam",
+	host: "localhost",
+	database: "CodingExam",
+	password: "password",
+	port: 5432
+}
 
 // Get the main entry point to the Client app
 router.get( "/", async ( req, res ) => {	
@@ -49,6 +59,24 @@ router.post( "/", async ( req, res ) => {
 				userID: req.body.user_id,
 				roles: req.body.roles
 			} )
+
+			const pool = new Pool( credentials )
+
+			// Query the database for a list of questions with a given ExamID
+			const results = await pool.query( `
+				SELECT 1
+				FROM "CodingExam".Exam E
+				WHERE E.CanvasExamID = '${req.body.ext_lti_assignment_id}'
+			` )
+
+			if( results.rows.length === 0 ) {
+				console.log( "this will work" )
+				await pool.query( `
+					INSERT INTO "CodingExam".Exam(CanvasExamID, TotalPoints)
+					VALUES('${req.body.ext_lti_assignment_id}', ${req.body.custom_canvas_assignment_points_possible})
+				` )
+				await pool.end()
+			}
 
 			// Modifies the index.html file that is returned to the client to contain the JWT token and sends it
 			fs.readFile( path.resolve( "../client/build/index.html" ), "utf8", ( err, data ) => {
