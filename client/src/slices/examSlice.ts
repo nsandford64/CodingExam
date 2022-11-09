@@ -16,6 +16,13 @@ const setQuestionIds = ( state: ExamState, action: PayloadAction<number[]> ) => 
 const setQuestionsMap = ( state: ExamState, action: PayloadAction<Map<number, Question>> ) => {
 	state.questionsMap = action.payload
 }
+// Update the questionsMap in the store to have the new Question
+const updateQuestion = ( state: ExamState, action: PayloadAction<Question> ) => {
+	if( !state.questionIds.includes( action.payload.id ) ) {
+		state.questionIds.push( action.payload.id )
+	}
+	state.questionsMap.set( action.payload.id, action.payload )
+}
 
 // Set the responseIds array in the store
 const setResponseIds = ( state: ExamState, action: PayloadAction<number[]> ) => {
@@ -27,6 +34,9 @@ const setResponsesMap = ( state: ExamState, action: PayloadAction<Map<number, Re
 }
 // Update the responsesMap in the store to have the new Response
 const updateResponse = ( state: ExamState, action: PayloadAction<Response> ) => {
+	if( !state.responseIds.includes( action.payload.questionId ) ) {
+		state.responseIds.push( action.payload.questionId )
+	}
 	state.responsesMap.set( action.payload.questionId, action.payload )
 }
 
@@ -123,6 +133,7 @@ export const examSlice = createSlice( {
 	reducers: {
 		setQuestionIds,
 		setQuestionsMap,
+		updateQuestion,
 		setResponseIds,
 		setResponsesMap,
 		updateResponse,
