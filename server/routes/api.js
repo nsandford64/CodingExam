@@ -381,4 +381,77 @@ router.post( "/instructorfeedback", async( req, res ) => {
 	}
 } )
 
+router.post( "/createexam", async( req, res ) => {
+	// Returns an invalid request response if the request doesn't have a token
+	if ( !req.headers.token ) {
+		res.send( {
+			"response": "Invalid request"
+		} )
+	}
+	else {
+		// Decode the token to get the sender's role
+		const token = req.headers.token
+		let role, CanvasExamID
+	
+		jwt.verify( token, "token_secret", ( err, object ) => {
+			CanvasExamID = object.assignmentID
+			role = object.roles     
+		} )
+		// if the sender isn't an instructor, return an invalid request response
+		if ( role != "Instructor" ) {
+			res.send( {
+				response: "Invalid request: not an instructor"
+			} )
+		}
+		else {
+			const pool = new Pool( credentials )
+			for ( const question of req.body.questions ) {
+				let hasCorrectAnswers = "FALSE"
+				
+				if ( question.type === 1 || question.type === 3 ) {
+					hasCorrectAnswers = "TRUE"
+				}
+
+				let results = await pool.query( `
+					SELECT E.ExamID
+					FROM "CodingExam".Exam E
+					WHERE E.CanvasExamID = '${CanvasExamID}'
+				` )
+
+				const examId = results.rows[0].examid
+				
+				results = await pool.query( `
+					INSERT INTO "CodingExam".ExamQuestion(QuestionText, HasCorrectAnswers, QuestionType, ExamID)
+					VALUES('${question.text}', ${hasCorrectAnswers}, ${question.type}, ${examId})
+					RETURNING QuestionID
+				` )
+
+				const questionId = results.rows[0].questionid
+				
+				for ( let i = 0; i < question.answers.length; i++ ) {
+					let correct = "FALSE"
+
+					if ( question.correctAnswer === i ) {
+						correct = "TRUE"
+					}
+
+					console.log( question.answers[i] )
+					await pool.query( `
+					INSERT INTO "CodingExam".QuestionAnswer(QuestionID, CorrectAnswer, AnswerIndex, AnswerText)
+					VALUES(${questionId}, ${correct}, ${i}, '${question.answers[i]}')
+				` )
+				}
+
+			}
+			
+			await pool.end()
+			// Send a valid submission response to the user
+			res.send( {
+				"response": "Valid submission"
+			} )
+		}
+	}
+		
+} )
+
 module.exports = router
