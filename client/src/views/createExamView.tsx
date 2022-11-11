@@ -1,13 +1,11 @@
 // Copyright 2022 under MIT License
 import { Button, InputGroup, Intent, Label, MenuItem } from "@blueprintjs/core"
 import { Select2 } from "@blueprintjs/select"
-import { produceWithPatches } from "immer"
 import * as React from "react"
 import styled from "styled-components"
-import { QuestionType } from "../App"
+import { Question, QuestionType } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
-import { MultipleChoice } from "../components/multipleChoice"
-import { examActions, selectQuestionIds } from "../slices/examSlice"
+import { examActions, selectNextQuestionId, selectQuestionIds } from "../slices/examSlice"
 import { QuestionSwitch } from "./examView"
 
 interface CreateExamViewProps {
@@ -29,6 +27,7 @@ export const CreateExamView = React.memo( ( props: CreateExamViewProps ) => {
 				<QuestionSwitch 
 					key={id}
 					questionId={id}
+					disabled
 				/>
 			) )}
 			{selectedQuestionType && (
@@ -81,24 +80,31 @@ interface CreateQuestionSwitchProps {
 	setSelectedQuestionType: ( val: string ) => void
 }
 
-const StyledCreateQuestionSwitch = styled.div`
-
-`
-
 const CreateQuestionSwitch = React.memo( ( props: CreateQuestionSwitchProps ) => {
 	const dispatch = useAppDispatch()
+
+	const createQuestion = React.useCallback( ( question: Question ) => {
+		props.setSelectedQuestionType( "" )
+
+		dispatch( examActions.updateQuestion( question ) )
+		dispatch( examActions.incrementNextQuestionId() )
+	}, [] )
 
 	switch( props.questionType ) {
 	case "MultipleChoice":
 		return (
 			<CreateMultipleChoice 
-				setSelectedQuestionType={props.setSelectedQuestionType}
+				createQuestion={createQuestion}
 			/>
 		)
 	case "ShortAnswer":
 		return null
 	case "TrueFalse":
-		return null
+		return (
+			<CreateTrueFalse 
+				createQuestion={createQuestion}
+			/>
+		)
 	case "CodingAnswer":
 		return null
 	default:
@@ -107,13 +113,9 @@ const CreateQuestionSwitch = React.memo( ( props: CreateQuestionSwitchProps ) =>
 } )
 CreateQuestionSwitch.displayName = "CreateQuestionSwitch"
 
-interface CreateMultipleChoiceProps {
-	setSelectedQuestionType: ( val: string ) => void
+interface CreateQuestionComponentProps {
+	createQuestion: ( question: Question ) => void
 }
-
-const StyledCreateMultipleChoice = styled.div`
-
-`
 
 const StyledRow = styled.div`
 	margin-bottom: 10px;
@@ -123,42 +125,60 @@ const StyledButtonContainer = styled.div`
 	display: flex;
 `
 
-const CreateMultipleChoice = React.memo( ( props: CreateMultipleChoiceProps ) => {
-	const [ text, setText ] = React.useState( "" )
-	const [ answers, setAnswers ] = React.useState( [ "" ] as string[] )
-	const [ correctAnswer, setCorrectAnswer ] = React.useState( "" )
+const CreateMultipleChoice = React.memo( ( props: CreateQuestionComponentProps ) => {
+
+	const nextQuestionId = useAppSelector( selectNextQuestionId )
+
+	const [ question, setQuestion ] = React.useState( {
+		answers: [ "" ],
+		id: nextQuestionId,
+		text: "",
+		type: QuestionType.MultipleChoice,
+		correctAnswer: 0
+	} as Question )
 
 	const handleChange = React.useCallback( ( index: number, value: string ) => {
-		const newAnswers = [ ...answers ]
+		const newAnswers = [ ...question.answers ]
 		newAnswers[index] = value
 
-		setAnswers( newAnswers )
-	}, [ answers ] )
+		setQuestion( { 
+			...question, answers: newAnswers 
+		} )
+	}, [ question ] )
 
 	const handleAdd = React.useCallback( () => {
-		const newAnswers = [ ...answers, "" ]
-		setAnswers( newAnswers )
-	}, [ answers ] )
+		const newAnswers = [ ...question.answers, "" ]
+		setQuestion( {
+			...question, 
+			answers: newAnswers
+		} )
+	}, [ question ] )
 
 	const handleRemove = React.useCallback( () => {
-		const newAnswers = [ ...answers ]
+		const newAnswers = [ ...question.answers ]
 		newAnswers.pop()
 
-		setAnswers( newAnswers )
-	}, [ answers ] )
+		setQuestion( {
+			...question,
+			answers: newAnswers
+		} )
+	}, [ question ] )
 
 	return (
-		<StyledCreateMultipleChoice>
+		<>
 			<StyledRow>
 				<Label style={{ fontWeight: "bold" }}>Question Text</Label>
 				<InputGroup 
-					value={text}
-					onChange={e => setText( e.target.value )}
+					value={question.text}
+					onChange={e => setQuestion( {
+						...question,
+						text: e.target.value
+					} )}
 				/>
 			</StyledRow>
 			<StyledRow>
 				<Label style={{ fontWeight: "bold" }}>Answer Choices</Label>
-				{answers.map( ( answer, index ) => (
+				{question.answers.map( ( answer, index ) => (
 					<InputGroup 
 						value={answer}
 						key={index}
@@ -170,29 +190,76 @@ const CreateMultipleChoice = React.memo( ( props: CreateMultipleChoiceProps ) =>
 					<Button 
 						icon="plus"
 						onClick={handleAdd}
-						disabled={answers.length === 4}
+						disabled={question.answers.length === 4}
 					/>
 					<Button 
 						icon="minus"
 						onClick={handleRemove}
 						style={{ marginLeft: "auto" }}
-						disabled={answers.length === 1}
+						disabled={question.answers.length === 1}
 					/>
 				</StyledButtonContainer>
 			</StyledRow>
 			<StyledRow>
 				<Label style={{ fontWeight: "bold" }}>Index of Correct Answer</Label>
 				<InputGroup 
-					value={correctAnswer}
-					onChange={e => setCorrectAnswer( e.target.value )}
+					value={question.correctAnswer?.toString() || "0"}
+					onChange={e => setQuestion( {
+						...question,
+						correctAnswer: parseInt( e.target.value ) || 0
+					} )}
 				/>
 			</StyledRow>
 			<Button 
 				text="Done"
 				intent={Intent.PRIMARY}
-				onClick={() => props.setSelectedQuestionType( "" )}
+				onClick={() => props.createQuestion( question )}
 			/>
-		</StyledCreateMultipleChoice>
+		</>
 	)
 } )
 CreateMultipleChoice.displayName = "CreateMultipleChoice"
+
+const CreateTrueFalse = React.memo( ( props: CreateQuestionComponentProps ) => {
+
+	const nextQuestionId = useAppSelector( selectNextQuestionId )
+
+	const [ question, setQuestion ] = React.useState( {
+		answers: [ "False", "True" ],
+		id: nextQuestionId,
+		text: "",
+		type: QuestionType.TrueFalse,
+		correctAnswer: 0
+	} as Question )
+
+	return (
+		<>
+			<StyledRow>
+				<Label style={{ fontWeight: "bold" }}>Question Text</Label>
+				<InputGroup 
+					value={question.text}
+					onChange={e => setQuestion( {
+						...question,
+						text: e.target.value
+					} )}
+				/>
+			</StyledRow>
+			<StyledRow>
+				<Label style={{ fontWeight: "bold" }}>Enter 1 for True or 0 for False</Label>
+				<InputGroup 
+					value={question.correctAnswer?.toString() || "0"}
+					onChange={e => setQuestion( {
+						...question,
+						correctAnswer: parseInt( e.target.value ) || 0
+					} )}
+				/>
+			</StyledRow>
+			<Button 
+				text="Done"
+				intent={Intent.PRIMARY}
+				onClick={() => props.createQuestion( question )}
+			/>
+		</>
+	)
+} )
+CreateTrueFalse.displayName = "CreateTrueFalse"

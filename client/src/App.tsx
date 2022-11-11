@@ -95,13 +95,14 @@ export type Exam = {
  * Question Type
  * 
  * This type defines what an exam question should look like.
- * Each question has a unique id, text, type, and an array of answers
+ * Each question has a unique id, text, type, a correct answer, and an array of answers
  */
 export type Question = {
 	id: number // Unique id for identification in the database
 	text: string // Question text to display to user
 	type: QuestionType // Type of the Question
 	answers: string[] // Array of answers choices to present to the user
+	correctAnswer?: number
 }
 
 /**

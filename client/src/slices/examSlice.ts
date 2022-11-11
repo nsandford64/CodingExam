@@ -58,6 +58,11 @@ const updateFeedback = ( state: ExamState, action: PayloadAction<Feedback> ) => 
 	state.feedbackMap.set( action.payload.questionId, action.payload )
 }
 
+// Increment the nextQuestionId
+const incrementNextQuestionId = ( state: ExamState ) => {
+	state.nextQuestionId++
+}
+
 /**
  * Selectors
  */
@@ -104,6 +109,11 @@ export const selectFeedbackById = createSelector(
 	( feedbackMap, id ) => feedbackMap.get( id )
 )
 
+// Select the next questionId
+export const selectNextQuestionId = ( state: RootState ) => (
+	state.exam.nextQuestionId
+)
+
 /**
  * Slice
  */
@@ -114,7 +124,8 @@ export interface ExamState {
 	responsesMap: Map<number, Response>
 	responseState: string,
 	feedbackIds: number[],
-	feedbackMap: Map<number, Feedback>
+	feedbackMap: Map<number, Feedback>,
+	nextQuestionId: number
 }
 
 const initialState: ExamState = {
@@ -124,7 +135,8 @@ const initialState: ExamState = {
 	responsesMap: new Map<number, Response>(),
 	responseState: "",
 	feedbackIds: [],
-	feedbackMap: new Map<number, Feedback>()
+	feedbackMap: new Map<number, Feedback>(),
+	nextQuestionId: 0
 }
 
 export const examSlice = createSlice( {
@@ -140,7 +152,8 @@ export const examSlice = createSlice( {
 		setResponseState,
 		setFeedbackIds,
 		setFeedbackMap,
-		updateFeedback
+		updateFeedback,
+		incrementNextQuestionId
 	}
 } )
 
