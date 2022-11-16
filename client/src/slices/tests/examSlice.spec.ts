@@ -14,7 +14,8 @@ describe( "exam reducer", () => {
 		responsesMap: new Map<number, Response>(),
 		responseState: "",
 		feedbackIds: [],
-		feedbackMap: new Map<number, Feedback>()
+		feedbackMap: new Map<number, Feedback>(),
+		nextQuestionId: 0
 	}
 
 	it( "should handle initial state", () => {
@@ -25,7 +26,8 @@ describe( "exam reducer", () => {
 			responsesMap: new Map<number, Response>(),
 			responseState: "",
 			feedbackIds: [],
-			feedbackMap: new Map<number, Feedback>()
+			feedbackMap: new Map<number, Feedback>(),
+			nextQuestionId: 0
 		} )
 	} )
 
@@ -116,5 +118,10 @@ describe( "exam reducer", () => {
 	it( "should handle setResponseState", () => {
 		const actual = examReducer( initialState, examActions.setResponseState( "test" ) )
 		expect( actual.responseState ).toEqual( "test" )
+	} )
+
+	it( "should handle incrementNextQuestionId", () => {
+		const actual = examReducer( initialState, examActions.incrementNextQuestionId() )
+		expect( actual.nextQuestionId ).toEqual( 1 )
 	} )
 } )

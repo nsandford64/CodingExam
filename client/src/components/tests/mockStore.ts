@@ -20,7 +20,8 @@ export const createMockStore = ( ( mockQuestion: Question ) => {
 		responsesMap: new Map<number, Response>(),
 		responseState: "",
 		feedbackIds: [],
-		feedbackMap: new Map<number, Feedback>()
+		feedbackMap: new Map<number, Feedback>(),
+		nextQuestionId: 0
 	}
 
 	const rootState: RootState = {

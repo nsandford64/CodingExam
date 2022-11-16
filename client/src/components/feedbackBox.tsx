@@ -57,7 +57,7 @@ export const FeedbackBox = React.memo( ( props: FeedbackBoxProps ) => {
 			<TextArea 
 				large
 				onChange={handleChange}
-				value={feedback?.value} 
+				value={feedback?.value || ""} 
 			/>
 		</StyledFeedbackBox>
 	)

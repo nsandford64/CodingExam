@@ -5,6 +5,7 @@ import styled from "styled-components"
 import { User } from "../App"
 import { useAppSelector } from "../app/hooks"
 import { selectFeedbackMap } from "../slices/examSlice"
+import { CreateExamView } from "./createExamView"
 import { ExamView } from "./examView"
 
 /**
@@ -50,8 +51,8 @@ export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 
 	// State that holds the array of Users
 	const [ users, setUsers ] = React.useState( [] as User[] )
-	// State that determines if the list of students should be shown
-	const [ showStudentList, setShowStudentList ] = React.useState( true )
+	// State that determines which view should be shown to the user
+	const [ view, setView ] = React.useState( "createExamView" as View )
 	// State that holds the selected student's canvasUserId
 	const [ canvasUserId, setCanvasUserId ] = React.useState( "" )
 
@@ -63,7 +64,7 @@ export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 	 * to render that student's responses
 	 */
 	const handleStudentClick = React.useCallback( ( id: string ) => {
-		setShowStudentList( false )
+		setView( "examView" )
 		setCanvasUserId( id )
 	}, [] )
 
@@ -87,7 +88,7 @@ export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 		const json = await data.json()
 		console.log( json )
 
-		setShowStudentList( true )
+		setView( "studentListView" )
 	}, [ feedbackMap, canvasUserId ] )
 
 	/**
@@ -116,15 +117,22 @@ export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 		<StyledInstructorView>
 			<StyledHeaderContainer>
 				<Button 
-					disabled={showStudentList}
+					disabled={view !== "examView"}
 					text="Back"
 					minimal
 					intent={Intent.PRIMARY}
-					onClick={() => setShowStudentList( true )}
+					onClick={() => setView( "studentListView" )}
 				/>
-				<h3>Student List</h3>
+				{view === "studentListView" && (
+					<h3>Student List</h3>
+				)}
 			</StyledHeaderContainer>
-			{showStudentList && (
+			{view === "createExamView" && (
+				<CreateExamView 
+					token={props.token}
+				/>
+			)}
+			{view === "studentListView" && (
 				<StyledStudentListContainer>
 					{users.map( user => (
 						<Button 
@@ -138,7 +146,7 @@ export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 					) )}
 				</StyledStudentListContainer>
 			)}
-			{!showStudentList && (
+			{view === "examView" && (
 				<>
 					<ExamView 
 						disabled
@@ -156,3 +164,8 @@ export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 	)
 } )
 InstructorView.displayName = "InstructorView"
+
+type View = 
+	"studentListView" 
+  | "examView"
+  | "createExamView"

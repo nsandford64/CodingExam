@@ -87,16 +87,28 @@ export const App = React.memo( () => {
 App.displayName = "App"
 
 /**
+ * Exam Type
+ * 
+ * This type defines what an exam should look like.
+ * Each exam has a list of questions and a list of correctAnswers
+ */
+export type Exam = {
+	questions: Question[],
+	correctAnswers: ( string | number )[]
+}
+
+/**
  * Question Type
  * 
  * This type defines what an exam question should look like.
- * Each question has a unique id, text, type, and an array of answers
+ * Each question has a unique id, text, type, a correct answer, and an array of answers
  */
 export type Question = {
 	id: number // Unique id for identification in the database
 	text: string // Question text to display to user
 	type: QuestionType // Type of the Question
 	answers: string[] // Array of answers choices to present to the user
+	correctAnswer?: number
 }
 
 /**
@@ -141,6 +153,7 @@ export type User = {
  * format for development.
  */
 export enum QuestionType {
+	None = 0,
 	MultipleChoice = 1,
 	ShortAnswer = 2,
 	TrueFalse = 3,
