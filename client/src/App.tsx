@@ -159,6 +159,7 @@ export interface ComponentProps {
  * format for development.
  */
 export enum QuestionType {
+	None = 0,
 	MultipleChoice = 1,
 	ShortAnswer = 2,
 	TrueFalse = 3,

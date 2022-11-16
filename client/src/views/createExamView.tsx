@@ -83,6 +83,21 @@ interface CreateQuestionSwitchProps {
 const CreateQuestionSwitch = React.memo( ( props: CreateQuestionSwitchProps ) => {
 	const dispatch = useAppDispatch()
 
+	const questionTypeEnum = React.useMemo( () => {
+		switch( props.questionType ) {
+		case "MultipleChoice":
+			return QuestionType.MultipleChoice
+		case "TrueFalse":
+			return QuestionType.TrueFalse
+		case "ShortAnswer":
+			return QuestionType.ShortAnswer
+		case "CodingAnswer":
+			return QuestionType.CodingAnswer
+		default:
+			return QuestionType.None
+		}
+	}, [ props.questionType ] )
+
 	const createQuestion = React.useCallback( ( question: Question ) => {
 		props.setSelectedQuestionType( "" )
 
@@ -90,25 +105,26 @@ const CreateQuestionSwitch = React.memo( ( props: CreateQuestionSwitchProps ) =>
 		dispatch( examActions.incrementNextQuestionId() )
 	}, [] )
 
-	switch( props.questionType ) {
-	case "MultipleChoice":
+	switch( questionTypeEnum ) {
+	case QuestionType.MultipleChoice:
 		return (
 			<CreateMultipleChoice 
 				createQuestion={createQuestion}
 			/>
 		)
-	case "ShortAnswer":
-		return null
-	case "TrueFalse":
+	case QuestionType.TrueFalse:
 		return (
 			<CreateTrueFalse 
 				createQuestion={createQuestion}
 			/>
 		)
-	case "CodingAnswer":
-		return null
 	default:
-		return null
+		return (
+			<CreateGeneric
+				questionType={questionTypeEnum}
+				createQuestion={createQuestion}
+			/>
+		)
 	}
 } )
 CreateQuestionSwitch.displayName = "CreateQuestionSwitch"
@@ -263,3 +279,41 @@ const CreateTrueFalse = React.memo( ( props: CreateQuestionComponentProps ) => {
 	)
 } )
 CreateTrueFalse.displayName = "CreateTrueFalse"
+
+interface CreateGenericProps {
+	questionType: QuestionType
+	createQuestion: ( question: Question ) => void
+}
+
+const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
+	const nextQuestionId = useAppSelector( selectNextQuestionId )
+
+	const [ question, setQuestion ] = React.useState( {
+		answers: [],
+		id: nextQuestionId,
+		text: "",
+		type: props.questionType,
+		correctAnswer: 0
+	} as Question )
+
+	return (	
+		<>
+			<StyledRow>
+				<Label style={{ fontWeight: "bold" }}>Question Text</Label>
+				<InputGroup 
+					value={question.text}
+					onChange={e => setQuestion( {
+						...question,
+						text: e.target.value
+					} )}
+				/>
+			</StyledRow>
+			<Button 
+				text="Done"
+				intent={Intent.PRIMARY}
+				onClick={() => props.createQuestion( question )}
+			/>
+		</>
+	)
+} )
+CreateGeneric.displayName = "CreateGeneric"	
