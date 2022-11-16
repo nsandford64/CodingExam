@@ -381,6 +381,7 @@ router.post( "/instructorfeedback", async( req, res ) => {
 	}
 } )
 
+// Creates the questions for an exam when the instructor submits a question set
 router.post( "/createexam", async( req, res ) => {
 	// Returns an invalid request response if the request doesn't have a token
 	if ( !req.headers.token ) {
@@ -404,14 +405,26 @@ router.post( "/createexam", async( req, res ) => {
 			} )
 		}
 		else {
+
+			// Insert each question into the database
 			const pool = new Pool( credentials )
+
 			for ( const question of req.body.questions ) {
+				/* 
+					Parses whether the question has correct answers by the question type.
+					Since that is a server/database field that the client doesn't need to 
+					know about, it is determined on server side and not sent by the request
+				*/
 				let hasCorrectAnswers = "FALSE"
 				
 				if ( question.type === 1 || question.type === 3 ) {
 					hasCorrectAnswers = "TRUE"
 				}
 
+				/*
+					Gets the internal database examID based on the Canvas assignmentID from the
+					request. Needed for inserting new questions.
+				*/
 				let results = await pool.query( `
 					SELECT E.ExamID
 					FROM "CodingExam".Exam E
@@ -420,6 +433,7 @@ router.post( "/createexam", async( req, res ) => {
 
 				const examId = results.rows[0].examid
 				
+				// Inserts the question into the database and returns the questionID for inserting potential answers
 				results = await pool.query( `
 					INSERT INTO "CodingExam".ExamQuestion(QuestionText, HasCorrectAnswers, QuestionType, ExamID)
 					VALUES('${question.text}', ${hasCorrectAnswers}, ${question.type}, ${examId})
@@ -428,14 +442,28 @@ router.post( "/createexam", async( req, res ) => {
 
 				const questionId = results.rows[0].questionid
 				
+				/*
+					Inserts the potential answers for each question into the database, using 
+					the questionID from the previous insert, .
+				*/
 				for ( let i = 0; i < question.answers.length; i++ ) {
+
+					/* 
+						Parses whether the answer is the correct one. The initial request will denote the
+						display index of the correct answer for each question, and since the answers for the questions
+						will be in the same order they were displayed, the index of the for loop can be used to 
+						mark the right answer as the "correct" answer in the database.
+					*/
 					let correct = "FALSE"
 
 					if ( question.correctAnswer === i ) {
 						correct = "TRUE"
 					}
 
-					console.log( question.answers[i] )
+					/*
+						Inserts the potential answer into the database, with the order the answers were 
+						in the request being the order they will be displayed in.
+					*/
 					await pool.query( `
 					INSERT INTO "CodingExam".QuestionAnswer(QuestionID, CorrectAnswer, AnswerIndex, AnswerText)
 					VALUES(${questionId}, ${correct}, ${i}, '${question.answers[i]}')
