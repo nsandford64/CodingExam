@@ -11,14 +11,14 @@ interface ColumnProps {
 }
 
 const StyledColumn = styled.div`
-	padding: "24px 0",
-	display: "flex",
-	flexDirection: "column",
-	marginTop: 8,
+	padding: 24px 0;
+	display: flex;
+	flex-direction: column;
+	margin-top: 8;
 
 	h2: {
-		margin: 0,
-		padding: "0 16px"
+		margin: 0;
+		padding: 0 16px;
 	}
     `
 

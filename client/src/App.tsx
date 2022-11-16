@@ -1,6 +1,7 @@
 // Copyright 2022 under MIT License
 import { Spinner } from "@blueprintjs/core"
 import React from "react"
+import { ParsonsProblem } from "./components/parsonsProblem"
 import { InstructorView } from "./views/instructorView"
 import { StudentView } from "./views/studentView"
 
@@ -66,6 +67,7 @@ export const App = React.memo( () => {
 	// Render the component
 	return (
 		<>
+			<ParsonsProblem/>
 			{loading && (
 				<Spinner 
 					size={50}
@@ -95,6 +97,18 @@ App.displayName = "App"
 export type Exam = {
 	questions: Question[],
 	correctAnswers: ( string | number )[]
+}
+	
+/*
+ * ComponentProps Interface
+ * 
+ * This interface establishes a common point between each question
+ * component.
+ * Each component can be disabled and has a questionId
+ */
+export interface ComponentProps {
+	disabled?: boolean
+	questionId: number // Specific questionId of the given question
 }
 
 /**

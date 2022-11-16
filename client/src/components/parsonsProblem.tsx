@@ -6,17 +6,33 @@ import { Response, ComponentProps } from "../App"
 import styled from "styled-components"
 import Column from "./column"
 import { DragDropContext, DropResult } from "react-beautiful-dnd"
+import { useAppDispatch, useAppSelector } from "../app/hooks"
+import { examActions, selectQuestionById, selectResponseById } from "../slices/examSlice"
 
 const StyledColumns = styled.div`
-	display: "grid",
-	gridTemplateColumns: "1fr 1fr 1fr",
-	margin: "10vh auto",
-	width: "80%",
-	height: "80vh",
-	gap: "8px"
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	margin: 10vh auto;
+	width: 80%;
+	height: 80vh;
+	gap: 8px;
 `
-
+/**
+ * Parson's Problem Component
+ * 
+ * This component renders two columns and unsorted blocks of code 
+ * for the user to sort correctly
+ */
 export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
+	
+	// Dispatches an event to the store
+	const dispatch = useAppDispatch()
+
+	// Question from the store
+	const question = useAppSelector( state => selectQuestionById( state, props.questionId ) )
+	// Response from the Store
+	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
+	
 	const initialColumns = {
 		unsorted: {
 			id: "unsorted",
@@ -95,6 +111,14 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 				[newStartCol.id]: newStartCol,
 				[newEndCol.id]: newEndCol
 			} ) )
+
+			const newResponse: Response = {
+				questionId: props.questionId,
+				value: parseInt( destination.droppableId )
+			}
+
+			dispatch( examActions.updateResponse( newResponse ) )
+
 			return null
 		}
 	}

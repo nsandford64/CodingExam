@@ -8,15 +8,15 @@ interface ItemProps {
 }
 
 const StyledItem = styled.div`
-	backgroundColor: "#eee",
-	borderRadius: 4,
-	padding: "4px 8px",
-	transition: "background-color .8s ease-out",
-	marginTop: 8,
+	background-color: #eee;
+	border-radius: 4;
+	padding: 4px 8px;
+	transition: background-color .8s ease-out;
+	margin-top: 8;
 
-	":hover": {
-		backgroundColor: "#fff",
-		transition: "background-color .1s ease-in"
+	:hover {
+		background-color: #fff;
+		transition: background-color .1s ease-in;
 	}
 `
 
