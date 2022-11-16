@@ -2,7 +2,7 @@
 
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { Feedback, Question, Response } from "../App"
-import { RootState } from "../app/store"
+import { AppThunk, RootState } from "../app/store"
 
 /**
  * Reducers
@@ -22,6 +22,11 @@ const updateQuestion = ( state: ExamState, action: PayloadAction<Question> ) => 
 		state.questionIds.push( action.payload.id )
 	}
 	state.questionsMap.set( action.payload.id, action.payload )
+}
+// Delete a question from the questionsMap and questionIds array
+const deleteQuestion = ( state: ExamState, action: PayloadAction<number> ) => {
+	state.questionIds = state.questionIds.filter( id => id !== action.payload )
+	state.questionsMap.delete( action.payload )
 }
 
 // Set the responseIds array in the store
@@ -115,6 +120,25 @@ export const selectNextQuestionId = ( state: RootState ) => (
 )
 
 /**
+ * Thunks
+ */
+
+// Creates an exam in the database using the server api
+export const createExamThunk: AppThunk<void> = ( dispatch, getState ) => {
+	const state = getState()
+
+	const questions: Question[] = []
+	state.exam.questionIds.forEach( id => {
+		const question = state.exam.questionsMap.get( id )
+		if( question ) {
+			questions.push( question )
+		}
+	} )
+
+	console.log( questions )
+}
+
+/**
  * Slice
  */
 export interface ExamState {
@@ -146,6 +170,7 @@ export const examSlice = createSlice( {
 		setQuestionIds,
 		setQuestionsMap,
 		updateQuestion,
+		deleteQuestion,
 		setResponseIds,
 		setResponsesMap,
 		updateResponse,
@@ -153,7 +178,7 @@ export const examSlice = createSlice( {
 		setFeedbackIds,
 		setFeedbackMap,
 		updateFeedback,
-		incrementNextQuestionId
+		incrementNextQuestionId,
 	}
 } )
 
