@@ -135,32 +135,6 @@ export type User = {
 }
 
 /**
- * ComponentProps Interface
- * 
- * This interface establishes a common point between each question
- * component.
- * Each component can be disabled and has a questionId
- */
-export interface ComponentProps {
-	disabled?: boolean
-	questionId: number // Specific questionId of the given question
-}
-
-/**
- * ColumnProps Interface
- * 
- * This interface establishes a common point between each Parsons
- * Problem column component.
- * Each column component has a header and a list of strings of code
- */
-export interface ColumnProps{
-	col:{
-		id: string,
-		list: string[]
-	}
-}
-
-/**
  * QuestionType Enum
  * 
  * This enum maps a database QuestionType to a more readable
