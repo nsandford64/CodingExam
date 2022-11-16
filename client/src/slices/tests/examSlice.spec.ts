@@ -6,6 +6,13 @@ import examReducer, {
 } from "../examSlice"
 enableMapSet()
 
+const question: Question = {
+	id: 1,
+	answers: [ "test" ],
+	text: "test",
+	type: QuestionType.TrueFalse
+}
+
 describe( "exam reducer", () => {
 	const initialState: ExamState = {
 		questionIds: [],
@@ -15,7 +22,8 @@ describe( "exam reducer", () => {
 		responseState: "",
 		feedbackIds: [],
 		feedbackMap: new Map<number, Feedback>(),
-		nextQuestionId: 0
+		nextQuestionId: 0,
+		token: ""
 	}
 
 	it( "should handle initial state", () => {
@@ -27,10 +35,14 @@ describe( "exam reducer", () => {
 			responseState: "",
 			feedbackIds: [],
 			feedbackMap: new Map<number, Feedback>(),
-			nextQuestionId: 0
+			nextQuestionId: 0,
+			token: ""
 		} )
 	} )
 
+	/**
+	 * Questions
+	 */
 	it( "should handle setQuestionIds", () => {
 		const questionIds = [ 1, 2, 3 ]
 
@@ -39,12 +51,6 @@ describe( "exam reducer", () => {
 	} )
 
 	it( "should handle setQuestionsMap", () => {
-		const question: Question = {
-			id: 1,
-			answers: [ "test" ],
-			text: "test",
-			type: QuestionType.TrueFalse
-		}
 		const questionsMap = new Map<number, Question>( [
 			[ 1, question ]
 		] )
@@ -53,6 +59,34 @@ describe( "exam reducer", () => {
 		expect( actual.questionsMap ).toEqual( questionsMap )
 	} )
 
+	it( "should handle updateQuestion", () => {
+		let actual = examReducer( initialState, examActions.updateQuestion( question ) )
+		expect( actual.questionIds.length ).toEqual( 1 )
+		expect( actual.questionIds.includes( 1 ) ).toEqual( true )
+		expect( actual.questionsMap.get( 1 ) ).toEqual( question )
+
+		const updatedQuestion = {
+			...question,
+			text: "updated"
+		}
+
+		actual = examReducer( actual, examActions.updateQuestion( updatedQuestion ) )
+		expect( actual.questionIds.length ).toEqual( 1 )
+		expect( actual.questionIds.includes( 1 ) ).toEqual( true )
+		expect( actual.questionsMap.get( 1 ) ).toEqual( updatedQuestion )
+	} )
+
+	it( "should handle deleteQuestion", () => {
+		let actual = examReducer( initialState, examActions.updateQuestion( question ) )
+		actual = examReducer( actual, examActions.deleteQuestion( question.id ) )
+		expect( actual.questionIds.length ).toEqual( 0 )
+		expect( actual.questionIds.includes( 1 ) ).toBe( false )
+		expect( actual.questionsMap.get( 1 ) ).toEqual( undefined )
+	} )
+
+	/**
+	 * Responses
+	 */
 	it( "should handle setResponseIds", () => {
 		const responseIds = [ 1, 2, 3 ]
 
@@ -85,6 +119,17 @@ describe( "exam reducer", () => {
 		expect( actual.responsesMap.get( response.questionId ) ).toEqual( response )
 	} )
 
+	/**
+	 * ResponseState
+	 */
+	it( "should handle setResponseState", () => {
+		const actual = examReducer( initialState, examActions.setResponseState( "test" ) )
+		expect( actual.responseState ).toEqual( "test" )
+	} )
+
+	/**
+	 * Feedback
+	 */
 	it( "should handle setFeedbackIds", () => {
 		const feedbackIds = [ 1, 2, 3 ]
 
@@ -115,13 +160,19 @@ describe( "exam reducer", () => {
 		expect( actual.feedbackMap.get( feedback.questionId ) ).toEqual( feedback )
 	} )
 
-	it( "should handle setResponseState", () => {
-		const actual = examReducer( initialState, examActions.setResponseState( "test" ) )
-		expect( actual.responseState ).toEqual( "test" )
-	} )
-
+	/**
+	 * NextQuestionId
+	 */
 	it( "should handle incrementNextQuestionId", () => {
 		const actual = examReducer( initialState, examActions.incrementNextQuestionId() )
 		expect( actual.nextQuestionId ).toEqual( 1 )
+	} )
+
+	/**
+	 * Token
+	 */
+	it( "should handle setToken", () => {
+		const actual = examReducer( initialState, examActions.setToken( "test" ) )
+		expect( actual.token ).toEqual( "test" )
 	} )
 } )
