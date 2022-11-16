@@ -8,17 +8,13 @@ import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { createExamThunk, examActions, selectNextQuestionId, selectQuestionIds } from "../slices/examSlice"
 import { QuestionSwitch } from "./examView"
 
-interface CreateExamViewProps {
-	token: string
-}
-
 const StyledCreateExamView = styled.div`
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 `
 
-export const CreateExamView = React.memo( ( props: CreateExamViewProps ) => {
+export const CreateExamView = React.memo( () => {
 	const dispatch = useAppDispatch()
 
 	const questionIds = useAppSelector( selectQuestionIds )

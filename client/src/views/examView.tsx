@@ -10,14 +10,13 @@ import { FeedbackBox } from "../components/feedbackBox"
 import { MultipleChoice } from "../components/multipleChoice"
 import { ShortAnswer } from "../components/shortAnswer"
 import { TrueFalse } from "../components/trueFalse"
-import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap } from "../slices/examSlice"
+import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap, selectToken } from "../slices/examSlice"
 
 // Props for the ExamView comoponent
 interface ExamViewProps {
 	disabled?: boolean
 	feedback?: boolean
 	canvasUserId?: string
-	token: string
 }
 
 /**
@@ -43,6 +42,8 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 	const questionIds = useAppSelector( selectQuestionIds )
 	// Map of responses from the store
 	const responsesMap = useAppSelector( selectResponsesMap )
+	// token from the store
+	const token = useAppSelector( selectToken )
 
 	// State that determines if the ExamView is in a loading state
 	const [ loading, setLoading ] = React.useState( true )
@@ -56,7 +57,7 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 			// Fetch exam questions
 			let data = await fetch( "http://localhost:9000/api/questions", {
 				headers: {
-					"token": props.token
+					"token": token
 				} 
 			} )
 
@@ -74,7 +75,7 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 			// Fetch exam responses (if there are any)
 			data = await fetch( "http://localhost:9000/api/responses", {
 				headers: {
-					"token": props.token,
+					"token": token,
 					"userID": props.canvasUserId || ""
 				}
 			} )
@@ -93,7 +94,7 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 			// Fetch exam feedback
 			data = await fetch( "http://localhost:9000/api/feedback", {
 				headers: {
-					"token": props.token,
+					"token": token,
 					"userID": props.canvasUserId || ""
 				}
 			} )
@@ -144,7 +145,7 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 				// Adding headers to the request
 				headers: {
 					"Content-type": "application/json; charset=UTF-8",
-					"token": props.token
+					"token": token
 				}
 			} )
 			const json = await res.json()

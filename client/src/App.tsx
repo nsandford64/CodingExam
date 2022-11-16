@@ -1,7 +1,9 @@
 // Copyright 2022 under MIT License
 import { Spinner } from "@blueprintjs/core"
 import React from "react"
+import { useAppDispatch } from "./app/hooks"
 import { ParsonsProblem } from "./components/parsonsProblem"
+import { examActions } from "./slices/examSlice"
 import { InstructorView } from "./views/instructorView"
 import { StudentView } from "./views/studentView"
 
@@ -19,6 +21,8 @@ declare global {
  */
 export const App = React.memo( () => {
 
+	const dispatch = useAppDispatch()
+
 	// State that determines if the App is in a loading state
 	const [ loading, setLoading ] = React.useState( true )
 	// State that holds whethere the InstructorView or the StudentView should be rendered
@@ -28,10 +32,10 @@ export const App = React.memo( () => {
 
 
 	// Stores the JWT token
-	const token = String( window.__INITIAL_DATA__ )
+	// const token = String( window.__INITIAL_DATA__ )
 
 	// Debug instructor token
-	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJJbnN0cnVjdG9yIiwiaWF0IjoxNjY2OTcyODM4fQ.n9qkthHs0HhonpjD4yFNA7RLRqrzK1lavWzvBIGn_y8"
+	const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJJbnN0cnVjdG9yIiwiaWF0IjoxNjY2OTcyODM4fQ.n9qkthHs0HhonpjD4yFNA7RLRqrzK1lavWzvBIGn_y8"
 	
 	// Debug learner token
 	// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJMZWFybmVyIiwiaWF0IjoxNjY3NTA3ODM0fQ.SIpwxp9p6SXHfjDcDHkYO8cp0jLAEOnEVCxEeDrvCWs"
@@ -62,12 +66,14 @@ export const App = React.memo( () => {
 
 		// Calls the async function
 		getRole()
+
+		// Set the token in the store
+		dispatch( examActions.setToken( token ) )
 	}, [] )
 
 	// Render the component
 	return (
 		<>
-			<ParsonsProblem/>
 			{loading && (
 				<Spinner 
 					size={50}
@@ -76,10 +82,10 @@ export const App = React.memo( () => {
 			{!loading && (
 				<>
 					{showInstructorView && (
-						<InstructorView token={token} />
+						<InstructorView />
 					)}
 					{!showInstructorView && (
-						<StudentView disabled={taken} token={token} />
+						<StudentView disabled={taken} />
 					)}
 				</>
 			)}

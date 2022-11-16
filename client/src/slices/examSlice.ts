@@ -1,7 +1,6 @@
 // Copyright 2022 under MIT License
 
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit"
-//import { Column } from "postgres"
 import { Feedback, Question, Response } from "../App"
 import { AppThunk, RootState } from "../app/store"
 
@@ -69,6 +68,11 @@ const incrementNextQuestionId = ( state: ExamState ) => {
 	state.nextQuestionId++
 }
 
+// Sets the token in the store
+const setToken = ( state: ExamState, action: PayloadAction<string> ) => {
+	state.token = action.payload
+}
+
 /**
  * Selectors
  */
@@ -120,12 +124,17 @@ export const selectNextQuestionId = ( state: RootState ) => (
 	state.exam.nextQuestionId
 )
 
+// Selects the token from the store
+export const selectToken = ( state: RootState ) => (
+	state.exam.token
+)
+
 /**
  * Thunks
  */
 
 // Creates an exam in the database using the server api
-export const createExamThunk: AppThunk<void> = ( dispatch, getState ) => {
+export const createExamThunk: AppThunk<void> = async ( dispatch, getState ) => {
 	const state = getState()
 
 	const questions: Question[] = []
@@ -136,7 +145,23 @@ export const createExamThunk: AppThunk<void> = ( dispatch, getState ) => {
 		}
 	} )
 
-	console.log( questions )
+	const res = await fetch( "http://localhost:9000/api/createexam", {
+		// Adding method type
+		method: "POST",
+
+		// Adding body or contents to send
+		body: JSON.stringify( questions ),
+     
+		// Adding headers to the request
+		headers: {
+			"Content-type": "application/json; charset=UTF-8",
+			"token": state.exam.token
+		}
+	} )
+
+	const json = await res.json()
+
+	console.log( json )
 }
 
 /**
@@ -150,7 +175,8 @@ export interface ExamState {
 	responseState: string,
 	feedbackIds: number[],
 	feedbackMap: Map<number, Feedback>,
-	nextQuestionId: number
+	nextQuestionId: number,
+	token: string
 }
 
 const initialState: ExamState = {
@@ -161,7 +187,8 @@ const initialState: ExamState = {
 	responseState: "",
 	feedbackIds: [],
 	feedbackMap: new Map<number, Feedback>(),
-	nextQuestionId: 0
+	nextQuestionId: 0,
+	token: ""
 }
 
 export const examSlice = createSlice( {
@@ -180,6 +207,7 @@ export const examSlice = createSlice( {
 		setFeedbackMap,
 		updateFeedback,
 		incrementNextQuestionId,
+		setToken
 	}
 } )
 

@@ -383,6 +383,7 @@ router.post( "/instructorfeedback", async( req, res ) => {
 
 // Creates the questions for an exam when the instructor submits a question set
 router.post( "/createexam", async( req, res ) => {
+
 	// Returns an invalid request response if the request doesn't have a token
 	if ( !req.headers.token ) {
 		res.send( {
@@ -393,7 +394,7 @@ router.post( "/createexam", async( req, res ) => {
 		// Decode the token to get the sender's role
 		const token = req.headers.token
 		let role, CanvasExamID
-	
+
 		jwt.verify( token, "token_secret", ( err, object ) => {
 			CanvasExamID = object.assignmentID
 			role = object.roles     
@@ -405,11 +406,10 @@ router.post( "/createexam", async( req, res ) => {
 			} )
 		}
 		else {
-
 			// Insert each question into the database
 			const pool = new Pool( credentials )
 
-			for ( const question of req.body.questions ) {
+			for ( const question of req.body ) {
 				/* 
 					Parses whether the question has correct answers by the question type.
 					Since that is a server/database field that the client doesn't need to 

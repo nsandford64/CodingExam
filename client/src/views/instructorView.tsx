@@ -4,16 +4,9 @@ import * as React from "react"
 import styled from "styled-components"
 import { User } from "../App"
 import { useAppSelector } from "../app/hooks"
-import { selectFeedbackMap } from "../slices/examSlice"
+import { selectFeedbackMap, selectToken } from "../slices/examSlice"
 import { CreateExamView } from "./createExamView"
 import { ExamView } from "./examView"
-
-/**
- * Props for InstructorView
- */
-interface InstructorViewProps {
-	token: string
-}
 
 /**
  * Style for InstructorView
@@ -47,7 +40,9 @@ const StyledStudentListContainer = styled.div`
  * They can click on a student and view their responses, as well as leave
  * feedback.
  */
-export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
+export const InstructorView = React.memo( () => {
+
+	const token = useAppSelector( selectToken )
 
 	// State that holds the array of Users
 	const [ users, setUsers ] = React.useState( [] as User[] )
@@ -80,7 +75,7 @@ export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 			),
 			headers: {
 				"Content-type": "application/json; charset=UTF-8",
-				"token": props.token,
+				"token": token,
 				"userid": canvasUserId
 			}
 		} )
@@ -99,7 +94,7 @@ export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 		const initUsers = async () => {
 			const data = await fetch( "http://localhost:9000/api/examtakers", {
 				headers: {
-					"token": props.token
+					"token": token
 				}
 			} )
 
@@ -128,9 +123,7 @@ export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 				)}
 			</StyledHeaderContainer>
 			{view === "createExamView" && (
-				<CreateExamView 
-					token={props.token}
-				/>
+				<CreateExamView />
 			)}
 			{view === "studentListView" && (
 				<StyledStudentListContainer>
@@ -152,7 +145,6 @@ export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 						disabled
 						feedback={true}
 						canvasUserId={canvasUserId}
-						token={props.token}
 					/>
 					<Button 
 						text={"Submit Feedback"}
