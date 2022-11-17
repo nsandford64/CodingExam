@@ -16,7 +16,6 @@ import { examActions, selectQuestionById, selectResponseById } from "../slices/e
  */
 const StyledCodingAnswer = styled.div`
 	padding: 10px;
-	width: 40%;
 `
 
 /**

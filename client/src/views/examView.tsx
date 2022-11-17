@@ -23,6 +23,9 @@ interface ExamViewProps {
  * Style for the ExamView
  */
 const StyledExamView = styled.div`
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 `
 
 /**
