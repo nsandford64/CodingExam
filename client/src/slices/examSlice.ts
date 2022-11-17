@@ -73,6 +73,19 @@ const setToken = ( state: ExamState, action: PayloadAction<string> ) => {
 	state.token = action.payload
 }
 
+// Re-initializes the store
+const reInitializeStore = ( state: ExamState ) => {
+	// Reset everything besides the token
+	state.questionIds = initialState.questionIds
+	state.questionsMap = initialState.questionsMap
+	state.responseIds = initialState.responseIds
+	state.responsesMap = initialState.responsesMap
+	state.responseState = initialState.responseState
+	state.feedbackIds = initialState.feedbackIds
+	state.feedbackMap = initialState.feedbackMap
+	state.nextQuestionId = initialState.nextQuestionId
+}
+
 /**
  * Selectors
  */
@@ -207,7 +220,8 @@ export const examSlice = createSlice( {
 		setFeedbackMap,
 		updateFeedback,
 		incrementNextQuestionId,
-		setToken
+		setToken,
+		reInitializeStore
 	}
 } )
 

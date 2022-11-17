@@ -34,6 +34,11 @@ export const CreateExamView = React.memo( () => {
 	// State to hold the selected QuestionType
 	const [ selectedQuestionType, setSelectedQuestionType ] = React.useState( "" )
 
+	// Called on render - reinitializes the store
+	React.useEffect( () => {
+		dispatch( examActions.reInitializeStore() )
+	}, [] )
+
 	// Render the component
 	return (
 		<StyledCreateExamView>

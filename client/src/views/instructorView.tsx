@@ -22,6 +22,15 @@ const StyledInstructorView = styled.div`
  */
 const StyledHeaderContainer = styled.div`
 	padding: 10px;
+	text-align: center;
+`
+
+/**
+ * Style for the top buttons
+ */
+const StyledButtonContainer = styled.div`
+	display: flex;
+	justify-content: space-between;
 `
 
 /**
@@ -47,7 +56,7 @@ export const InstructorView = React.memo( () => {
 	// State that holds the array of Users
 	const [ users, setUsers ] = React.useState( [] as User[] )
 	// State that determines which view should be shown to the user
-	const [ view, setView ] = React.useState( "createExamView" as View )
+	const [ view, setView ] = React.useState( "studentListView" as View )
 	// State that holds the selected student's canvasUserId
 	const [ canvasUserId, setCanvasUserId ] = React.useState( "" )
 
@@ -111,13 +120,21 @@ export const InstructorView = React.memo( () => {
 	return (
 		<StyledInstructorView>
 			<StyledHeaderContainer>
-				<Button 
-					disabled={view !== "examView"}
-					text="Back"
-					minimal
-					intent={Intent.PRIMARY}
-					onClick={() => setView( "studentListView" )}
-				/>
+				<StyledButtonContainer>
+					<Button 
+						disabled={view === "studentListView"}
+						text="Back"
+						minimal
+						intent={Intent.PRIMARY}
+						onClick={() => setView( "studentListView" )}
+					/>
+					{view === "studentListView" && (
+						<Button 
+							text="Create Exam"
+							onClick={() => setView( "createExamView" )}
+						/>
+					)}
+				</StyledButtonContainer>
 				{view === "studentListView" && (
 					<h3>Student List</h3>
 				)}

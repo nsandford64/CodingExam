@@ -2,7 +2,6 @@
 import { Spinner } from "@blueprintjs/core"
 import React from "react"
 import { useAppDispatch } from "./app/hooks"
-import { ParsonsProblem } from "./components/parsonsProblem"
 import { examActions } from "./slices/examSlice"
 import { InstructorView } from "./views/instructorView"
 import { StudentView } from "./views/studentView"
