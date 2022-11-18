@@ -9,6 +9,9 @@ import { DragDropContext, DropResult } from "react-beautiful-dnd"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { examActions, selectQuestionById, selectResponseById } from "../slices/examSlice"
 
+/**
+ * Style for the Columns
+ */
 const StyledColumns = styled.div`
 	display: grid;
 	grid-template-columns: 1fr 1fr 1fr;
@@ -51,21 +54,22 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 
 		// Make sure we're actually moving the item
 		if (
-			source.droppableId === destination.droppableId &&
-      destination.index === source.index
-		)
+			source.droppableId === destination.droppableId 
+			&& destination.index === source.index
+		) {
 			return null
+		}
 
 		// Set start and end variables
-		const start = columns[source.droppableId]
-		const end = columns[destination.droppableId]
+		const start = columns[source.droppableId === "sorted" ? "sorted" : "unsorted"]
+		const end = columns[destination.droppableId === "sorted" ? "sorted" : "unsorted"]
 
 		// If start is the same as end, we're in the same column
 		if ( start === end ) {
 			// Move the item within the list
 			// Start by making a new list without the dragged item
 			const newList = start.list.filter(
-				( _: any, idx: number ) => idx !== source.index
+				( _, idx: number ) => idx !== source.index
 			)
 
 			// Then insert the item at the right location
@@ -84,7 +88,7 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 			// If start is different from end, we need to update multiple columns
 			// Filter the start list like before
 			const newStartList = start.list.filter(
-				( _: any, idx: number ) => idx !== source.index
+				( _, idx: number ) => idx !== source.index
 			)
 
 			// Create a new start column
