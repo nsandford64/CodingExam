@@ -317,8 +317,8 @@ describe( "/api/instructorfeedback endpoint tests", () => {
 describe( "/api/createexam endpoint tests", () => {
 	it( "POSt to /api/createexam should return a valid submission response", async () => {
 		const res = await requestWithSupertest.post( "/api/createexam" )
-			.send( {
-				"questions": [ {"text":"test text", 
+			.send( 
+				[ {"text":"test text", 
 					"correctAnswer":0,
 					"type":1,
 					"answers": [ "text 1", "text 2" ] },
@@ -328,7 +328,7 @@ describe( "/api/createexam endpoint tests", () => {
 					"type":1,
 					"answers": [ "text 1", "text 2" ]
 				} ]
-			} )
+			)
 			.set( { token: instructorToken } )
 		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
 		expect( res.status ).toEqual( 200 )
@@ -359,8 +359,8 @@ describe( "/api/createexam endpoint tests", () => {
 		const initNum = initialQuestions.body.questions.length
 		
 		const res = await requestWithSupertest.post( "/api/createexam" )
-			.send( {
-				"questions": [ {"text":"test text", 
+			.send(
+				[ {"text":"test text", 
 					"correctAnswer":0,
 					"type":1,
 					"answers": [ "text 1", "text 2" ] },
@@ -370,7 +370,7 @@ describe( "/api/createexam endpoint tests", () => {
 					"type":1,
 					"answers": [ "text 1", "text 2" ]
 				} ]
-			} )
+			)
 			.set( { token: instructorToken } )
 
 		const newQuestions = await requestWithSupertest.get( "/api/questions" )
