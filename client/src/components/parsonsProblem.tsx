@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-// Taken from Josh Ellis's article: CodeAlong: Multi-Column Drag and Drop in React
+// Code used from Josh Ellis's example: CodeAlong: Multi-Column Drag and Drop in React
 
 import React, { useState } from "react"
 import { Response, ComponentProps } from "../App"
@@ -12,6 +12,9 @@ import { examActions, selectQuestionById, selectResponseById } from "../slices/e
 /**
  * Style for the Columns
  */
+/*
+* Style for the Parson's Problem component
+*/
 const StyledColumns = styled.div`
 	display: grid;
 	grid-template-columns: 1fr 1fr 1fr;
@@ -23,11 +26,12 @@ const StyledColumns = styled.div`
 /**
  * Parson's Problem Component
  * 
- * This component renders two columns and unsorted blocks of code 
- * for the user to sort correctly
+ * This component renders two columns and unsorted fragments of code 
+ * for the user to sort in the correct order
  */
 export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 	
+	/* TODO: Integrate with Redux
 	// Dispatches an event to the store
 	const dispatch = useAppDispatch()
 
@@ -35,7 +39,11 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 	const question = useAppSelector( state => selectQuestionById( state, props.questionId ) )
 	// Response from the Store
 	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
+	*/
 	
+	/* The initial values of the unsorted and sorted columns 
+	*  TODO: Make the list pull from the database, once redux is implemented
+	*/
 	const initialColumns = {
 		unsorted: {
 			id: "unsorted",
@@ -48,24 +56,26 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 	}
 	const [ columns, setColumns ] = useState( initialColumns )
 
+	/**
+	 * Called whenever the user drags one of the code fragments to a
+	 * different index within a column.  
+	 */
 	const onDragEnd = ( { source, destination }: DropResult ) => {
 		// Make sure we have a valid destination
 		if ( destination === undefined || destination === null ) return null
 
 		// Make sure we're actually moving the item
-		if (
-			source.droppableId === destination.droppableId 
-			&& destination.index === source.index
-		) {
+		if ( source.droppableId === destination.droppableId && destination.index === source.index )
 			return null
 		}
 
-		// Set start and end variables
-		const start = columns[source.droppableId === "sorted" ? "sorted" : "unsorted"]
-		const end = columns[destination.droppableId === "sorted" ? "sorted" : "unsorted"]
+		// Set start and end column variables
+		const start = columns[source.droppableId]
+		const end = columns[destination.droppableId]
 
-		// If start is the same as end, we're in the same column
+		// If start column is the same as end, we're in the same column
 		if ( start === end ) {
+
 			// Move the item within the list
 			// Start by making a new list without the dragged item
 			const newList = start.list.filter(
@@ -83,9 +93,12 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 
 			// Update the state
 			setColumns( state => ( { ...state, [newCol.id]: newCol } ) )
+
 			return null
+
 		} else {
-			// If start is different from end, we need to update multiple columns
+
+			// If start column is different from end, we need to update multiple columns
 			// Filter the start list like before
 			const newStartList = start.list.filter(
 				( _, idx: number ) => idx !== source.index
@@ -121,12 +134,13 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 				value: parseInt( destination.droppableId )
 			}
 
-			dispatch( examActions.updateResponse( newResponse ) )
+			/*TODO: Integrate with Redux*/// dispatch( examActions.updateResponse( newResponse ) )
 
 			return null
 		}
 	}
 
+	// Renders the component
 	return (
 		<DragDropContext onDragEnd={onDragEnd}>
 			<StyledColumns>
@@ -136,6 +150,6 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 			</StyledColumns>
 		</DragDropContext>
 	)
-} 
-)
+})
+
 ParsonsProblem.displayName = "ParsonsProblem"
