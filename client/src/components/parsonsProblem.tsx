@@ -65,7 +65,7 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 		if ( destination === undefined || destination === null ) return null
 
 		// Make sure we're actually moving the item
-		if ( source.droppableId === destination.droppableId && destination.index === source.index )
+		if ( source.droppableId === destination.droppableId && destination.index === source.index ){
 			return null
 		}
 
@@ -150,6 +150,7 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 			</StyledColumns>
 		</DragDropContext>
 	)
-})
+}
+)
 
 ParsonsProblem.displayName = "ParsonsProblem"
