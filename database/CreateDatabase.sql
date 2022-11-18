@@ -83,10 +83,11 @@ VALUES ('2b7a2ea9f28bc312753640b0c1cc537fa85c5a49', 'John User'),
 ('aocigpqdjfi18340t8g0vajald99fa03a', 'Test User');
 
 INSERT INTO "CodingExam".Exam(CanvasExamID, TotalPoints)
-VALUES ('01cf10c5-f5d3-466e-b716-53f2b0bcd3b4', 1), ('e81f6b6e-8755-4fec-b2d5-c471d34f2e62', 0);
+VALUES ('01cf10c5-f5d3-466e-b716-53f2b0bcd3b4', 1), ('e81f6b6e-8755-4fec-b2d5-c471d34f2e62', 0),
+('jqpeijfpoadvpioaueouaouera', 0);
 
 INSERT INTO "CodingExam".UserExam(UserID, ExamID)
-VALUES (1, 1), (2, 1), (3, 1), (4, 1), (5, 1);
+VALUES (1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (1,3);
 
 INSERT INTO "CodingExam".QuestionType(QuestionType)
 VALUES ('MultipleChoice'), ('ShortAnswer'), ('TrueFalse'), ('CodingAnswer');

@@ -19,9 +19,26 @@ const credentials = {
 
 // Get the main entry point to the Client app
 router.get( "/", async ( req, res ) => {	
-	// Some hard coded tokens for use in testing outside of canvas
+	/*
+		Some hard coded tokens for use in testing outside of canvas
+		Both tokens can have the roles property changed between "Learner"
+		and "Instructor" to switch between the student and instructor views
+
+		token1 will pull up an assignment with questions, used for all but
+		one of the application's functionalities
+	*/
 	const token1 = generateAccessToken( { 
 		assignmentID: "01cf10c5-f5d3-466e-b716-53f2b0bcd3b4",
+		userID: "2b7a2ea9f28bc312753640b0c1cc537fa85c5a49",
+		roles: "Learner"
+	} )
+
+	/*
+		token2 will pull up an assignment with no questions
+		Used for the create an exam view in its current state
+	*/
+	const token2 = generateAccessToken( { 
+		assignmentID: "jqpeijfpoadvpioaueouaouera",
 		userID: "2b7a2ea9f28bc312753640b0c1cc537fa85c5a49",
 		roles: "Learner"
 	} )

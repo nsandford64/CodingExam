@@ -13,7 +13,9 @@ const credentials = {
 	port: 5432
 }
 
-// Endpoint of the API router that returns the role within the token
+/* Endpoint of the API router that returns the role within the token
+   Also returns if the client has taken the exam or not
+*/
 router.get( "/role", async function ( req, res ) {
 	// Send an invalid request response if the reqeust doesn't have a token
 	if ( !req.headers.token ) {
@@ -33,7 +35,7 @@ router.get( "/role", async function ( req, res ) {
 
 		const pool = new Pool( credentials )
 
-		// Query the database for a list of questions with a given ExamID
+		// Query the database to see if the client has taken the exam yet
 		const results = await pool.query( `
 			SELECT UE.HasTaken
 			FROM "CodingExam".UserExam UE
@@ -45,7 +47,8 @@ router.get( "/role", async function ( req, res ) {
 		await pool.end()
 
 		let taken = results.rows[0].hastaken
-
+		
+		// Sends back the role of the client along with if they have taken the exam
 		res.send( {
 			role: role,
 			taken: taken
@@ -209,6 +212,9 @@ router.post( "/", async ( req, res ) => {
 			}
 		} )
 
+		/*
+			Sets the HasTaken property in the database to true after the exam has been submitted
+		*/
 		pool.query( `
 				UPDATE "CodingExam".UserExam UEO
 				SET HasTaken = TRUE

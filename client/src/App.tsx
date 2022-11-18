@@ -6,6 +6,7 @@ import { examActions } from "./slices/examSlice"
 import { InstructorView } from "./views/instructorView"
 import { StudentView } from "./views/studentView"
 
+// Interface code to help the client grab the token from the index.html file
 declare global {
     interface Window {
         __INITIAL_DATA__:unknown
@@ -31,13 +32,13 @@ export const App = React.memo( () => {
 
 
 	// Stores the JWT token
-	// const token = String( window.__INITIAL_DATA__ )
+	const token = String( window.__INITIAL_DATA__ )
 
 	// Debug instructor token
-	const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJJbnN0cnVjdG9yIiwiaWF0IjoxNjY2OTcyODM4fQ.n9qkthHs0HhonpjD4yFNA7RLRqrzK1lavWzvBIGn_y8"
+	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJqcXBlaWpmcG9hZHZwaW9hdWVvdWFvdWVyYSIsInVzZXJJRCI6IjJiN2EyZWE5ZjI4YmMzMTI3NTM2NDBiMGMxY2M1MzdmYTg1YzVhNDkiLCJyb2xlcyI6Ikluc3RydWN0b3IiLCJpYXQiOjE2Njg3ODA5MjZ9.B9PZf9DoiGPeCA12M7O0J9UKrNY6Y5ygjPxBJLTiZmw"
 	
 	// Debug learner token
-	// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJMZWFybmVyIiwiaWF0IjoxNjY3NTA3ODM0fQ.SIpwxp9p6SXHfjDcDHkYO8cp0jLAEOnEVCxEeDrvCWs"
+	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJqcXBlaWpmcG9hZHZwaW9hdWVvdWFvdWVyYSIsInVzZXJJRCI6IjJiN2EyZWE5ZjI4YmMzMTI3NTM2NDBiMGMxY2M1MzdmYTg1YzVhNDkiLCJyb2xlcyI6IkxlYXJuZXIiLCJpYXQiOjE2Njg3ODA5MDJ9.5U7F0X1ArkZnb13HLEYIbmqAJHte3yARpfqJtaWp-AU"
 	
 	/**
 	 * Runs on render - determines the user's role based on their JWT token
