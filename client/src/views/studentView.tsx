@@ -35,7 +35,9 @@ export const StudentView = React.memo( ( props: StudentViewProps ) => {
 	// Render the component
 	return (
 		<StyledStudentView>
-			<h1>{responseState}</h1>
+			{responseState && (
+				<h1>{responseState}</h1>
+			)}			
 			<ExamView 
 				disabled={props.disabled}
 				feedback={props.disabled}

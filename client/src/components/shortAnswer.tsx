@@ -51,6 +51,9 @@ export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
 				large
 				onChange={handleChange}
 				value={response?.value} 
+				fill
+				growVertically
+				style={{ minHeight: "100px", resize: "none" }}
 			/>
 		</StyledShortAnswer>
 	)

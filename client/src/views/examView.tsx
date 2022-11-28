@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Button, Intent, Spinner } from "@blueprintjs/core"
+import { Button, Colors, Intent, Spinner } from "@blueprintjs/core"
 import * as React from "react"
 import { batch } from "react-redux"
 import styled from "styled-components"
@@ -26,6 +26,39 @@ const StyledExamView = styled.div`
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	width: 100%;
+`
+
+/**
+ * Style for the container that holds the questions
+ */
+export const StyledQuestionsContainer = styled.div`
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+`
+
+/**
+ * Style for a single question
+ */
+export const StyledQuestionContainer = styled.div`
+	border: 1px solid ${Colors.BLACK};
+	border-radius: 2px;
+	margin-bottom: 25px;
+`
+
+/**
+ * Style for a Question's header
+ */
+export const StyledQuestionHeader = styled.div`
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid ${Colors.BLACK};
+	padding: 10px;
+	background-color: ${Colors.LIGHT_GRAY4};
+	font-weight: bold;
 `
 
 /**
@@ -164,23 +197,31 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 			{loading && (
 				<Spinner 
 					size={50}
+					style={{ padding: "50px" }}
 				/>
 			)}
 			{!loading && (
 				<> 
-					{questionIds.map( id => (
-						<QuestionSwitch 
-							key={id}
-							disabled={props.disabled}
-							feedback={props.feedback}
-							questionId={id}
-						/>
-					) )}
+					<StyledQuestionsContainer>
+						{questionIds.map( ( id, index ) => (
+							<StyledQuestionContainer key={id}>
+								<StyledQuestionHeader>
+									Question {index + 1}
+								</StyledQuestionHeader>
+								<QuestionSwitch
+									disabled={props.disabled}
+									feedback={props.feedback}
+									questionId={id}
+								/>
+							</StyledQuestionContainer>
+						) )}
+					</StyledQuestionsContainer>
 					{!props.disabled && (
 						<Button 
 							text="Submit"
 							onClick={submit}
 							intent={Intent.PRIMARY}
+							fill
 						/>
 					)}
 				</>

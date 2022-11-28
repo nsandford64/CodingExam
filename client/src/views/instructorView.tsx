@@ -21,8 +21,8 @@ const StyledInstructorView = styled.div`
  * Style for the header elements
  */
 const StyledHeaderContainer = styled.div`
-	padding: 10px;
 	text-align: center;
+	width: 100%;
 `
 
 /**
@@ -166,6 +166,7 @@ export const InstructorView = React.memo( () => {
 					<Button 
 						text={"Submit Feedback"}
 						onClick={() => handleFeedbackClick()}
+						fill
 					/>
 				</>
 			)}
