@@ -1,6 +1,6 @@
 // Copyright 2022 under MIT License
-import { Spinner } from "@blueprintjs/core"
 import React from "react"
+import styled from "styled-components"
 import { useAppDispatch } from "./app/hooks"
 import { examActions } from "./slices/examSlice"
 import { InstructorView } from "./views/instructorView"
@@ -12,6 +12,23 @@ declare global {
         __INITIAL_DATA__:unknown
     }
 }
+
+/**
+ * Style for the App
+ */
+const StyledApp = styled.div`
+	padding: 25px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+`
+
+/**
+ * Style to controll the width of each View
+ */
+const StyledViewContainer = styled.div`
+	width: 600px;
+`
 
 /**
  * App Component
@@ -29,7 +46,6 @@ export const App = React.memo( () => {
 	const [ showInstructorView, setShowInstructorView ] = React.useState( false )
 	// State that holds whether the exam has already been taken
 	const [ taken, setTaken ] = React.useState( false )
-
 
 	// Stores the JWT token
 	//const token = String( window.__INITIAL_DATA__ )
@@ -73,23 +89,18 @@ export const App = React.memo( () => {
 
 	// Render the component
 	return (
-		<>
-			{loading && (
-				<Spinner 
-					size={50}
-				/>
-			)}
+		<StyledApp>
 			{!loading && (
-				<>
+				<StyledViewContainer>
 					{showInstructorView && (
 						<InstructorView />
 					)}
 					{!showInstructorView && (
 						<StudentView disabled={taken} />
 					)}
-				</>
+				</StyledViewContainer>
 			)}
-		</>
+		</StyledApp>
 	)
 } )
 App.displayName = "App"

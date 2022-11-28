@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { TextArea } from "@blueprintjs/core"
+import { Label, TextArea } from "@blueprintjs/core"
 import * as React from "react"
 import styled from "styled-components"
 import { Feedback } from "../App"
@@ -54,10 +54,14 @@ export const FeedbackBox = React.memo( ( props: FeedbackBoxProps ) => {
 	// Render the component
 	return (
 		<StyledFeedbackBox>
+			<Label>Feedback:</Label>
 			<TextArea 
 				large
 				onChange={handleChange}
 				value={feedback?.value || ""} 
+				fill
+				style={{ minHeight: "100px", resize: "none" }}
+				growVertically
 			/>
 		</StyledFeedbackBox>
 	)

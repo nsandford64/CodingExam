@@ -6,7 +6,7 @@ import styled from "styled-components"
 import { Question, QuestionType } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { createExamThunk, examActions, selectNextQuestionId, selectQuestionIds } from "../slices/examSlice"
-import { QuestionSwitch } from "./examView"
+import { QuestionSwitch, StyledQuestionContainer, StyledQuestionHeader, StyledQuestionsContainer } from "./examView"
 
 /**
  * Style for the CreateExamView
@@ -15,6 +15,7 @@ const StyledCreateExamView = styled.div`
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	width: 100%;
 `
 
 /**
@@ -42,12 +43,15 @@ export const CreateExamView = React.memo( () => {
 	// Render the component
 	return (
 		<StyledCreateExamView>
-			{questionIds.map( id => (
-				<QuestionDisplay 
-					key={id}
-					questionId={id}
-				/>
-			) )}
+			<StyledQuestionsContainer>
+				{questionIds.map( ( id, index ) => (
+					<QuestionDisplay 
+						index={index}
+						key={id}
+						questionId={id}
+					/>
+				) )}
+			</StyledQuestionsContainer>
 			{selectedQuestionType && (
 				<CreateQuestionSwitch 
 					questionType={selectedQuestionType}
@@ -78,13 +82,8 @@ CreateExamView.displayName = "CreateExamView"
  */
 interface QuestionDisplayProps {
 	questionId: number
+	index: number
 }
-
-/**
- * Style for QuestionDisplay
- */
-const StyledQuestionDisplay = styled.div`
-`
 
 /**
  * QuestionDisplay
@@ -96,20 +95,21 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 	const dispatch = useAppDispatch()
 
 	return (
-		<StyledQuestionDisplay>
-			<StyledButtonContainer>
+		<StyledQuestionContainer>
+			<StyledQuestionHeader>
+				Question {props.index + 1}
 				<Button 
 					intent={Intent.DANGER}
 					icon="minus"
 					onClick={() => dispatch( examActions.deleteQuestion( props.questionId ) )}
 					style={{ marginLeft: "auto" }}
 				/>
-			</StyledButtonContainer>
+			</StyledQuestionHeader>
 			<QuestionSwitch
 				questionId={props.questionId}
 				disabled
 			/>
-		</StyledQuestionDisplay>
+		</StyledQuestionContainer>
 	)
 } )
 QuestionDisplay.displayName = "QuestionDisplay"

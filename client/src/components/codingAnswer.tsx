@@ -58,7 +58,8 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 				theme="github"
 				onChange={handleChange}
 				name="editor"
-				defaultValue={`${response?.value}`}
+				defaultValue={`${response?.value || ""}`}
+				width="100%"
 			/>
 		</StyledCodingAnswer>
 	)
