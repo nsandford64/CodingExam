@@ -4,6 +4,8 @@ import * as React from "react"
 import AceEditor from "react-ace"
 
 import "brace/mode/java"
+import "brace/mode/csharp"
+import "brace/mode/python"
 import "brace/theme/github"
 
 import styled from "styled-components"
