@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { CodingAnswer } from "../components/codingAnswer"
 import { FeedbackBox } from "../components/feedbackBox"
 import { MultipleChoice } from "../components/multipleChoice"
+import { ParsonsProblem } from "../components/parsonsProblem"
 import { ShortAnswer } from "../components/shortAnswer"
 import { TrueFalse } from "../components/trueFalse"
 import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap, selectToken } from "../slices/examSlice"
@@ -135,6 +136,8 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 	 * response in the responsesMap to update the database
 	 */
 	const submit = React.useCallback( async () => {
+		
+		console.log( Array.from( responsesMap.values() ) )
 		try {
 			const res = await fetch( "http://localhost:9000/api", {
 				// Adding method type
@@ -261,6 +264,20 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 		return (
 			<>
 				<CodingAnswer
+					disabled={props.disabled}
+					questionId={question.id}
+				/>
+				{props.feedback && (
+					<FeedbackBox
+						questionId={question.id}
+					/>
+				)}
+			</>
+		)
+	case QuestionType.ParsonsProblem:
+		return (
+			<>
+				<ParsonsProblem
 					disabled={props.disabled}
 					questionId={question.id}
 				/>

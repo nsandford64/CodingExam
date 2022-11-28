@@ -190,6 +190,7 @@ router.post( "/", async ( req, res ) => {
 	
 		// Insert each response into the StudentResponse table
 		await req.body.forEach( response => {
+			console.log( response )
 			// Query to insert a text response into the database
 			if ( typeof response.value === "string" ) {
 				// eslint-disable-next-line no-useless-escape

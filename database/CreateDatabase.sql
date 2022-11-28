@@ -104,14 +104,15 @@ VALUES ('What''s the best programming language?', TRUE, 1, 1),
 ('Select true for full points', TRUE, 3, 2);
 
 INSERT INTO "CodingExam".ExamQuestion(QuestionText, HasCorrectAnswers, ParsonsAnswer, QuestionType, ExamID)
-VALUES ('This is a BLANK Parsons Problem that BLANK', TRUE, '21', 5, 1);
+VALUES ('This is a test parsons problem', TRUE, '21', 5, 1);
 
 INSERT INTO "CodingExam".QuestionAnswer(QuestionID, CorrectAnswer, AnswerIndex, AnswerText)
 VALUES (1, TRUE, 0, 'C#'), (1, TRUE, 1, 'Java'), (1, TRUE, 2, 'TypeScript'), (1, TRUE, 3, 'Fortran'), 
 (2, TRUE, 1, 'True'), (2, FALSE, 2, 'False'),
 (6, TRUE, 0, '6'), (6, TRUE, 1, '7'), (6, TRUE, 2, '8'), (6, TRUE, 3, '9'),
 (7, TRUE, 0, '1'), (7, TRUE, 1, '2'), (7, TRUE, 2, '3'), (7, TRUE, 3, '4'),
-(8, TRUE, 1, 'True'), (8, FALSE, 2, 'False');
+(8, TRUE, 1, 'True'), (8, FALSE, 2, 'False'),
+(9, FALSE, 1, 'Second Block'), (9, FALSE, 2, 'First Block');
 
 INSERT INTO "CodingExam".StudentResponse(IsTextResponse, AnswerResponse, QuestionID, CanvasUserID)
 VALUES (FALSE, 0, 1, 'a3alsdf9cjasq713h4jwld9c8galsdf94'), (FALSE, 1, 2, 'a3alsdf9cjasq713h4jwld9c8galsdf94'),
