@@ -35,10 +35,10 @@ export const App = React.memo( () => {
 	const token = String( window.__INITIAL_DATA__ )
 
 	// Debug instructor token
-	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJqcXBlaWpmcG9hZHZwaW9hdWVvdWFvdWVyYSIsInVzZXJJRCI6IjJiN2EyZWE5ZjI4YmMzMTI3NTM2NDBiMGMxY2M1MzdmYTg1YzVhNDkiLCJyb2xlcyI6Ikluc3RydWN0b3IiLCJpYXQiOjE2Njg3ODA5MjZ9.B9PZf9DoiGPeCA12M7O0J9UKrNY6Y5ygjPxBJLTiZmw"
+	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJJbnN0cnVjdG9yIiwiaWF0IjoxNjY5NjUwNDc5fQ.nRG5XThVcizudoSSHJkpqtBXT64TJwBnd4PSuS08j-E"
 	
 	// Debug learner token
-	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJqcXBlaWpmcG9hZHZwaW9hdWVvdWFvdWVyYSIsInVzZXJJRCI6IjJiN2EyZWE5ZjI4YmMzMTI3NTM2NDBiMGMxY2M1MzdmYTg1YzVhNDkiLCJyb2xlcyI6IkxlYXJuZXIiLCJpYXQiOjE2Njg3ODA5MDJ9.5U7F0X1ArkZnb13HLEYIbmqAJHte3yARpfqJtaWp-AU"
+	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJMZWFybmVyIiwiaWF0IjoxNjY5NjUwNTA2fQ.p8uzKBf65xuvZbki5841T-8kAo6xzRVVPICBW9eiOGg"
 	
 	/**
 	 * Runs on render - determines the user's role based on their JWT token

@@ -90,7 +90,7 @@ INSERT INTO "CodingExam".UserExam(UserID, ExamID)
 VALUES (1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (1,3);
 
 INSERT INTO "CodingExam".QuestionType(QuestionType)
-VALUES ('MultipleChoice'), ('ShortAnswer'), ('TrueFalse'), ('CodingAnswer');
+VALUES ('MultipleChoice'), ('ShortAnswer'), ('TrueFalse'), ('CodingAnswer'), ('ParsonsProblem');
 
 INSERT INTO "CodingExam".ExamQuestion(QuestionText, HasCorrectAnswers, QuestionType, ExamID)
 VALUES ('What''s the best programming language?', TRUE, 1, 1),
