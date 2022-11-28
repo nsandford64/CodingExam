@@ -46,6 +46,7 @@ CREATE TABLE "CodingExam".ExamQuestion
 	QuestionText VARCHAR(300) NOT NULL,
 	HasCorrectAnswers BOOLEAN NOT NULL,
 	QuestionType INT NOT NULL REFERENCES "CodingExam".QuestionType(QuestionTypeID),
+	ParsonsAnswer VARCHAR(20),
 	ExamID INT NOT NULL REFERENCES "CodingExam".Exam(ExamID)
 );
 
@@ -101,6 +102,9 @@ VALUES ('What''s the best programming language?', TRUE, 1, 1),
 ('Which number is the biggest', TRUE, 1, 2),
 ('Which number is the smallest', TRUE, 1, 2),
 ('Select true for full points', TRUE, 3, 2);
+
+INSERT INTO "CodingExam".ExamQuestion(QuestionText, HasCorrectAnswers, ParsonsAnswer, QuestionType, ExamID)
+VALUES ('This is a BLANK Parsons Problem that BLANK', TRUE, '21', 5, 1);
 
 INSERT INTO "CodingExam".QuestionAnswer(QuestionID, CorrectAnswer, AnswerIndex, AnswerText)
 VALUES (1, TRUE, 0, 'C#'), (1, TRUE, 1, 'Java'), (1, TRUE, 2, 'TypeScript'), (1, TRUE, 3, 'Fortran'), 
