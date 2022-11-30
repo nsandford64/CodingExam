@@ -36,6 +36,37 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 	// Response from the Store
 	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
 
+	const questionsMap = new Map()
+	const reverseQuestionsMap = new Map()
+	const [ hasRendered, setHasRendered ] = React.useState( false )
+	const responseColumns: string[] = []
+	
+	React.useEffect( () => {
+		question?.answers.map( ( currElement, index ) => {
+			questionsMap.set( currElement, index )
+			reverseQuestionsMap.set( index, currElement )
+		} )
+		
+		if ( !hasRendered ) {
+
+			const unsortedItems = question?.answers || []
+			const sortedItems = response?.value.toString() || ""
+			const newSortedList: string[] = []
+
+			for( const item of sortedItems ) {
+				newSortedList.push( reverseQuestionsMap.get( parseInt( item ) ) )
+			}
+
+			const newUnsortedList = unsortedItems.filter( item => !( newSortedList.includes( item ) ) )
+
+			initialColumns.sorted.list = newSortedList
+			initialColumns.unsorted.list = newUnsortedList
+			
+			setHasRendered( true )
+		}
+
+	} )
+
 	const initialColumns = {
 		unsorted: {
 			id: "unsorted",
@@ -43,9 +74,10 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 		},
 		sorted: {
 			id: "sorted",
-			list: []
+			list: responseColumns
 		}
 	}
+
 	const [ columns, setColumns ] = useState( initialColumns )
 
 	const onDragEnd = ( { source, destination }: DropResult ) => {
@@ -83,6 +115,20 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 
 			// Update the state
 			setColumns( state => ( { ...state, [newCol.id]: newCol } ) )
+
+			let currentResponse = ""
+
+			newCol.list.forEach( item => {
+				currentResponse += questionsMap.get( item )
+			} )
+
+			const newResponse: Response = {
+				questionId: props.questionId,
+				isText: true,
+				value: currentResponse
+			}
+
+			dispatch( examActions.updateResponse( newResponse ) )
 			
 			return null
 		} 
@@ -118,19 +164,24 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 				[newEndCol.id]: newEndCol
 			} ) )
 
+			let currentResponse = ""
+
+			if ( newStartCol.id === "sorted" ) {
+				newStartCol.list.forEach( item => {
+					currentResponse += questionsMap.get( item )
+				} )	
+			}
+			else {
+				newEndCol.list.forEach( item => {
+					currentResponse += questionsMap.get( item )
+				} )
+			}
+
 			const newResponse: Response = {
 				questionId: props.questionId,
-				value: parseInt( destination.droppableId )
+				isText: true,
+				value: currentResponse
 			}
-			console.log( parseInt( destination.droppableId ) )
-
-			console.log( columns.sorted.list )
-			/*const newResponse: Response = {
-				questionId: props.questionId,
-				value: Array.from( columns.sorted.id )
-			}
-			dispatch( examActions.updateResponse( Array.from( columns.sorted.id ) ) )
-            */
 
 			dispatch( examActions.updateResponse( newResponse ) )
 

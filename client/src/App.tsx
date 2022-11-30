@@ -142,6 +142,16 @@ export type Question = {
 	correctAnswer?: number
 }
 
+/*
+* Item Type
+* This type defines what an item is in the Parsons Problem question type
+* Each item has an id and text to display
+*/ 
+export type Item = {
+	id: number
+	text: string
+}
+
 /**
  * Response Type
  * 
