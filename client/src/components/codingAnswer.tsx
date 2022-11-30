@@ -4,6 +4,8 @@ import * as React from "react"
 import AceEditor from "react-ace"
 
 import "brace/mode/java"
+import "brace/mode/csharp"
+import "brace/mode/python"
 import "brace/theme/github"
 
 import styled from "styled-components"
@@ -54,7 +56,7 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 			<Label>{question?.text}</Label>
 			<AceEditor
 				readOnly={props.disabled}
-				mode="java"
+				mode="csharp"
 				theme="github"
 				onChange={handleChange}
 				name="editor"
