@@ -3,7 +3,7 @@ import { Button, InputGroup, Intent, Label, MenuItem } from "@blueprintjs/core"
 import { Select2 } from "@blueprintjs/select"
 import * as React from "react"
 import styled from "styled-components"
-import { Question, QuestionType } from "../App"
+import { LANGUAGE_CHOICES, Question, QuestionType } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { createExamThunk, examActions, selectNextQuestionId, selectQuestionIds } from "../slices/examSlice"
 import { QuestionSwitch, StyledQuestionContainer, StyledQuestionHeader, StyledQuestionsContainer } from "./examView"
@@ -58,20 +58,25 @@ export const CreateExamView = React.memo( () => {
 					setSelectedQuestionType={setSelectedQuestionType}
 				/>
 			)}
-			{!selectedQuestionType && (
-				<>
-					<QuestionDropdown 
-						setSelectedQuestionType={setSelectedQuestionType}
-					/>
-					<Button 
-						intent={Intent.PRIMARY}
-						text="Done"
-						disabled={questionIds.length === 0}
-						onClick={() => dispatch( createExamThunk )}
-						style={{ marginTop: "10px" }}
-					/>	
-				</>
+			{selectedQuestionType && (
+				<Button 
+					text="Cancel"
+					onClick={() => setSelectedQuestionType( "" )}
+				/>
 			)}
+			{!selectedQuestionType && (
+				<QuestionDropdown 
+					setSelectedQuestionType={setSelectedQuestionType}
+				/>
+			)}
+			<Button 
+				intent={Intent.PRIMARY}
+				text="Done"
+				disabled={selectedQuestionType !== "" || questionIds.length === 0}
+				fill
+				onClick={() => dispatch( createExamThunk )}
+				style={{ marginTop: "25px" }}
+			/>	
 		</StyledCreateExamView>
 	)
 } )
@@ -444,7 +449,8 @@ const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
 		id: nextQuestionId,
 		text: "",
 		type: props.questionType,
-		correctAnswer: 0
+		correctAnswer: 0,
+		language: ""
 	} as Question )
 
 	// Render the component
@@ -460,6 +466,30 @@ const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
 					} )}
 				/>
 			</StyledRow>
+			{props.questionType === QuestionType.CodingAnswer && (
+				<StyledRow>
+					<Select2<string> 
+						items={LANGUAGE_CHOICES}
+						filterable={false}
+						itemRenderer={( item, { handleClick } ) => (
+							<MenuItem 
+								key={item}
+								text={item}
+								onClick={handleClick}
+								roleStructure="listoption"
+								style={{ textAlign: "center" }}
+							/>
+						)}
+						onItemSelect={item => setQuestion( {
+							...question,
+							language: item
+						} )}
+						popoverProps={{ position: "bottom" }}
+					>
+						<Button text={question.language ? question.language : "Select language..."} />
+					</Select2>
+				</StyledRow>
+			)}
 			<Button 
 				text="Add"
 				intent={Intent.PRIMARY}

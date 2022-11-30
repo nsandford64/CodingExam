@@ -51,10 +51,10 @@ export const App = React.memo( () => {
 	//const token = String( window.__INITIAL_DATA__ )
 
 	// Debug instructor token
-	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJJbnN0cnVjdG9yIiwiaWF0IjoxNjY5NjUwNDc5fQ.nRG5XThVcizudoSSHJkpqtBXT64TJwBnd4PSuS08j-E"
+	const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJJbnN0cnVjdG9yIiwiaWF0IjoxNjY5NjUwNDc5fQ.nRG5XThVcizudoSSHJkpqtBXT64TJwBnd4PSuS08j-E"
 	
 	// Debug learner token
-	const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJMZWFybmVyIiwiaWF0IjoxNjY5NjUwODg5fQ.miDHfCzTY5ouYNXvp7UetHtlSqKk9evKSTXfxjlBkuk"
+	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJMZWFybmVyIiwiaWF0IjoxNjY5NjUwODg5fQ.miDHfCzTY5ouYNXvp7UetHtlSqKk9evKSTXfxjlBkuk"
 	
 	/**
 	 * Runs on render - determines the user's role based on their JWT token
@@ -132,14 +132,15 @@ export interface ComponentProps {
  * Question Type
  * 
  * This type defines what an exam question should look like.
- * Each question has a unique id, text, type, a correct answer, and an array of answers
+ * Each question has a unique id, text, type, a correct answer, a language, and an array of answers
  */
 export type Question = {
 	id: number // Unique id for identification in the database
 	text: string // Question text to display to user
 	type: QuestionType // Type of the Question
 	answers: string[] // Array of answers choices to present to the user
-	correctAnswer?: number
+	correctAnswer?: number // Correct answer for the question
+	language?: string // Language for a CodingAnswer question
 }
 
 /**
@@ -191,3 +192,9 @@ export enum QuestionType {
 	CodingAnswer = 4,
 	ParsonsProblem = 5
 }
+
+export const LANGUAGE_CHOICES = [
+	"java",
+	"python",
+	"csharp"
+]
