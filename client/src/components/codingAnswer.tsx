@@ -53,10 +53,10 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 	// Render the component
 	return (
 		<StyledCodingAnswer>
-			<Label>{question?.text}</Label>
+			<Label>{ question?.text.split( ":" )[0] } </Label>
 			<AceEditor
 				readOnly={props.disabled}
-				mode={question?.language}
+				mode={ question?.text.split( ":" )[1] }
 				theme="github"
 				onChange={handleChange}
 				name="editor"
