@@ -143,14 +143,27 @@ export type Question = {
 	language?: string // Language for a CodingAnswer question
 }
 
-/*
+/**
 * Item Type
+*
 * This type defines what an item is in the Parsons Problem question type
 * Each item has an id and text to display
 */ 
 export type Item = {
 	id: number
 	text: string
+}
+
+/**
+ * Column Type
+ * 
+ * This type defines what a column is in the Prasons Problem question type
+ * Each column has a list of items, a name, and an id
+ */
+export type Column = {
+	list: Item[]
+	name: string
+	id: string
 }
 
 /**
