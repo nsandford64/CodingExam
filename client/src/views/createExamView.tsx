@@ -482,6 +482,7 @@ const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
 						)}
 						onItemSelect={item => setQuestion( {
 							...question,
+							text: question.text,
 							language: item
 						} )}
 						popoverProps={{ position: "bottom" }}
@@ -493,7 +494,16 @@ const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
 			<Button 
 				text="Add"
 				intent={Intent.PRIMARY}
-				onClick={() => props.createQuestion( question )}
+				onClick={ () => {
+					if ( question.type === 4 ) {
+						props.createQuestion( {...question,
+							text: question.text + ":" + ( question.language ? question.language : "java" ) } )
+					}
+					else {
+						props.createQuestion( question )
+					}
+				}
+				}
 			/>
 		</>
 	)
