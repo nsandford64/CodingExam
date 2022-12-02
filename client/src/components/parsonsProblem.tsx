@@ -8,6 +8,7 @@ import Column from "./column"
 import { DragDropContext, DropResult } from "react-beautiful-dnd"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { examActions, selectQuestionById, selectResponseById } from "../slices/examSlice"
+import { Label } from "@blueprintjs/core"
 
 /**
  * Style for the Columns
@@ -190,13 +191,16 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 	}
 
 	return (
-		<DragDropContext onDragEnd={onDragEnd}>
-			<StyledColumns>
-				{Object.values( columns ).map( col => (
-					<Column col={col} key={col.id} />
-				) )}
-			</StyledColumns>
-		</DragDropContext>
+		<>
+			<Label>{question?.text}</Label>
+			<DragDropContext onDragEnd={onDragEnd}>
+				<StyledColumns>
+					{Object.values( columns ).map( col => (
+						<Column col={col} key={col.id} />
+					) )}
+				</StyledColumns>
+			</DragDropContext>
+		</>
 	)
 } 
 )
