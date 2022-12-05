@@ -1,25 +1,28 @@
 // Copyright 2022 under MIT License
 // Taken from Josh Ellis's article: CodeAlong: Multi-Column Drag and Drop in React
-
-import React, { useState } from "react"
-import { Response, ComponentProps } from "../App"
+import React from "react"
+import { Response, ComponentProps, Column, Item } from "../App"
 import styled from "styled-components"
-import Column from "./column"
 import { DragDropContext, DropResult } from "react-beautiful-dnd"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { examActions, selectQuestionById, selectResponseById } from "../slices/examSlice"
 import { Label } from "@blueprintjs/core"
+import ParsonsColumn from "./column"
+
+/**
+ * Style for the ParsonsProblem
+ */
+const StyledParsonsProblem = styled.div`
+	padding: 10px;
+`
 
 /**
  * Style for the Columns
  */
 const StyledColumns = styled.div`
 	display: grid;
-	grid-template-columns: 1fr 1fr 1fr;
-	margin: 10vh auto;
-	width: 80%;
-	height: 80vh;
-	gap: 8px;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px;
 `
 /**
  * Parson's Problem Component
@@ -37,60 +40,75 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 	// Response from the Store
 	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
 
-	const questionsMap = new Map()
-	const reverseQuestionsMap = new Map()
-	const [ hasRendered, setHasRendered ] = React.useState( false )
-	const responseColumns: string[] = []
-	
-	React.useEffect( () => {
-		question?.answers.map( ( currElement, index ) => {
-			questionsMap.set( currElement, index )
-			reverseQuestionsMap.set( index, currElement )
-		} )
-		
-		if ( !hasRendered ) {
-
-			const unsortedItems = question?.answers || []
-			const sortedItems = response?.value.toString() || ""
-			const newSortedList: string[] = []
-
-			for( const item of sortedItems ) {
-				newSortedList.push( reverseQuestionsMap.get( parseInt( item ) ) )
-			}
-
-			const newUnsortedList = unsortedItems.filter( item => !( newSortedList.includes( item ) ) )
-
-			initialColumns.sorted.list = newSortedList
-			initialColumns.unsorted.list = newUnsortedList
-			
-			setHasRendered( true )
-		}
-
-	} )
-
-	const initialColumns = {
+	const [ columns, setColumns ] = React.useState( {
 		unsorted: {
 			id: "unsorted",
-			list: question?.answers || []
+			list: [],
+			name: "Drag from here"
 		},
 		sorted: {
 			id: "sorted",
-			list: responseColumns
+			list: [],
+			name: "Construct your solution here"
 		}
-	}
+	} as { unsorted: Column, sorted: Column } )
+	
+	React.useEffect( () => {
+		console.log( response )
+	}, [ response ] )
 
-	const [ columns, setColumns ] = useState( initialColumns )
+	React.useEffect( () => {
+		const items: Item[] = []
+
+		question?.answers.map( ( answer, index ) => {
+			const item: Item = {
+				id: index,
+				text: answer
+			}
+
+			items.push( item )
+		} )
+
+		let unsortedItems = items
+		
+		const values = response?.value.toString() || ""
+		const sortedItems: Item[] = []
+
+		for( const char of values ) {
+			const index = parseInt( char )
+
+			const item: Item = {
+				id: index,
+				text: unsortedItems[index].text
+			}
+
+			sortedItems.push( item )
+		}
+
+		unsortedItems = unsortedItems.filter( item => !sortedItems.includes( item ) )
+
+		setColumns( prevState => ( {
+			unsorted: {
+				...prevState.unsorted,
+				list: unsortedItems
+			},
+			sorted: {
+				...prevState.sorted,
+				list: sortedItems
+			}
+		} ) )
+	}, [] )
 
 	const onDragEnd = ( { source, destination }: DropResult ) => {
 		// Make sure we have a valid destination
-		if ( destination === undefined || destination === null ) return null
+		if ( !destination ) return
 
 		// Make sure we're actually moving the item
 		if (
 			source.droppableId === destination.droppableId 
 			&& destination.index === source.index
 		) {
-			return null
+			return
 		}
 
 		// Set start and end variables
@@ -110,28 +128,32 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 
 			// Then create a new copy of the column object
 			const newCol = {
+				name: start.name,
 				id: start.id,
 				list: newList
 			}
 
 			// Update the state
-			setColumns( state => ( { ...state, [newCol.id]: newCol } ) )
+			setColumns( prevState => ( {
+				...prevState,
+				[newCol.id]: newCol
+			} ) )
 
-			let currentResponse = ""
+			// If we're in the sorted column, we need to update the response
+			if( newCol.id === "sorted" ) {
+				let currentResponse = ""
+				newCol.list.forEach( item => {
+					currentResponse += item.id.toString()
+				} )
 
-			newCol.list.forEach( item => {
-				currentResponse += questionsMap.get( item )
-			} )
+				const newResponse: Response = {
+					questionId: props.questionId,
+					isText: true,
+					value: currentResponse
+				}
 
-			const newResponse: Response = {
-				questionId: props.questionId,
-				isText: true,
-				value: currentResponse
+				dispatch( examActions.updateResponse( newResponse ) )
 			}
-
-			dispatch( examActions.updateResponse( newResponse ) )
-			
-			return null
 		} 
 		else {
 			// If start is different from end, we need to update multiple columns
@@ -142,6 +164,7 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 
 			// Create a new start column
 			const newStartCol = {
+				name: start.name,
 				id: start.id,
 				list: newStartList
 			}
@@ -154,27 +177,27 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 
 			// Create a new end column
 			const newEndCol = {
+				name: end.name,
 				id: end.id,
 				list: newEndList
 			}
 
 			// Update the state
-			setColumns( state => ( {
-				...state,
+			setColumns( prevState => ( {
+				...prevState,
 				[newStartCol.id]: newStartCol,
 				[newEndCol.id]: newEndCol
 			} ) )
 
 			let currentResponse = ""
-
 			if ( newStartCol.id === "sorted" ) {
 				newStartCol.list.forEach( item => {
-					currentResponse += questionsMap.get( item )
+					currentResponse += item.id
 				} )	
 			}
 			else {
 				newEndCol.list.forEach( item => {
-					currentResponse += questionsMap.get( item )
+					currentResponse += item.id
 				} )
 			}
 
@@ -185,22 +208,19 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 			}
 
 			dispatch( examActions.updateResponse( newResponse ) )
-
-			return null
 		}
 	}
 
 	return (
-		<>
+		<StyledParsonsProblem>
 			<Label>{question?.text}</Label>
 			<DragDropContext onDragEnd={onDragEnd}>
 				<StyledColumns>
-					{Object.values( columns ).map( col => (
-						<Column col={col} key={col.id} />
-					) )}
+					<ParsonsColumn column={columns.unsorted} />
+					<ParsonsColumn column={columns.sorted} />
 				</StyledColumns>
 			</DragDropContext>
-		</>
+		</StyledParsonsProblem>
 	)
 } 
 )

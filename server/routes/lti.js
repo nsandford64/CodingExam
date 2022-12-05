@@ -80,21 +80,42 @@ router.post( "/", async ( req, res ) => {
 
 			const pool = new Pool( credentials )
 
-			// Query the database for a list of questions with a given ExamID
-			const results = await pool.query( `
+			if ( req.body.roles === "Instructor" ) {
+				// Query the database for a list of questions with a given ExamID
+				const results = await pool.query( `
 				SELECT 1
 				FROM "CodingExam".Exam E
 				WHERE E.CanvasExamID = '${req.body.ext_lti_assignment_id}'
 			` )
 
-			if( results.rows.length === 0 ) {
-				console.log( "this will work" )
-				await pool.query( `
+				if( results.rows.length === 0 ) {
+					await pool.query( `
 					INSERT INTO "CodingExam".Exam(CanvasExamID, TotalPoints)
 					VALUES('${req.body.ext_lti_assignment_id}', ${req.body.custom_canvas_assignment_points_possible})
 				` )
-				await pool.end()
+				
+				}
 			}
+
+			if ( req.body.roles === "Learner" ) {
+				const results = await pool.query( `
+					SELECT U.UserID, E.ExamID
+					FROM "CodingExam".UserExam UE
+					INNER JOIN "CodingExam".Exam E ON UE.ExamID = E.ExamID
+					INNER JOIN "CodingExam".Users U ON U.UserID = UE.UserID
+					WHERE E.CanvasExamID = '01cf10c5-f5d3-466e-b716-53f2b0bcd3b4' AND
+						U.CanvasUserID = '2b7a2ea9f28bc312753640b0c1cc537fa85c5a49'
+				` )
+
+				if ( results.rows.length === 0 ) {
+					await pool.query( ` 
+						INSERT INTO "CodingExam".UserExam(UserID, ExamID)
+						VALUES(${results.rows[0].userid}, ${results.rows[0].examid})
+					` )
+				}
+			}
+
+			await pool.end()
 
 			// Modifies the index.html file that is returned to the client to contain the JWT token and sends it
 			fs.readFile( path.resolve( "../client/build/index.html" ), "utf8", ( err, data ) => {

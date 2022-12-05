@@ -449,9 +449,23 @@ const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
 		id: nextQuestionId,
 		text: "",
 		type: props.questionType,
-		correctAnswer: 0,
-		language: ""
+		correctAnswer: 0
 	} as Question )
+	// State to hold the language, if this is a CodingAnswer question
+	const [ language, setLanguage ] = React.useState( "" )
+
+	// Called when the Add button is pressed - creates a new Question 
+	const handleAdd = React.useCallback( () => {
+		if ( question.type === QuestionType.CodingAnswer ) {
+			props.createQuestion( {
+				...question,
+				text: question.text + ":" + ( language || "java" ) 
+			} )
+		}
+		else {
+			props.createQuestion( question )
+		}
+	}, [ question, language ] )
 
 	// Render the component
 	return (	
@@ -480,20 +494,28 @@ const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
 								style={{ textAlign: "center" }}
 							/>
 						)}
+<<<<<<< HEAD
 						onItemSelect={item => setQuestion( {
 							...question,
 							language: item
 						} )}
+=======
+						onItemSelect={item => setLanguage( item )}
+>>>>>>> d5beef1f0e1ea060cccf5d5c8c395ea02f8fe05e
 						popoverProps={{ position: "bottom" }}
 					>
-						<Button text={question.language ? question.language : "Select language..."} />
+						<Button text={language || "Select language..."} />
 					</Select2>
 				</StyledRow>
 			)}
 			<Button 
 				text="Add"
 				intent={Intent.PRIMARY}
+<<<<<<< HEAD
 				onClick={() => props.createQuestion( question )}
+=======
+				onClick={handleAdd}
+>>>>>>> d5beef1f0e1ea060cccf5d5c8c395ea02f8fe05e
 			/>
 		</>
 	)

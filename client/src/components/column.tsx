@@ -1,65 +1,56 @@
 // Copyright 2022 under MIT License
 
 import React from "react"
-import Item from "./item"
+import ColumnItem from "./columnItem"
 import { Droppable } from "react-beautiful-dnd"
 import styled from "styled-components"
+import { Colors, Label } from "@blueprintjs/core"
+import { Column } from "../App"
 
 /** Interface for the Column objects containing the id and a list of 
 *	strings containing the code fragments.
 */
-interface ColumnProps {
-  col: {
-    id: string;
-    list: string[];
-  };
+interface ParsonsColumnProps {
+  column: Column
 }
 
 /**
  * Style for the Column component for Parson's Problem component
  */
-const StyledColumn = styled.div`
-	padding: 24px 0;
+const StyledParsonsColumn = styled.div`
 	display: flex;
 	flex-direction: column;
-	margin-top: 8;
+`
 
-	h2: {
-		margin: 0;
-		padding: 0 16px;
-	}
-    `
 /** 
  * Style for the List component for the Column component for the Parson's
  * Problem component.
 */
 const StyledList = styled.div`
-	background-color: #ddd;
-	border-radius: 8;
-	padding: 16;
 	display: flex;
 	flex-direction: column;
 	flex-grow: 1;
-	margin-top: 8;
+	border: 1px solid ${Colors.BLACK};
+	border-radius: 2px;
 `
 
-// Renders the Column component to the Parson's Problems component
-const Column: React.FC<ColumnProps> = ( { col: { list, id } } ) => {
+const ParsonsColumn = React.memo( ( props: ParsonsColumnProps ) => {
 	return (
-		<Droppable droppableId={id}>
+		<Droppable droppableId={props.column.id}>
 			{( provided ) => (
-				<StyledColumn>
-					<h2>{id}</h2>
+				<StyledParsonsColumn>
+					<Label>{props.column.name}</Label>
 					<StyledList {...provided.droppableProps} ref={provided.innerRef}>
-						{list.map( ( text, index ) => (
-							<Item key={text} text={text} index={index} />
+						{props.column.list.map( ( item, index ) => (
+							<ColumnItem key={item.id} item={item} index={index} />
 						) )}
 						{provided.placeholder}
 					</StyledList>
-				</StyledColumn>
+				</StyledParsonsColumn>
 			)}
 		</Droppable>
 	)
-}
+} )
+ParsonsColumn.displayName = "ParsonsColumn"
 
-export default Column
+export default ParsonsColumn
