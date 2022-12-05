@@ -257,7 +257,6 @@ interface CreateQuestionComponentProps {
  */
 const StyledRow = styled.div`
 	margin-bottom: 10px;
-	width: 100%;
 `
 
 /**
