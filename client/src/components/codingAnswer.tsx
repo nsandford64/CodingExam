@@ -50,13 +50,23 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 		dispatch( examActions.updateResponse( newResponse ) )
 	}, [] )
 
+	const splitText = question?.text.split( ":" ) || []
+
+	let text = ""
+	splitText.forEach( ( el, index ) => {
+		if( index !== splitText.length - 1 ) {
+			text += el
+		}
+	} )
+	const mode = splitText[ splitText.length - 1 ]
+
 	// Render the component
 	return (
 		<StyledCodingAnswer>
-			<Label>{question?.text}</Label>
+			<Label>{text}</Label>
 			<AceEditor
 				readOnly={props.disabled}
-				mode="csharp"
+				mode={mode}
 				theme="sqlserver"
 				onChange={handleChange}
 				name="editor"

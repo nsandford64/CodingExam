@@ -193,6 +193,8 @@ const CreateQuestionSwitch = React.memo( ( props: CreateQuestionSwitchProps ) =>
 			return QuestionType.ShortAnswer
 		case "CodingAnswer":
 			return QuestionType.CodingAnswer
+		case "ParsonsProblem":
+			return QuestionType.ParsonsProblem
 		default:
 			return QuestionType.None
 		}
@@ -223,6 +225,12 @@ const CreateQuestionSwitch = React.memo( ( props: CreateQuestionSwitchProps ) =>
 				createQuestion={createQuestion}
 			/>
 		)
+	case QuestionType.ParsonsProblem:
+		return (
+			<CreateParsonsProblem 
+				createQuestion={createQuestion}
+			/>
+		)
 	default:
 		return (
 			<CreateGeneric
@@ -249,6 +257,7 @@ interface CreateQuestionComponentProps {
  */
 const StyledRow = styled.div`
 	margin-bottom: 10px;
+	width: 100%;
 `
 
 /**
@@ -423,6 +432,120 @@ const CreateTrueFalse = React.memo( ( props: CreateQuestionComponentProps ) => {
 	)
 } )
 CreateTrueFalse.displayName = "CreateTrueFalse"
+
+/**
+ * CreateParsonsProblem Component
+ * 
+ * This component allos the user to create a ParsonsProblem
+ * question
+ */
+const CreateParsonsProblem = React.memo( ( props: CreateQuestionComponentProps ) => {
+
+	// nextQuestionId from the store
+	const nextQuestionId = useAppSelector( selectNextQuestionId )
+
+	// State to hold the currently modified question
+	const [ question, setQuestion ] = React.useState( {
+		answers: [ "" ],
+		id: nextQuestionId,
+		text: "",
+		type: QuestionType.ParsonsProblem,
+		parsonsAnswer: ""
+	} as Question )
+
+	/**
+	 * Called when the user modifies an answer value - this ensures
+	 * the question state is kept up to date
+	 */
+	const handleChange = React.useCallback( ( index: number, value: string ) => {
+		const newAnswers = [ ...question.answers ]
+		newAnswers[index] = value
+
+		setQuestion( { 
+			...question, answers: newAnswers 
+		} )
+	}, [ question ] )
+
+	/**
+	 * Called when the user wants to add another answer choice
+	 */
+	const handleAdd = React.useCallback( () => {
+		const newAnswers = [ ...question.answers, "" ]
+		setQuestion( {
+			...question, 
+			answers: newAnswers
+		} )
+	}, [ question ] )
+
+	/**
+	 * Called when the user wants to delete an answer choice
+	 */
+	const handleRemove = React.useCallback( () => {
+		const newAnswers = [ ...question.answers ]
+		newAnswers.pop()
+
+		setQuestion( {
+			...question,
+			answers: newAnswers
+		} )
+	}, [ question ] )
+
+	// Render the component
+	return (
+		<>
+			<StyledRow>
+				<Label style={{ fontWeight: "bold" }}>Question Text</Label>
+				<InputGroup 
+					value={question.text}
+					onChange={e => setQuestion( {
+						...question,
+						text: e.target.value
+					} )}
+				/>
+			</StyledRow>
+			<StyledRow>
+				<Label style={{ fontWeight: "bold" }}>Answer Choices</Label>
+				{question.answers.map( ( answer, index ) => (
+					<InputGroup 
+						value={answer}
+						key={index}
+						onChange={e => handleChange( index, e.target.value )}
+						style={{ marginBottom: "5px" }}
+					/>
+				) )}
+				<StyledButtonContainer>
+					<Button 
+						icon="plus"
+						onClick={handleAdd}
+					/>
+					<Button 
+						icon="minus"
+						onClick={handleRemove}
+						style={{ marginLeft: "auto" }}
+						disabled={question.answers.length === 1}
+					/>
+				</StyledButtonContainer>
+			</StyledRow>
+			<StyledRow>
+				<Label style={{ fontWeight: "bold" }}>Correct Order of Elements (enter in the format ###)</Label>
+				<InputGroup 
+					value={question.parsonsAnswer || ""}
+					onChange={e => setQuestion( {
+						...question,
+						parsonsAnswer: e.target.value
+					} )}
+				/>
+			</StyledRow>
+			<Button 
+				text="Add"
+				intent={Intent.PRIMARY}
+				onClick={() => props.createQuestion( question )}
+			/>
+		</>
+	)
+} )
+CreateParsonsProblem.displayName = "CreateParsonsProblem"
+
 
 /**
  * Props for CreateGeneric
