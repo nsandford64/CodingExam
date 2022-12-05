@@ -97,7 +97,7 @@ INSERT INTO "CodingExam".ExamQuestion(QuestionText, HasCorrectAnswers, QuestionT
 VALUES ('What''s the best programming language?', TRUE, 1, 1),
 ('Computer Science is dope.', TRUE, 3, 1),
 ('How do you feel today?', FALSE, 2, 1),
-('Print "Hello World" in the language:python', FALSE, 4, 1),
+('Print "Hello World" in the language', FALSE, 4, 1),
 ('What''s your favorite color', FALSE, 2, 2),
 ('Which number is the biggest', TRUE, 1, 2),
 ('Which number is the smallest', TRUE, 1, 2),

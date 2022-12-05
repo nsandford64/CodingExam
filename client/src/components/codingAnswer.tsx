@@ -6,7 +6,7 @@ import AceEditor from "react-ace"
 import "brace/mode/java"
 import "brace/mode/csharp"
 import "brace/mode/python"
-import "brace/theme/github"
+import "brace/theme/sqlserver"
 
 import styled from "styled-components"
 import { Response, ComponentProps } from "../App"
@@ -53,11 +53,11 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 	// Render the component
 	return (
 		<StyledCodingAnswer>
-			<Label>{ question?.text.split( ":" )[0] } </Label>
+			<Label>{question?.text}</Label>
 			<AceEditor
 				readOnly={props.disabled}
-				mode={ question?.text.split( ":" )[1] }
-				theme="github"
+				mode="csharp"
+				theme="sqlserver"
 				onChange={handleChange}
 				name="editor"
 				defaultValue={`${response?.value || ""}`}

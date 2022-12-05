@@ -494,7 +494,14 @@ const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
 								style={{ textAlign: "center" }}
 							/>
 						)}
+<<<<<<< HEAD
+						onItemSelect={item => setQuestion( {
+							...question,
+							language: item
+						} )}
+=======
 						onItemSelect={item => setLanguage( item )}
+>>>>>>> d5beef1f0e1ea060cccf5d5c8c395ea02f8fe05e
 						popoverProps={{ position: "bottom" }}
 					>
 						<Button text={language || "Select language..."} />
@@ -504,7 +511,11 @@ const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
 			<Button 
 				text="Add"
 				intent={Intent.PRIMARY}
+<<<<<<< HEAD
+				onClick={() => props.createQuestion( question )}
+=======
 				onClick={handleAdd}
+>>>>>>> d5beef1f0e1ea060cccf5d5c8c395ea02f8fe05e
 			/>
 		</>
 	)
