@@ -390,7 +390,7 @@ router.post( "/instructorfeedback", async( req, res ) => {
 
 // Creates the questions for an exam when the instructor submits a question set
 router.post( "/createexam", async( req, res ) => {
-
+	console.log( req.body )
 	// Returns an invalid request response if the request doesn't have a token
 	if ( !req.headers.token ) {
 		res.send( {
@@ -440,12 +440,22 @@ router.post( "/createexam", async( req, res ) => {
 
 				const examId = results.rows[0].examid
 				
-				// Inserts the question into the database and returns the questionID for inserting potential answers
-				results = await pool.query( `
-					INSERT INTO "CodingExam".ExamQuestion(QuestionText, HasCorrectAnswers, QuestionType, ExamID)
-					VALUES('${question.text}', ${hasCorrectAnswers}, ${question.type}, ${examId})
+				if ( question.type === 5 ) {
+					// Inserts the question into the database and returns the questionID for inserting potential answers
+					results = await pool.query( `
+					INSERT INTO "CodingExam".ExamQuestion(QuestionText, HasCorrectAnswers, QuestionType, ExamID, ParsonsAnswer)
+					VALUES('${question.text}', ${hasCorrectAnswers}, ${question.type}, ${examId}, '${question.parsonsAnswer}')
 					RETURNING QuestionID
 				` )
+				}
+				else {
+				// Inserts the question into the database and returns the questionID for inserting potential answers
+					results = await pool.query( `
+						INSERT INTO "CodingExam".ExamQuestion(QuestionText, HasCorrectAnswers, QuestionType, ExamID)
+						VALUES('${question.text}', ${hasCorrectAnswers}, ${question.type}, ${examId})
+						RETURNING QuestionID
+					` )
+				}
 
 				const questionId = results.rows[0].questionid
 				
@@ -463,7 +473,7 @@ router.post( "/createexam", async( req, res ) => {
 					*/
 					let correct = "FALSE"
 
-					if ( question.correctAnswer === i ) {
+					if ( question.correctAnswer === i && question.type != 5 ) {
 						correct = "TRUE"
 					}
 
