@@ -52,10 +52,6 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 			name: "Construct your solution here"
 		}
 	} as { unsorted: Column, sorted: Column } )
-	
-	React.useEffect( () => {
-		console.log( response )
-	}, [ response ] )
 
 	React.useEffect( () => {
 		const items: Item[] = []
@@ -214,10 +210,10 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 	return (
 		<StyledParsonsProblem>
 			<Label>{question?.text}</Label>
-			<DragDropContext onDragEnd={onDragEnd}>
+			<DragDropContext onDragEnd={onDragEnd} >
 				<StyledColumns>
-					<ParsonsColumn column={columns.unsorted} />
-					<ParsonsColumn column={columns.sorted} />
+					<ParsonsColumn disabled={props.disabled || false} column={columns.unsorted} />
+					<ParsonsColumn disabled={props.disabled || false} column={columns.sorted} />
 				</StyledColumns>
 			</DragDropContext>
 		</StyledParsonsProblem>

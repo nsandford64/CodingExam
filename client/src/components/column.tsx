@@ -11,7 +11,8 @@ import { Column } from "../App"
 *	strings containing the code fragments.
 */
 interface ParsonsColumnProps {
-  column: Column
+	column: Column
+	disabled?: boolean
 }
 
 /**
@@ -42,7 +43,12 @@ const ParsonsColumn = React.memo( ( props: ParsonsColumnProps ) => {
 					<Label>{props.column.name}</Label>
 					<StyledList {...provided.droppableProps} ref={provided.innerRef}>
 						{props.column.list.map( ( item, index ) => (
-							<ColumnItem key={item.id} item={item} index={index} />
+							<ColumnItem 
+								key={item.id} 
+								item={item} 
+								index={index} 
+								disabled={props.disabled}
+							/>
 						) )}
 						{provided.placeholder}
 					</StyledList>

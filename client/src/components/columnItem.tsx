@@ -11,6 +11,7 @@ import { Item } from "../App"
 interface ColumnItemProps {
 	item: Item
 	index: number
+	disabled?: boolean
 }
 
 /** 
@@ -34,7 +35,11 @@ const StyledItem = styled.div`
 // Renders the Item component for the Column component for the Parson's Problems component
 const ColumnItem = React.memo( ( props: ColumnItemProps ) => {
 	return (
-		<Draggable draggableId={props.item.text} index={props.index}>
+		<Draggable 
+			draggableId={props.item.text} 
+			index={props.index} 
+			isDragDisabled={props.disabled}
+		>
 			{provided => (
 				<StyledItem
 					ref={provided.innerRef}
