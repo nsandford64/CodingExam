@@ -5,8 +5,8 @@ import { Draggable } from "react-beautiful-dnd"
 import styled from "styled-components"
 import { Item } from "../App"
 
-/** Interface for the Column objects containing the text of the code
- *  fragment and the index of where the item started from.  
+/**
+ * Props for ColumnItem
  */
 interface ColumnItemProps {
 	item: Item
@@ -15,8 +15,7 @@ interface ColumnItemProps {
 }
 
 /** 
- * Style for the Item component for the Column component for the 
- * Parson's Problem component
+ * Style for each Item inside a ParsonsColumn
 */
 const StyledItem = styled.div`
 	border-radius: 2px;
@@ -32,8 +31,14 @@ const StyledItem = styled.div`
 	}
 `
 
-// Renders the Item component for the Column component for the Parson's Problems component
+/**
+ * ColumnItem Component
+ * 
+ * This component renders a an item inside of a ParsonsColumn
+ */
 const ColumnItem = React.memo( ( props: ColumnItemProps ) => {
+
+	// Render the component
 	return (
 		<Draggable 
 			draggableId={props.item.text} 

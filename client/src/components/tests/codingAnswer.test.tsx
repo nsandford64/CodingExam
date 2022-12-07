@@ -10,7 +10,7 @@ import { CodingAnswer } from "../codingAnswer"
 const mockQuestion: Question = {
 	answers: [],
 	id: 0,
-	text: "test",
+	text: "test:java",
 	type: QuestionType.CodingAnswer
 }
 

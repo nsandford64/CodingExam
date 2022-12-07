@@ -7,7 +7,7 @@ import { DragDropContext, DropResult } from "react-beautiful-dnd"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { examActions, selectQuestionById, selectResponseById } from "../slices/examSlice"
 import { Label } from "@blueprintjs/core"
-import ParsonsColumn from "./column"
+import ParsonsColumn from "./parsonsColumn"
 
 /**
  * Style for the ParsonsProblem
@@ -40,6 +40,7 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 	// Response from the Store
 	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
 
+	// Holds the columns and a list of each of their items
 	const [ columns, setColumns ] = React.useState( {
 		unsorted: {
 			id: "unsorted",
@@ -53,9 +54,13 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 		}
 	} as { unsorted: Column, sorted: Column } )
 
+	/**
+	 * Called on render - this effect initializes each column's values
+	 */
 	React.useEffect( () => {
 		const items: Item[] = []
 
+		// Map each question answer into an item
 		question?.answers.map( ( answer, index ) => {
 			const item: Item = {
 				id: index,
@@ -70,6 +75,7 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 		const values = response?.value.toString() || ""
 		const sortedItems: Item[] = []
 
+		// Parse out the already sorted values for the sorted column
 		for( const char of values ) {
 			const index = parseInt( char )
 
@@ -81,8 +87,10 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 			sortedItems.push( item )
 		}
 
+		// Remove the sorted items from the unsorted list
 		unsortedItems = unsortedItems.filter( item => !sortedItems.includes( item ) )
 
+		// Update the columns state
 		setColumns( prevState => ( {
 			unsorted: {
 				...prevState.unsorted,
@@ -95,6 +103,9 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 		} ) )
 	}, [] )
 
+	/**
+	 * Called when an item is dragged and released
+	 */
 	const onDragEnd = ( { source, destination }: DropResult ) => {
 		// Make sure we have a valid destination
 		if ( !destination ) return
@@ -113,7 +124,6 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 
 		// If start is the same as end, we're in the same column
 		if ( start === end ) {
-			// Move the item within the list
 			// Start by making a new list without the dragged item
 			const newList = start.list.filter(
 				( _, idx: number ) => idx !== source.index
@@ -148,11 +158,11 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 					value: currentResponse
 				}
 
+				// Update the response in the store
 				dispatch( examActions.updateResponse( newResponse ) )
 			}
 		} 
 		else {
-			// If start is different from end, we need to update multiple columns
 			// Filter the start list like before
 			const newStartList = start.list.filter(
 				( _, idx: number ) => idx !== source.index
@@ -203,10 +213,12 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 				value: currentResponse
 			}
 
+			// Update the response in the store
 			dispatch( examActions.updateResponse( newResponse ) )
 		}
 	}
 
+	// Render the component
 	return (
 		<StyledParsonsProblem>
 			<Label>{question?.text}</Label>

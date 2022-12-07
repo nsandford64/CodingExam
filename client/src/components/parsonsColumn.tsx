@@ -7,9 +7,9 @@ import styled from "styled-components"
 import { Colors, Label } from "@blueprintjs/core"
 import { Column } from "../App"
 
-/** Interface for the Column objects containing the id and a list of 
-*	strings containing the code fragments.
-*/
+/**
+ * Props for ParsonsColumn
+ */
 interface ParsonsColumnProps {
 	column: Column
 	disabled?: boolean
@@ -35,7 +35,15 @@ const StyledList = styled.div`
 	border-radius: 2px;
 `
 
+/**
+ * ParsonsColumn Component
+ * 
+ * This component renders a column in a ParsonsProblem. Each column
+ * has ColumnItems that can be drug back and forth
+ */
 const ParsonsColumn = React.memo( ( props: ParsonsColumnProps ) => {
+
+	// Render the component
 	return (
 		<Droppable droppableId={props.column.id}>
 			{( provided ) => (
