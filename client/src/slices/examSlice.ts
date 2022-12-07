@@ -1,5 +1,4 @@
 // Copyright 2022 under MIT License
-
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { Feedback, Question, Response } from "../App"
 import { AppThunk, RootState } from "../app/store"

@@ -1,5 +1,4 @@
 // Copyright 2022 under MIT License
-
 import React from "react"
 import ColumnItem from "./columnItem"
 import { Droppable } from "react-beautiful-dnd"

@@ -84,14 +84,14 @@ router.post( "/", async ( req, res ) => {
 				const results = await pool.query( `
 				SELECT 1
 				FROM "CodingExam".Exam E
-				WHERE E.CanvasExamID = '${req.body.ext_lti_assignment_id}'
-			` )
+				WHERE E.CanvasExamID = $1
+			`, [ req.body.ext_lti_assignment_id ] )
 
 				if( results.rows.length === 0 ) {
 					await pool.query( `
 					INSERT INTO "CodingExam".Exam(CanvasExamID, TotalPoints)
-					VALUES('${req.body.ext_lti_assignment_id}', ${req.body.custom_canvas_assignment_points_possible})
-				` )
+					VALUES($1, $2)
+				`, [ req.body.ext_lti_assignment_id, req.body.custom_canvas_assignment_points_possible ] )
 				
 				}
 			}
@@ -103,9 +103,9 @@ router.post( "/", async ( req, res ) => {
 					FROM "CodingExam".UserExam UE
 					INNER JOIN "CodingExam".Exam E ON UE.ExamID = E.ExamID
 					INNER JOIN "CodingExam".Users U ON U.UserID = UE.UserID
-					WHERE E.CanvasExamID = '${req.body.ext_lti_assignment_id}' AND
-						U.CanvasUserID = '${req.body.user_id}'
-				` )
+					WHERE E.CanvasExamID = $1 AND
+						U.CanvasUserID = $2
+				`, [ req.body.ext_lti_assignment_id, req.body.user_id ] )
 
 				if ( results.rows.length === 0 ) {
 					results = await pool.query( `

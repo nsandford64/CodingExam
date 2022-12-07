@@ -1,3 +1,4 @@
+// Copyright 2022 under MIT License
 import { configureStore } from "@reduxjs/toolkit"
 import { Feedback, Question, Response } from "../../App"
 import { RootState } from "../../app/store"

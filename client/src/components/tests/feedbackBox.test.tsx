@@ -1,3 +1,4 @@
+// Copyright 2022 under MIT License
 import React from "react"
 import { Provider } from "react-redux"
 import { act } from "react-dom/test-utils"
