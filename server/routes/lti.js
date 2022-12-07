@@ -95,22 +95,39 @@ router.post( "/", async ( req, res ) => {
 				
 				}
 			}
+			console.log( req.body.user_id )
 
 			if ( req.body.roles === "Learner" ) {
-				const results = await pool.query( `
-					SELECT U.UserID, E.ExamID
+				let results = await pool.query( `
+					SELECT 1
 					FROM "CodingExam".UserExam UE
 					INNER JOIN "CodingExam".Exam E ON UE.ExamID = E.ExamID
 					INNER JOIN "CodingExam".Users U ON U.UserID = UE.UserID
-					WHERE E.CanvasExamID = '01cf10c5-f5d3-466e-b716-53f2b0bcd3b4' AND
-						U.CanvasUserID = '2b7a2ea9f28bc312753640b0c1cc537fa85c5a49'
+					WHERE E.CanvasExamID = '${req.body.ext_lti_assignment_id}' AND
+						U.CanvasUserID = '${req.body.user_id}'
 				` )
 
 				if ( results.rows.length === 0 ) {
+					results = await pool.query( `
+						SELECT UserID
+						FROM "CodingExam".Users
+						WHERE CanvasUserID = $1
+					`, [ req.body.user_id ] )
+
+					const userid = results.rows[0].userid
+
+					results = await pool.query( `
+						SELECT ExamID
+						FROM "CodingExam".Exam
+						WHERE CanvasExamID = $1
+					`, [ req.body.ext_lti_assignment_id ] )
+					
+					const examid = results.rows[0].examid
+
 					await pool.query( ` 
 						INSERT INTO "CodingExam".UserExam(UserID, ExamID)
-						VALUES(${results.rows[0].userid}, ${results.rows[0].examid})
-					` )
+						VALUES($1, $2)
+					`, [ userid, examid ] )
 				}
 			}
 
