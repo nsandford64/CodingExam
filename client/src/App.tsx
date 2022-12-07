@@ -48,10 +48,10 @@ export const App = React.memo( () => {
 	const [ taken, setTaken ] = React.useState( false )
 
 	// Stores the JWT token
-	//const token = String( window.__INITIAL_DATA__ )
+	const token = String( window.__INITIAL_DATA__ )
 
 	// Debug instructor token
-	const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJJbnN0cnVjdG9yIiwiaWF0IjoxNjY5NjUwNDc5fQ.nRG5XThVcizudoSSHJkpqtBXT64TJwBnd4PSuS08j-E"
+	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJJbnN0cnVjdG9yIiwiaWF0IjoxNjY5NjUwNDc5fQ.nRG5XThVcizudoSSHJkpqtBXT64TJwBnd4PSuS08j-E"
 	
 	// Debug learner token
 	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiIwMWNmMTBjNS1mNWQzLTQ2NmUtYjcxNi01M2YyYjBiY2QzYjQiLCJ1c2VySUQiOiIyYjdhMmVhOWYyOGJjMzEyNzUzNjQwYjBjMWNjNTM3ZmE4NWM1YTQ5Iiwicm9sZXMiOiJMZWFybmVyIiwiaWF0IjoxNjY5NjUwODg5fQ.miDHfCzTY5ouYNXvp7UetHtlSqKk9evKSTXfxjlBkuk"

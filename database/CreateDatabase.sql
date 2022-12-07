@@ -81,7 +81,8 @@ VALUES ('2b7a2ea9f28bc312753640b0c1cc537fa85c5a49', 'John User'),
 ('a3alsdf9cjasq713h4jwld9c8galsdf94', 'Noah Sandford'),
 ('aasdja45ojaf2nvpnoaejoirtjj9eq0jf', 'Jacob Williams'),
 ('a4sdlkj99oqneig9bspdakfmdj19384kk', 'Jack Walter'),
-('aocigpqdjfi18340t8g0vajald99fa03a', 'Test User');
+('aocigpqdjfi18340t8g0vajald99fa03a', 'Test User'),
+('c228b52524eee4c7e7dfff0169f113dcd2e56d7e', 'Test Student');
 
 INSERT INTO "CodingExam".Exam(CanvasExamID, TotalPoints)
 VALUES ('01cf10c5-f5d3-466e-b716-53f2b0bcd3b4', 1), ('e81f6b6e-8755-4fec-b2d5-c471d34f2e62', 0),

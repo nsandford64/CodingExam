@@ -35,8 +35,11 @@ router.get( "/role", async function ( req, res ) {
 
 		const pool = new Pool( credentials )
 
-		// Query the database to see if the client has taken the exam yet
-		const results = await pool.query( `
+		let taken = false
+		if ( role !== "Instructor" ) {
+			
+			// Query the database to see if the client has taken the exam yet
+			const results = await pool.query( `
 			SELECT UE.HasTaken
 			FROM "CodingExam".UserExam UE
 				INNER JOIN "CodingExam".Exam E ON E.ExamID = UE.ExamID
@@ -44,9 +47,10 @@ router.get( "/role", async function ( req, res ) {
 			WHERE E.CanvasExamID = '${examID}' AND U.CanvasUserID = '${userID}'
 		` )
 
-		await pool.end()
+			await pool.end()
 
-		let taken = results.rows[0].hastaken
+			taken = results.rows[0].hastaken
+		}
 		
 		// Sends back the role of the client along with if they have taken the exam
 		res.send( {
