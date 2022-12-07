@@ -44,8 +44,8 @@ router.get( "/role", async function ( req, res ) {
 			FROM "CodingExam".UserExam UE
 				INNER JOIN "CodingExam".Exam E ON E.ExamID = UE.ExamID
 				INNER JOIN "CodingExam".Users U ON U.UserID = UE.UserID
-			WHERE E.CanvasExamID = '${examID}' AND U.CanvasUserID = '${userID}'
-		` )
+			WHERE E.CanvasExamID = $1 AND U.CanvasUserID = $2
+		`, [ examID, userID ] )
 
 			await pool.end()
 
@@ -80,14 +80,14 @@ router.get( "/questions", async function( req, res ) {
 
 		// Query the database for a list of questions with a given ExamID
 		const results = await pool.query( `
-		SELECT EQ.QuestionID, EQ.QuestionText, EQ.HasCorrectAnswers, EQ.QuestionType, EQ.ExamID,
-			QA.AnswerID, QA.CorrectAnswer, QA.AnswerIndex, QA.AnswerText
-		FROM "CodingExam".Exam E
-		INNER JOIN "CodingExam".ExamQuestion EQ ON EQ.ExamID = E.ExamID
-		LEFT JOIN "CodingExam".QuestionAnswer QA ON QA.QuestionID = EQ.QuestionID
-		WHERE E.CanvasExamID = '${examID}'
-		ORDER BY EQ.QuestionID, QA.AnswerIndex
-	` )
+			SELECT EQ.QuestionID, EQ.QuestionText, EQ.HasCorrectAnswers, EQ.QuestionType, EQ.ExamID,
+				QA.AnswerID, QA.CorrectAnswer, QA.AnswerIndex, QA.AnswerText
+			FROM "CodingExam".Exam E
+			INNER JOIN "CodingExam".ExamQuestion EQ ON EQ.ExamID = E.ExamID
+			LEFT JOIN "CodingExam".QuestionAnswer QA ON QA.QuestionID = EQ.QuestionID
+			WHERE E.CanvasExamID = $1
+			ORDER BY EQ.QuestionID, QA.AnswerIndex
+		`, [ examID ] )
 
 		await pool.end()
 
@@ -150,13 +150,13 @@ router.get( "/responses", async ( req, res ) => {
 
 		// Query the database for a particular student's responses for a particular exam
 		const results = await pool.query( `
-		SELECT SR.QuestionID, SR.IsTextResponse, SR.TextResponse, SR.AnswerResponse
-		FROM "CodingExam".StudentResponse SR 
-		INNER JOIN "CodingExam".ExamQuestion EQ ON EQ.QuestionID = SR.QuestionID
-		INNER JOIN "CodingExam".Exam E ON E.ExamID = EQ.ExamID
-		WHERE E.CanvasExamID = '${examID}' AND SR.CanvasUserID = '${userID}'
-		ORDER BY SR.QuestionID
-	` )
+			SELECT SR.QuestionID, SR.IsTextResponse, SR.TextResponse, SR.AnswerResponse
+			FROM "CodingExam".StudentResponse SR 
+			INNER JOIN "CodingExam".ExamQuestion EQ ON EQ.QuestionID = SR.QuestionID
+			INNER JOIN "CodingExam".Exam E ON E.ExamID = EQ.ExamID
+			WHERE E.CanvasExamID = $1 AND SR.CanvasUserID = $2
+			ORDER BY SR.QuestionID
+		`, [ examID, userID ] )
 
 		// Map all result rows into an array of Response objects
 		const responses = results.rows.map( row => {
@@ -194,41 +194,31 @@ router.post( "/", async ( req, res ) => {
 	
 		// Insert each response into the StudentResponse table
 		await req.body.forEach( response => {
-			console.log( response )
-			// Query to insert a text response into the database
-			if ( typeof response.value === "string" ) {
-				// eslint-disable-next-line no-useless-escape
-				const stringValue = `${response.value}`.replace( "'", "''" )
-				pool.query( `
-				INSERT INTO "CodingExam".StudentResponse(IsTextResponse, TextResponse, QuestionID, CanvasUserID)
-				VALUES (TRUE, '${stringValue}', ${response.questionId}, '${userID}')
+			const isText = typeof response.value === "string"
+			const isTextResponse = isText ? "TRUE" : "FALSE"
+			const responseType = isText ? "TextResponse" : "AnswerResponse"
+
+			// Query to insert a response into the databse
+			pool.query( `
+				INSERT INTO "CodingExam".StudentResponse(IsTextResponse, ${responseType}, QuestionID, CanvasUserID)
+				VALUES (${isTextResponse}, $1, $2, $3)
 				ON CONFLICT (QuestionID, CanvasUserID) DO UPDATE
-					SET TextResponse = '${stringValue}';
-			` )
-			}
-			// Query to insert a non-text response into the database
-			else {
-				pool.query( `
-				INSERT INTO "CodingExam".StudentResponse(IsTextResponse, AnswerResponse, QuestionID, CanvasUserID)
-				VALUES (FALSE, ${response.value}, ${response.questionId}, '${userID}')
-				ON CONFLICT (QuestionID, CanvasUserID) DO UPDATE
-					SET AnswerResponse = ${response.value};
-			` )
-			}
+					SET ${responseType} = $4;
+			`, [ response.value, response.questionId, userID, response.value ] )
 		} )
 
 		/*
 			Sets the HasTaken property in the database to true after the exam has been submitted
 		*/
 		pool.query( `
-				UPDATE "CodingExam".UserExam UEO
-				SET HasTaken = TRUE
-				FROM "CodingExam".UserExam AS UE
-					INNER JOIN "CodingExam".Exam AS E ON UE.ExamID = E.ExamID
-					INNER JOIN "CodingExam".Users AS U ON UE.UserID = U.UserID
-				WHERE E.CanvasExamID = '${examID}' AND U.CanvasUserID = '${userID}'
-					AND UE.UserID = UEO.UserID AND UE.ExamID = UEO.ExamID
-			` )
+			UPDATE "CodingExam".UserExam UEO
+			SET HasTaken = TRUE
+			FROM "CodingExam".UserExam AS UE
+				INNER JOIN "CodingExam".Exam AS E ON UE.ExamID = E.ExamID
+				INNER JOIN "CodingExam".Users AS U ON UE.UserID = U.UserID
+			WHERE E.CanvasExamID = $1 AND U.CanvasUserID = $2
+				AND UE.UserID = UEO.UserID AND UE.ExamID = UEO.ExamID
+		`, [ examID, userID ] )
 			
 		await pool.end()
 
@@ -273,13 +263,13 @@ router.get( "/feedback", async ( req, res ) => {
 
 		// Queries the database for feedback for a particular user and exam
 		const results = await pool.query( `
-		SELECT SR.QuestionID, SR.InstructorFeedback
-		FROM "CodingExam".StudentResponse SR 
-		INNER JOIN "CodingExam".ExamQuestion EQ ON EQ.QuestionID = SR.QuestionID
-		INNER JOIN "CodingExam".Exam E ON E.ExamID = EQ.ExamID
-		WHERE E.CanvasExamID = '${examID}' AND SR.CanvasUserID = '${userID}'
-		ORDER BY SR.QuestionID
-	` )
+			SELECT SR.QuestionID, SR.InstructorFeedback
+			FROM "CodingExam".StudentResponse SR 
+			INNER JOIN "CodingExam".ExamQuestion EQ ON EQ.QuestionID = SR.QuestionID
+			INNER JOIN "CodingExam".Exam E ON E.ExamID = EQ.ExamID
+			WHERE E.CanvasExamID = $1 AND SR.CanvasUserID = $2
+			ORDER BY SR.QuestionID
+		`, [ examID, userID ] )
 
 		// Map all result rows into an array of Feedback objects
 		const feedback = results.rows.map( row => {
@@ -329,13 +319,13 @@ router.get( "/examtakers", async( req, res ) => {
 
 			//Query's the database for the students that have taken a particular exam
 			const results = await pool.query( `
-			SELECT U.CanvasUserID, U.FullName
-			FROM "CodingExam".Exam E
-			INNER JOIN "CodingExam".UserExam UE ON UE.ExamID = E.ExamID
-			INNER JOIN "CodingExam".Users U ON U.UserID = UE.UserID
-			WHERE E.CanvasExamID = '${examID}'
-			ORDER BY U.FullName
-			` )
+				SELECT U.CanvasUserID, U.FullName
+				FROM "CodingExam".Exam E
+				INNER JOIN "CodingExam".UserExam UE ON UE.ExamID = E.ExamID
+				INNER JOIN "CodingExam".Users U ON U.UserID = UE.UserID
+				WHERE E.CanvasExamID = $1
+				ORDER BY U.FullName
+			`, [ examID ] )
 
 			await pool.end()
 
@@ -380,9 +370,9 @@ router.post( "/instructorfeedback", async( req, res ) => {
 			await req.body.forEach( question => {
 				pool.query( `
 					UPDATE "CodingExam".StudentResponse
-					SET InstructorFeedback = '${question.value}'
-					WHERE QuestionID = ${question.questionId} AND CanvasUserID = '${userID}'
-				` )
+					SET InstructorFeedback = $1
+					WHERE QuestionID = $2 AND CanvasUserID = $3
+				`, [ question.value, question.questionId, userID ] )
 			} )
 			// Send a valid submission response to the user
 			res.send( {
@@ -394,7 +384,6 @@ router.post( "/instructorfeedback", async( req, res ) => {
 
 // Creates the questions for an exam when the instructor submits a question set
 router.post( "/createexam", async( req, res ) => {
-	console.log( req.body )
 	// Returns an invalid request response if the request doesn't have a token
 	if ( !req.headers.token ) {
 		res.send( {
@@ -439,26 +428,26 @@ router.post( "/createexam", async( req, res ) => {
 				let results = await pool.query( `
 					SELECT E.ExamID
 					FROM "CodingExam".Exam E
-					WHERE E.CanvasExamID = '${CanvasExamID}'
-				` )
+					WHERE E.CanvasExamID = $1
+				`, [ CanvasExamID ] )
 
 				const examId = results.rows[0].examid
 				
 				if ( question.type === 5 ) {
 					// Inserts the question into the database and returns the questionID for inserting potential answers
 					results = await pool.query( `
-					INSERT INTO "CodingExam".ExamQuestion(QuestionText, HasCorrectAnswers, QuestionType, ExamID, ParsonsAnswer)
-					VALUES('${question.text}', ${hasCorrectAnswers}, ${question.type}, ${examId}, '${question.parsonsAnswer}')
-					RETURNING QuestionID
-				` )
+						INSERT INTO "CodingExam".ExamQuestion(QuestionText, HasCorrectAnswers, QuestionType, ExamID, ParsonsAnswer)
+						VALUES($1, $2, $3, $4, $5)
+						RETURNING QuestionID
+					`, [ question.text, hasCorrectAnswers, question.type, examId, question.parsonsAnswer ] )
 				}
 				else {
 				// Inserts the question into the database and returns the questionID for inserting potential answers
 					results = await pool.query( `
 						INSERT INTO "CodingExam".ExamQuestion(QuestionText, HasCorrectAnswers, QuestionType, ExamID)
-						VALUES('${question.text}', ${hasCorrectAnswers}, ${question.type}, ${examId})
+						VALUES($1, $2, $3, $4)
 						RETURNING QuestionID
-					` )
+					`, [ question.text, hasCorrectAnswers, question.type, examId ] )
 				}
 
 				const questionId = results.rows[0].questionid
@@ -486,9 +475,9 @@ router.post( "/createexam", async( req, res ) => {
 						in the request being the order they will be displayed in.
 					*/
 					await pool.query( `
-					INSERT INTO "CodingExam".QuestionAnswer(QuestionID, CorrectAnswer, AnswerIndex, AnswerText)
-					VALUES(${questionId}, ${correct}, ${i}, '${question.answers[i]}')
-				` )
+						INSERT INTO "CodingExam".QuestionAnswer(QuestionID, CorrectAnswer, AnswerIndex, AnswerText)
+						VALUES($1, $2, $3, $4)
+					`, [ questionId, correct, i, question.answers[ i ] ] )
 				}
 
 			}
