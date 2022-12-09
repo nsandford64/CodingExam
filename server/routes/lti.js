@@ -92,6 +92,9 @@ router.post( "/", async ( req, res ) => {
 		// If the request is invalid, the console logs an error, else it returns a message to the LTI provider
 		if ( !isValid ) {
 			console.error( err )
+			console.log( req.protocol )
+			console.log( req.headers )
+			console.error( req.body )
 			res.status( 401 ).send( "Unauthorized" )
 		}	else {
 			const ltiData = { 
