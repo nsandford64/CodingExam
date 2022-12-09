@@ -123,7 +123,9 @@ VALUES (FALSE, 0, 1, 'a3alsdf9cjasq713h4jwld9c8galsdf94'), (FALSE, 1, 2, 'a3alsd
 INSERT INTO "CodingExam".StudentResponse(IsTextResponse, TextResponse, QuestionID, CanvasUserID)
 VALUES (TRUE, 'Good', 3, 'a3alsdf9cjasq713h4jwld9c8galsdf94'),
 (TRUE, 'Great', 3, 'aasdja45ojaf2nvpnoaejoirtjj9eq0jf'),
-(TRUE, 'Pretty good', 3, 'a4sdlkj99oqneig9bspdakfmdj19384kk');
+(TRUE, 'Pretty good', 3, 'a4sdlkj99oqneig9bspdakfmdj19384kk'),
+(TRUE, 'print("Hello world!")', 4, 'a4sdlkj99oqneig9bspdakfmdj19384kk'),
+(TRUE, '10', 9, 'a4sdlkj99oqneig9bspdakfmdj19384kk');
 
 INSERT INTO "CodingExam".StudentResponse(IsTextResponse, AnswerResponse, InstructorFeedback, QuestionID, CanvasUserID)
 VALUES (FALSE, 2, 'feedback for question 1', 1, 'aocigpqdjfi18340t8g0vajald99fa03a'), (FALSE, 0, 'feedback for question 2', 2, 'aocigpqdjfi18340t8g0vajald99fa03a');
