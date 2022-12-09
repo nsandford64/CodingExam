@@ -76,7 +76,7 @@ router.get( "/", ( req, res ) => {
 	// If we aren't in development mode, we need to explicitly 
 	// override the index route, or the static index.html will be 
 	// served instead.
-	router.get('/', (req, res) => res.status(404));
+	router.get('/', (req, res) => res.sendStatus(404));
 }
 
 // Handles a POST request from the LTI consumer, in this case Canvas
