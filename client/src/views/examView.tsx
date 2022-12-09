@@ -13,7 +13,7 @@ import { ShortAnswer } from "../components/shortAnswer"
 import { TrueFalse } from "../components/trueFalse"
 import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap, selectToken } from "../slices/examSlice"
 
-// Props for the ExamView comoponent
+// Props for the ExamView component
 interface ExamViewProps {
 	disabled?: boolean
 	feedback?: boolean
@@ -92,12 +92,12 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 	React.useEffect( () => {
 		const initQuestions = async () => {
 			// Fetch exam questions
-			let data = await fetch( "http://localhost:9000/api/questions", {
+			let data = await fetch( "/api/questions", {
 				headers: {
 					"token": token
 				} 
 			} )
-
+			
 			let json  = await data.json()
 			const questions: Question[] = json.questions
 
@@ -110,7 +110,7 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 			} )
 
 			// Fetch exam responses (if there are any)
-			data = await fetch( "http://localhost:9000/api/responses", {
+			data = await fetch( "/api/responses", {
 				headers: {
 					"token": token,
 					"userID": props.canvasUserId || ""
@@ -129,7 +129,7 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 			} )
 
 			// Fetch exam feedback
-			data = await fetch( "http://localhost:9000/api/feedback", {
+			data = await fetch( "/api/feedback", {
 				headers: {
 					"token": token,
 					"userID": props.canvasUserId || ""
@@ -172,7 +172,7 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 		
 		console.log( Array.from( responsesMap.values() ) )
 		try {
-			const res = await fetch( "http://localhost:9000/api", {
+			const res = await fetch( "/api", {
 				// Adding method type
 				method: "POST",
 

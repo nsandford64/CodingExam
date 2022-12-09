@@ -77,7 +77,7 @@ export const InstructorView = React.memo( () => {
 	 * updates feedback in the store
 	 */
 	const handleFeedbackClick = React.useCallback( async () => {
-		const data = await fetch( "http://localhost:9000/api/instructorfeedback", {
+		const data = await fetch( "/api/instructorfeedback", {
 			method: "POST",
 			body: JSON.stringify(
 				Array.from( feedbackMap.values() )
@@ -101,7 +101,7 @@ export const InstructorView = React.memo( () => {
 	 */
 	React.useEffect( () => {
 		const initUsers = async () => {
-			const data = await fetch( "http://localhost:9000/api/examtakers", {
+			const data = await fetch( "/api/examtakers", {
 				headers: {
 					"token": token
 				}

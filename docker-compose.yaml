@@ -1,0 +1,38 @@
+version: "3"
+services:
+  app:
+    build: .
+    depends_on:
+      - postgres
+    environment:
+      # node environment variable - switch to production for production environment
+      NODE_ENV: development
+      # postgres database variables
+      CODING_EXAM_DB_HOST: postgres
+      CODING_EXAM_DB_PORT: 5432
+      CODING_EXAM_DB_NAME: coding_exam
+      CODING_EXAM_DB_USER: coding_exam_user 
+      CODING_EXAM_DB_PASSWORD: coding_exam_pass
+      # canvas LTI variables
+      CODING_EXAM_LTI_CLIENT_KEY: Codekey
+      CODING_EXAM_LTI_CLIENT_SECRET: Keysecret
+    ports:
+      - "9000:9000"
+    #volumes:
+      #- .:/app/
+      #- /app/node_modules 
+
+  postgres:
+    container_name: postgres
+    image: "postgres:12"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: coding_exam_user 
+      POSTGRES_PASSWORD: coding_exam_pass
+      POSTGRES_DB: coding_exam
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

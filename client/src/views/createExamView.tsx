@@ -1,11 +1,13 @@
 // Copyright 2022 under MIT License
-import { Button, InputGroup, Intent, Label, MenuItem } from "@blueprintjs/core"
+import { Button, InputGroup, Intent, Label, MenuItem, Spinner, TextArea } from "@blueprintjs/core"
 import { Select2 } from "@blueprintjs/select"
 import * as React from "react"
+import { useState, useEffect } from "react"
+import { batch } from "react-redux"
 import styled from "styled-components"
 import { LANGUAGE_CHOICES, Question, QuestionType } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
-import { createExamThunk, examActions, selectNextQuestionId, selectQuestionIds } from "../slices/examSlice"
+import { createExamThunk, examActions, selectNextQuestionId, selectQuestionIds, selectToken } from "../slices/examSlice"
 import { QuestionSwitch, StyledQuestionContainer, StyledQuestionHeader, StyledQuestionsContainer } from "./examView"
 
 /**
@@ -31,16 +33,57 @@ export const CreateExamView = React.memo( () => {
 
 	// questionIds from the store
 	const questionIds = useAppSelector( selectQuestionIds )
+	// token from the store
+	const token = useAppSelector( selectToken )
 
 	// State to hold the selected QuestionType
-	const [ selectedQuestionType, setSelectedQuestionType ] = React.useState( "" )
+	const [ selectedQuestionType, setSelectedQuestionType] = React.useState( "" )
+	const [ loading, setLoading ] = React.useState( true )
 
 	// Called on render - reinitializes the store
 	React.useEffect( () => {
-		dispatch( examActions.reInitializeStore() )
+		console.log('in effect', token)
+		const initQuestions = async () => {
+			// Fetch exam questions
+			const data = await fetch( "/api/questions", {
+				headers: {
+					"token": token
+				} 
+			} )
+			
+			const json  = await data.json()
+			console.log('json', json)
+			const questions: Question[] = json.questions
+console.log('questions', questions)
+			// Loop through questions and create ids and a map
+			const newQuestionIds: number[] = []
+			const newQuestionsMap = new Map<number, Question>()
+			questions.forEach( question => {
+				newQuestionIds.push( question.id )
+				newQuestionsMap.set( question.id, question )
+			} )
+
+			// Update the store
+			batch(()=>{
+				dispatch( examActions.reInitializeStore() )
+				dispatch( examActions.setQuestionIds( newQuestionIds))
+			})
+
+			setLoading( false )
+		}
+		// call async function
+		initQuestions();
 	}, [] )
 
 	// Render the component
+	if(loading) return (
+		<StyledCreateExamView>
+			<Spinner 
+				size={50}
+				style={{ padding: "50px" }}
+			/>
+		</StyledCreateExamView>
+	)
 	return (
 		<StyledCreateExamView>
 			<StyledQuestionsContainer>
@@ -78,8 +121,8 @@ export const CreateExamView = React.memo( () => {
 				style={{ marginTop: "25px" }}
 			/>	
 		</StyledCreateExamView>
-	)
-} )
+	)}
+)
 CreateExamView.displayName = "CreateExamView"
 
 /**
@@ -104,8 +147,14 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 			<StyledQuestionHeader>
 				Question {props.index + 1}
 				<Button 
+					intent={Intent.WARNING}
+					icon="edit"
+					//onClick={() => dispatch( examActions.deleteQuestion( props.questionId ) )}
+					style={{ marginLeft: "auto" }}
+				/>
+				<Button 
 					intent={Intent.DANGER}
-					icon="minus"
+					icon="delete"
 					onClick={() => dispatch( examActions.deleteQuestion( props.questionId ) )}
 					style={{ marginLeft: "auto" }}
 				/>
@@ -269,7 +318,7 @@ const StyledButtonContainer = styled.div`
 /**
  * CreateMultipleChoice Component
  * 
- * This component allos the user to create a MultipleChoice
+ * This component allows the user to create a MultipleChoice
  * question
  */
 const CreateMultipleChoice = React.memo( ( props: CreateQuestionComponentProps ) => {
@@ -328,7 +377,10 @@ const CreateMultipleChoice = React.memo( ( props: CreateQuestionComponentProps )
 		<>
 			<StyledRow>
 				<Label style={{ fontWeight: "bold" }}>Question Text</Label>
-				<InputGroup 
+				<TextArea
+					growVertically={true}
+					large={true}
+					fill={true}
 					value={question.text}
 					onChange={e => setQuestion( {
 						...question,
@@ -404,7 +456,10 @@ const CreateTrueFalse = React.memo( ( props: CreateQuestionComponentProps ) => {
 		<>
 			<StyledRow>
 				<Label style={{ fontWeight: "bold" }}>Question Text</Label>
-				<InputGroup 
+				<TextArea
+					growVertically={true}
+					large={true}
+					fill={true}
 					value={question.text}
 					onChange={e => setQuestion( {
 						...question,
@@ -414,7 +469,10 @@ const CreateTrueFalse = React.memo( ( props: CreateQuestionComponentProps ) => {
 			</StyledRow>
 			<StyledRow>
 				<Label style={{ fontWeight: "bold" }}>Enter 1 for True or 0 for False</Label>
-				<InputGroup 
+				<TextArea
+					growVertically={true}
+					large={true}
+					fill={true}
 					value={question.correctAnswer?.toString() || "0"}
 					onChange={e => setQuestion( {
 						...question,

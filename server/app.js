@@ -9,6 +9,9 @@ const cors = require( "cors" )
 
 const app = express()
 
+// Turn off browser caching
+app.disable('etag')
+
 // Require routers
 const apiRouter = require( "./routes/api" )
 const ltiRouter = require( "./routes/lti" )
@@ -44,4 +47,6 @@ app.use( function( err, req, res ) {
 	res.status( err.status || 500 )
 	res.render( "error" )
 } )
+
+
 module.exports = app
