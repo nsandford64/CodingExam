@@ -37,6 +37,17 @@ async function startup() {
     console.log("Migrations Complete!")
   }
 
+  /** 
+   * Set the trust proxy settings 
+   */
+  const trustProxy = process.env.TRUST_PROXY; 
+  if(trustProxy) {
+    // The 'trust proxy' setting can either be a boolean
+    // (blanket trust any proxy) or a specific ip address
+    if(trustProxy === "true") app.set('trust proxy', true);
+    else app.set('trust proxy', trustProxy);
+  }
+
   /**
    * Get port from environment and store in Express.
    */
