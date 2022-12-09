@@ -1,3 +1,4 @@
+// Copyright 2022 under MIT License
 import React from "react"
 import { Provider } from "react-redux"
 import { Question, QuestionType } from "../../App"
@@ -10,7 +11,7 @@ import { CodingAnswer } from "../codingAnswer"
 const mockQuestion: Question = {
 	answers: [],
 	id: 0,
-	text: "test",
+	text: "test:java",
 	type: QuestionType.CodingAnswer
 }
 

@@ -1,3 +1,4 @@
+// Copyright 2022 under MIT License
 import { enableMapSet } from "immer"
 import { Feedback, Question, QuestionType, Response } from "../../App"
 import examReducer, {

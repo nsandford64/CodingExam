@@ -175,6 +175,11 @@ export const InstructorView = React.memo( () => {
 } )
 InstructorView.displayName = "InstructorView"
 
+/**
+ * View Type
+ * 
+ * Determines which view should be displayed to the instructor
+ */
 type View = 
 	"studentListView" 
   | "examView"

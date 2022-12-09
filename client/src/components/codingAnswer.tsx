@@ -2,16 +2,16 @@
 import { Label } from "@blueprintjs/core"
 import * as React from "react"
 import AceEditor from "react-ace"
-
-import "brace/mode/java"
-import "brace/mode/csharp"
-import "brace/mode/python"
-import "brace/theme/sqlserver"
-
 import styled from "styled-components"
 import { Response, ComponentProps } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { examActions, selectQuestionById, selectResponseById } from "../slices/examSlice"
+
+// AceEditor modes and themes
+import "brace/mode/java"
+import "brace/mode/csharp"
+import "brace/mode/python"
+import "brace/theme/sqlserver"
 
 /**
  * Style for the CodingAnswer component
@@ -50,8 +50,10 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 		dispatch( examActions.updateResponse( newResponse ) )
 	}, [] )
 
+	// Split the text from the text:language format
 	const splitText = question?.text.split( ":" ) || []
 
+	// Set the text and mode for the AceEditor
 	let text = ""
 	splitText.forEach( ( el, index ) => {
 		if( index !== splitText.length - 1 ) {
