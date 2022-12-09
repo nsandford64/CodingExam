@@ -158,7 +158,7 @@ export const createExamThunk: AppThunk<void> = async ( dispatch, getState ) => {
 		}
 	} )
 
-	const res = await fetch( "http://localhost:9000/api/createexam", {
+	const res = await fetch( "/api/createexam", {
 		// Adding method type
 		method: "POST",
 

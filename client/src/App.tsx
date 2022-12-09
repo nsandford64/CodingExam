@@ -63,7 +63,7 @@ export const App = React.memo( () => {
 		// Gets the user's role depending on their token
 		const getRole = async () => {			
 			// Fetch role
-			const data = await fetch( "http://localhost:9000/api/role", {
+			const data = await fetch( "/api/role", {
 				headers: {
 					"token": token
 				}
