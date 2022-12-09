@@ -80,13 +80,14 @@ router.post( "/", async ( req, res ) => {
 			const pool = new Pool( credentials )
 
 			if ( req.body.roles === "Instructor" ) {
-				// Query the database for a list of questions with a given ExamID
+				//Queries the database to see if the Canvas assignment being opened exists in the database
 				const results = await pool.query( `
 				SELECT 1
 				FROM "CodingExam".Exam E
 				WHERE E.CanvasExamID = $1
 			`, [ req.body.ext_lti_assignment_id ] )
 
+				//If the exam doesn't exist yet, create it in the database
 				if( results.rows.length === 0 ) {
 					await pool.query( `
 					INSERT INTO "CodingExam".Exam(CanvasExamID, TotalPoints)
@@ -95,9 +96,9 @@ router.post( "/", async ( req, res ) => {
 				
 				}
 			}
-			console.log( req.body.user_id )
 
 			if ( req.body.roles === "Learner" ) {
+				//Queries the database to see if the user exists in the UserExam table
 				let results = await pool.query( `
 					SELECT 1
 					FROM "CodingExam".UserExam UE
@@ -107,7 +108,9 @@ router.post( "/", async ( req, res ) => {
 						U.CanvasUserID = $2
 				`, [ req.body.ext_lti_assignment_id, req.body.user_id ] )
 
+				//If they don't exist, create an entry for themm to keep track of their exam attempt
 				if ( results.rows.length === 0 ) {
+					//Gets their internal database UserID
 					results = await pool.query( `
 						SELECT UserID
 						FROM "CodingExam".Users
@@ -116,6 +119,7 @@ router.post( "/", async ( req, res ) => {
 
 					const userid = results.rows[0].userid
 
+					//Gets the internal database ExamID for the exam
 					results = await pool.query( `
 						SELECT ExamID
 						FROM "CodingExam".Exam
@@ -124,6 +128,7 @@ router.post( "/", async ( req, res ) => {
 					
 					const examid = results.rows[0].examid
 
+					//Inserts the row into UserExam
 					await pool.query( ` 
 						INSERT INTO "CodingExam".UserExam(UserID, ExamID)
 						VALUES($1, $2)
