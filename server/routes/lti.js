@@ -80,7 +80,7 @@ if(process.env.NODE_ENV == 'development') {
 	// If we aren't in development mode, we need to explicitly 
 	// override the index route, or the static index.html will be 
 	// served instead.
-	app.get('/', (req, res) => res.status(404));
+	router.get('/', (req, res) => res.status(404));
 }
 
 /*
@@ -88,7 +88,7 @@ if(process.env.NODE_ENV == 'development') {
  */ 
 router.post( "/", async ( req, res ) => {
 	const knex = req.app.get("db")
-	
+
 	provider.valid_request( req, async ( err, isValid ) => {
 		// If the request is invalid, the console logs an error, else it returns a message to the LTI provider
 		if ( !isValid ) {
