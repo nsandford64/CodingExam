@@ -87,6 +87,7 @@ if(process.env.NODE_ENV == 'development') {
  * Handles a POST request from the LTI consumer, in this case Canvas
  */ 
 router.post( "/", async ( req, res ) => {
+	const knex = req.app.get("db")
 	
 	provider.valid_request( req, async ( err, isValid ) => {
 		// If the request is invalid, the console logs an error, else it returns a message to the LTI provider
