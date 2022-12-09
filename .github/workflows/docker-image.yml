@@ -24,6 +24,13 @@ jobs:
     # Job Steps
     steps:
 
+      # Step 0 - Checkout the Repository
+      # https://github.com/actions/checkout
+      - name: 0 - Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
       # Step 1 - Log In to GitHub Container Registry
       # https://github.com/docker/login-action
       - name: 1 - Login to GitHub Container Registry
