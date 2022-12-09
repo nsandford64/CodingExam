@@ -5,6 +5,8 @@ services:
     depends_on:
       - postgres
     environment:
+      # trust proxy settings - use true or ip address when proxied
+      TRUST_PROXY: "true"
       # node environment variable - switch to production for production environment
       NODE_ENV: development
       # postgres database variables

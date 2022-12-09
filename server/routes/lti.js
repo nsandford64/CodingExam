@@ -4,10 +4,10 @@ const lti = require( "ims-lti" )
 const path = require( "path" )
 const jwt = require( "jsonwebtoken" )
 const fs = require( "fs" )
-const { Pool } = require( "pg" )
-const { default: knex } = require("knex")
 const app = require("../app")
 const { setDefaultResultOrder } = require("dns/promises")
+const { create } = require("domain")
+const { Http2ServerRequest } = require("http2")
 
 const router = express.Router()
 
@@ -29,20 +29,23 @@ const credentials = require('../knexfile').connection
 	Both tokens can have the roles property changed between "Learner"
 	and "Instructor" to switch between the student and instructor views
 */
-console.log("NODE_ENV", process.env.NODE_ENV)
 if(process.env.NODE_ENV == 'development') {
 	
-	// Get the main entry point to the Client app
-router.get( "/", ( req, res ) => {	
-	res.send(`<h1>Debug access</h1>
-		<ul>
-			<li><a href="/learner">Learner Entry Point</a></li>
-			<li><a href="/instructor">Instructor Entry Point</a></li>
-		</ul>
-	`)
-	
+	/*
+	 * Get the main entry point to the Client app
+	 */
+	router.get( "/", ( req, res ) => {	
+		res.send(`<h1>Debug access</h1>
+			<ul>
+				<li><a href="/learner">Learner Entry Point</a></li>
+				<li><a href="/instructor">Instructor Entry Point</a></li>
+			</ul>
+		`)
 	})
 
+	/*
+	 * Loads the app as an instructor
+	 */
 	router.get( "/instructor", async ( req, res ) => {
 		const knex = req.app.get('db')
 		const ltiData = { 
@@ -51,13 +54,15 @@ router.get( "/", ( req, res ) => {
 			userID: "example-instructor",
 			roles: "Instructor"
 		}
-		console.log("Logging in as Learner", ltiData)
 		await findOrCreateUser(knex, ltiData.userID, ltiData.fullName)
 		await createExam(knex, ltiData.assignmentID)
 		const token = generateAccessToken(ltiData)
 		serveIndex(res, token)
 	})
 
+	/*
+	 * Loads the app as a learner
+	 */
 	router.get( "/learner", async ( req, res ) => {
 		const knex = req.app.get('db')
 		const ltiData = { 
@@ -66,7 +71,6 @@ router.get( "/", ( req, res ) => {
 			userID: "example-learner",
 			roles: "Learner"
 		}
-		console.log("Logging in as Learner", ltiData)
 		await findOrCreateUser(knex, ltiData.userID, ltiData.fullName)
 		const token = generateAccessToken(ltiData)
 		serveIndex(res, token)
@@ -76,84 +80,38 @@ router.get( "/", ( req, res ) => {
 	// If we aren't in development mode, we need to explicitly 
 	// override the index route, or the static index.html will be 
 	// served instead.
-	router.get('/', (req, res) => res.sendStatus(404));
+	app.get('/', (req, res) => res.status(404));
 }
 
-// Handles a POST request from the LTI consumer, in this case Canvas
+/*
+ * Handles a POST request from the LTI consumer, in this case Canvas
+ */ 
 router.post( "/", async ( req, res ) => {
 	
-
-	// Sets the requests encrypted connection property to true since the app is running through a proxy
-	req.connection.encrypted = true
 	provider.valid_request( req, async ( err, isValid ) => {
 		// If the request is invalid, the console logs an error, else it returns a message to the LTI provider
 		if ( !isValid ) {
 			console.error( err )
 			res.status( 401 ).send( "Unauthorized" )
-		}
-		else {
-			//Generates a token for the user
-			const token = generateAccessToken( { 
+		}	else {
+			const ltiData = { 
 				assignmentID: req.body.ext_lti_assignment_id,
 				userID: req.body.user_id,
 				roles: req.body.roles
-			} )
-
-			const pool = new Pool( credentials )
-
-			if ( req.body.roles === "Instructor" ) {
-				// Query the database for a list of questions with a given assignmentID
-				const results = await pool.query( `
-				SELECT 1
-				FROM Exam E
-				WHERE E.CanvasassignmentID = '${req.body.ext_lti_assignment_id}'
-			` )
-
-				if( results.rows.length === 0 ) {
-					await pool.query( `
-					INSERT INTO Exam(CanvasassignmentID, TotalPoints)
-					VALUES('${req.body.ext_lti_assignment_id}', ${req.body.custom_canvas_assignment_points_possible})
-				` )
-				
-				}
 			}
-
-			if ( req.body.roles === "Learner" ) {
-				const results = await pool.query( `
-					SELECT U.UserID, E.assignmentID
-					FROM UserExam UE
-					INNER JOIN Exam E ON UE.assignmentID = E.assignmentID
-					INNER JOIN Users U ON U.UserID = UE.UserID
-					WHERE E.CanvasassignmentID = '01cf10c5-f5d3-466e-b716-53f2b0bcd3b4' AND
-						U.CanvasUserID = '2b7a2ea9f28bc312753640b0c1cc537fa85c5a49'
-				` )
-
-				if ( results.rows.length === 0 ) {
-					await pool.query( ` 
-						INSERT INTO UserExam(UserID, assignmentID)
-						VALUES(${results.rows[0].userid}, ${results.rows[0].assignmentID})
-					` )
-				}
-			}
-
-			await pool.end()
-
-			// Modifies the index.html file that is returned to the client to contain the JWT token and sends it
-			fs.readFile( path.resolve( "../client/build/index.html" ), "utf8", ( err, data ) => {
-				if ( err ) {
-					console.error( err )
-					return res.status( 500 ).send( "An error occurred" )
-				}
-				res.send( data.replace(
-					"<div id=\"replace\"></div>",
-					`window.__INITIAL_DATA__ = '${token}'`
-				) )
-			} )
-
+			await findOrCreateUser(knex, ltiData.userID, ltiData.fullName)
+			if(ltiData.roles === "Instructor") await createExam(knex, ltiData.assignmentID)
+			const token = generateAccessToken(ltiData)
+			serveIndex(res, token)
 		}
-	} )
-} )
+	})
+})
 
+/**
+ * Serves the app HTML file, modified to include the token data
+ * @param {Http2ServerResponse} res - the HTTP response to complete 
+ * @param {string} token - the JWT to attach to the app 
+ */
 async function serveIndex(res, token) {
 	fs.readFile( path.resolve( "../client/build/index.html" ), "utf8", ( err, data ) => {
 		if ( err ) {
@@ -167,6 +125,11 @@ async function serveIndex(res, token) {
 	} )
 }
 
+/**
+ * Create an exam for the canvas assignment, if one does not yet exist
+ * @param {Knex} knex - the database connection
+ * @param {int} canvasAssignmentID - the canvas assignment id
+ */
 async function createExam(knex, canvasAssignmentID){
 	// Try creating an exam. Since the column canvas_exam_id is unique
 	// if one already exists, this will fail
@@ -177,8 +140,14 @@ async function createExam(knex, canvasAssignmentID){
 	} catch(_err) {}
 }
 
-// Returns the database id of the user with the corresponding
-// canvas user id, or generates a new user if one does not exist
+/**
+ * Returns the database id of the user with the corresponding
+ * canvas user id, or generates a new user if one does not exist
+ * @param {*} knex 
+ * @param {*} canvasUserId 
+ * @param {*} fullName 
+ * @returns 
+ */
 async function findOrCreateUser(knex, canvasUserId, fullName){
 	var user = await knex('users')
 		.where('canvas_user_id', canvasUserId)
@@ -194,7 +163,9 @@ async function findOrCreateUser(knex, canvasUserId, fullName){
 	return user.id
 }
 	
-//Generates an access token using an object containing the encoded properties as the key
+/**
+ * Generates an access token using an object containing the encoded properties as the key 
+ */
 function generateAccessToken( object ) {
 	return jwt.sign( object, "token_secret" )
 }
