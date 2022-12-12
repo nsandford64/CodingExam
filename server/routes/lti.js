@@ -101,7 +101,9 @@ router.post( "/", async ( req, res ) => {
 			const ltiData = { 
 				assignmentID: req.body.ext_lti_assignment_id,
 				userID: req.body.user_id,
-				roles: req.body.roles
+				roles: req.body.roles,
+				fullName: req.body.lis_person_name_full,
+				email: req.body.lis_person_contact_email_primary
 			}
 			await findOrCreateUser(knex, ltiData.userID, ltiData.fullName)
 			if(ltiData.roles === "Instructor") await createExam(knex, ltiData.assignmentID)
