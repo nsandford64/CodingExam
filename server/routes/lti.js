@@ -80,7 +80,7 @@ if(process.env.NODE_ENV == 'development') {
 	// If we aren't in development mode, we need to explicitly 
 	// override the index route, or the static index.html will be 
 	// served instead.
-	router.get('/', (req, res) => res.status(404));
+	router.get('/', (req, res) => res.sendStatus(404));
 }
 
 /*
