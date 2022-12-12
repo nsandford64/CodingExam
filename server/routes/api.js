@@ -47,7 +47,7 @@ router.get( "/role", async function ( req, res ) {
 	if(role == "Learner")
 	{
 		// Query the database to see if the client has taken the exam yet
-		const {HasTaken} = await knex
+		const response = await knex
 			.select('HasTaken')
 			.from('exams_users')
 			.innerJoin('exams', 'exams.id', 'exams_users.exam_id')
@@ -55,7 +55,7 @@ router.get( "/role", async function ( req, res ) {
 			.where('canvas_user_id', userID)
 			.where('canvas_assignment_id', assignmentID)
 			.first()
-		taken = HasTaken
+		if(response && response.HasTaken) taken = true
 	}
 
 	// Sends back the role of the client along with if they have taken the exam
