@@ -1,8 +1,9 @@
 // Copyright 2022 under MIT License
 
-import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { createAsyncThunk, createSelector, createSlice } from "@reduxjs/toolkit"
+import type {PayloadAction, ThunkAction, AnyAction} from '@reduxjs/toolkit'
 import { Feedback, Question, Response } from "../App"
-import { AppThunk, RootState } from "../app/store"
+import type { AppThunk, RootState } from "../app/store"
 
 /**
  * Reducers
@@ -66,6 +67,11 @@ const updateFeedback = ( state: ExamState, action: PayloadAction<Feedback> ) => 
 // Increment the nextQuestionId
 const incrementNextQuestionId = ( state: ExamState ) => {
 	state.nextQuestionId++
+}
+
+// Advance the NextQuestionId to the specified amount
+const advanceNextQuestionId = ( state: ExamState, action: PayloadAction<number> ) => {
+	state.nextQuestionId = action.payload
 }
 
 // Sets the token in the store
@@ -145,7 +151,23 @@ export const selectToken = ( state: RootState ) => (
 /**
  * Thunks
  */
+/*
+// Gets an unused exam question id from the database using the server api
+export const fetchNextQuestionId = 
+	(): AppThunk<void> => 
+	async (dispatch, getState) => {
+		const state = getState()
 
+		const res = await fetch( "/api/nextquestionid", {
+			// Adding headers to the request
+			headers: {
+				"token": state.exam.token
+			}
+		})
+		const json = await res.json()
+		dispatch(advanceNextQuestionId(json.nextID));
+	}
+*/
 // Creates an exam in the database using the server api
 export const createExamThunk: AppThunk<void> = async ( dispatch, getState ) => {
 	const state = getState()
@@ -220,6 +242,7 @@ export const examSlice = createSlice( {
 		setFeedbackMap,
 		updateFeedback,
 		incrementNextQuestionId,
+		advanceNextQuestionId,
 		setToken,
 		reInitializeStore
 	}

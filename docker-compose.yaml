@@ -6,7 +6,7 @@ services:
       - postgres
     environment:
       # trust proxy settings - use true or ip address when proxied
-      TRUST_PROXY: "true"
+      #TRUST_PROXY: "true"
       # node environment variable - switch to production for production environment
       NODE_ENV: development
       # postgres database variables
@@ -33,8 +33,8 @@ services:
       POSTGRES_USER: coding_exam_user 
       POSTGRES_PASSWORD: coding_exam_pass
       POSTGRES_DB: coding_exam
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    #healthcheck:
+    #  test: ["CMD-SHELL", "pg_isready", "-U", "coding_exam_user", "-d", "coding_exam"]
+    #  interval: 10s
+    #  timeout: 5s
+    #  retries: 5

@@ -2,6 +2,7 @@
 import { Label } from "@blueprintjs/core"
 import * as React from "react"
 import AceEditor from "react-ace"
+import ReactMarkdown from "react-markdown"
 
 import "brace/mode/java"
 import "brace/mode/csharp"
@@ -63,7 +64,11 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 	// Render the component
 	return (
 		<StyledCodingAnswer>
-			<Label>{text}</Label>
+			<Label>
+				<ReactMarkdown>
+					{text}	
+				</ReactMarkdown>
+			</Label>
 			<AceEditor
 				readOnly={props.disabled}
 				mode={mode}

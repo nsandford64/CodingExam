@@ -1,6 +1,7 @@
 // Copyright 2022 under MIT License
 import { Radio, RadioGroup } from "@blueprintjs/core"
 import * as React from "react"
+import ReactMarkdown from "react-markdown"
 import styled from "styled-components"
 import { Response, ComponentProps } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
@@ -39,13 +40,15 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 
 		dispatch( examActions.updateResponse( newResponse ) )
 	}, [] )
-	
+	// Format markdown in the question text
+	const label = question ? <ReactMarkdown>{question?.text}</ReactMarkdown> : ""
+
 	// Render the component
 	return (
 		<StyledTrueFalse>
 			<RadioGroup
 				disabled={props.disabled}
-				label={question?.text}
+				label={label}
 				onChange={handleChange}
 				selectedValue={response?.value}
 			>

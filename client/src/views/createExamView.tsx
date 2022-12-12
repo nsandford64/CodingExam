@@ -40,9 +40,8 @@ export const CreateExamView = React.memo( () => {
 	const [ selectedQuestionType, setSelectedQuestionType] = React.useState( "" )
 	const [ loading, setLoading ] = React.useState( true )
 
-	// Called on render - reinitializes the store
+	// Called on render - reinitialize the store
 	React.useEffect( () => {
-		console.log('in effect', token)
 		const initQuestions = async () => {
 			// Fetch exam questions
 			const data = await fetch( "/api/questions", {
@@ -52,9 +51,8 @@ export const CreateExamView = React.memo( () => {
 			} )
 			
 			const json  = await data.json()
-			console.log('json', json)
 			const questions: Question[] = json.questions
-console.log('questions', questions)
+
 			// Loop through questions and create ids and a map
 			const newQuestionIds: number[] = []
 			const newQuestionsMap = new Map<number, Question>()
@@ -255,6 +253,8 @@ const CreateQuestionSwitch = React.memo( ( props: CreateQuestionSwitchProps ) =>
 	 */
 	const createQuestion = React.useCallback( ( question: Question ) => {
 		props.setSelectedQuestionType( "" )
+
+
 
 		dispatch( examActions.updateQuestion( question ) )
 		dispatch( examActions.incrementNextQuestionId() )
@@ -652,7 +652,10 @@ const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
 		<>
 			<StyledRow>
 				<Label style={{ fontWeight: "bold" }}>Question Text</Label>
-				<InputGroup 
+				<TextArea
+					growVertically={true}
+					large={true}
+					fill={true}
 					value={question.text}
 					onChange={e => setQuestion( {
 						...question,

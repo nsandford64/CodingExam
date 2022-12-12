@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Button, Colors, Intent, Spinner } from "@blueprintjs/core"
+import { Button, Callout, Colors, Intent, Spinner } from "@blueprintjs/core"
 import * as React from "react"
 import { batch } from "react-redux"
 import styled from "styled-components"
@@ -11,7 +11,7 @@ import { MultipleChoice } from "../components/multipleChoice"
 import { ParsonsProblem } from "../components/parsonsProblem"
 import { ShortAnswer } from "../components/shortAnswer"
 import { TrueFalse } from "../components/trueFalse"
-import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap, selectToken } from "../slices/examSlice"
+import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap, selectToken, selectResponseState } from "../slices/examSlice"
 
 // Props for the ExamView component
 interface ExamViewProps {
@@ -75,7 +75,9 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 	// Dispatch an event to the store
 	const dispatch = useAppDispatch()
 
-	// Array of questionIds from the Redux store
+	// Exam response state
+	const responseState = useAppSelector( selectResponseState )
+		// Array of questionIds from the Redux store
 	const questionIds = useAppSelector( selectQuestionIds )
 	// Map of responses from the store
 	const responsesMap = useAppSelector( selectResponsesMap )
@@ -164,13 +166,14 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 		initQuestions()
 	}, [] )
 
+	const [ submitted, setSubmitted ] = React.useState( false )
+
 	/**
 	 * Runs when the submit button is pressed - posts each
 	 * response in the responsesMap to update the database
 	 */
 	const submit = React.useCallback( async () => {
 		
-		console.log( Array.from( responsesMap.values() ) )
 		try {
 			const res = await fetch( "/api", {
 				// Adding method type
@@ -203,8 +206,8 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 					style={{ padding: "50px" }}
 				/>
 			)}
-			{!loading && (
-				<> 
+			{!loading && (				
+				<>
 					<StyledQuestionsContainer>
 						{questionIds.map( ( id, index ) => (
 							<StyledQuestionContainer key={id}>
@@ -226,6 +229,16 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 							intent={Intent.PRIMARY}
 							fill
 						/>
+					)}
+					{responseState && responseState.includes("Valid") && (
+						<Callout intent="success">
+							Success! Your exam was submitted.
+						</Callout>
+					)}
+					{responseState && responseState.includes("Invalid") && (
+						<Callout intent="danger">
+							Oh no! There was a problem saving your exam.  Contact your instructor for help.
+						</Callout>
 					)}
 				</>
 			)}

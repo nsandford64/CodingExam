@@ -44,18 +44,18 @@ router.get( "/role", async function ( req, res ) {
 	const knex = req.app.get('db')
 	let taken = false
 	
-	if(role == "Student")
+	if(role == "Learner")
 	{
 		// Query the database to see if the client has taken the exam yet
-		const results = await knex.raw( `
-			SELECT *
-			FROM exams_users eu 
-				INNER JOIN exams e ON e.id = eu.exam_id
-				INNER JOIN users u ON u.id = eu.user_id
-			WHERE e.canvas_assignment_id = :assignmentID AND u.canvas_user_id = :userID
-		`, {assignmentID, userID})
-
-		taken = results.rows[0].has_taken
+		const {HasTaken} = await knex
+			.select('HasTaken')
+			.from('exams_users')
+			.innerJoin('exams', 'exams.id', 'exams_users.exam_id')
+			.innerJoin('users', 'users.id', 'exams_users.user_id')
+			.where('canvas_user_id', userID)
+			.where('canvas_assignment_id', assignmentID)
+			.first()
+		taken = HasTaken
 	}
 
 	// Sends back the role of the client along with if they have taken the exam
@@ -121,17 +121,6 @@ router.get( "/responses", async ( req, res ) => {
 		.where('exams.canvas_assignment_id', assignmentID)
 		.where('users.canvas_user_id', userID)
 
-/*
-		// Query the database for a particular student's responses for a particular exam
-		const results = await pool.query( `
-		SELECT SR.QuestionID, SR.IsTextResponse, SR.TextResponse, SR.AnswerResponse
-		FROM StudentResponse SR 
-		INNER JOIN ExamQuestion EQ ON EQ.QuestionID = SR.QuestionID
-		INNER JOIN Exam E ON E.assignmentID = EQ.assignmentID
-		WHERE E.CanvasassignmentID = '${assignmentID}' AND SR.CanvasUserID = '${userID}'
-		ORDER BY SR.QuestionID
-	` )
-*/
 	// Map all result rows into an array of Response objects
 	const responses = results.map(row => {
 		return {
@@ -147,67 +136,60 @@ router.get( "/responses", async ( req, res ) => {
 
 // Inserts an answer into the StudentResponse table in the database
 router.post( "/", async ( req, res ) => {
-	// Sends an invalid submission response if the request doesn't have a token
-	if( !req.headers.token ) {
-		res.send( {
-			"response": "Invalid submission"
-		} )
-	}
-	else {
-		// Decodes the token to get the userID of the student
-		const token = req.headers.token
-		let userID, assignmentID
-		jwt.verify( token, "token_secret", ( err, object ) => {
-			userID = object.userID
-			assignmentID = object.assignmentID
-		} )
-		const pool = new Pool( credentials )
-	
-		// Insert each response into the StudentResponse table
-		await req.body.forEach( response => {
-			console.log( response )
-			// Query to insert a text response into the database
-			if ( typeof response.value === "string" ) {
-				// eslint-disable-next-line no-useless-escape
-				const stringValue = `${response.value}`.replace( "'", "''" )
-				pool.query( `
-				INSERT INTO StudentResponse(IsTextResponse, TextResponse, QuestionID, CanvasUserID)
-				VALUES (TRUE, '${stringValue}', ${response.questionId}, '${userID}')
-				ON CONFLICT (QuestionID, CanvasUserID) DO UPDATE
-					SET TextResponse = '${stringValue}';
-			` )
-			}
-			// Query to insert a non-text response into the database
-			else {
-				pool.query( `
-				INSERT INTO StudentResponse(IsTextResponse, AnswerResponse, QuestionID, CanvasUserID)
-				VALUES (FALSE, ${response.value}, ${response.questionId}, '${userID}')
-				ON CONFLICT (QuestionID, CanvasUserID) DO UPDATE
-					SET AnswerResponse = ${response.value};
-			` )
-			}
-		} )
+	const {role, userID, assignmentID} = req.session
+	const knex = req.app.get('db')
 
-		/*
-			Sets the HasTaken property in the database to true after the exam has been submitted
-		*/
-		pool.query( `
-				UPDATE UserExam UEO
-				SET HasTaken = TRUE
-				FROM UserExam AS UE
-					INNER JOIN Exam AS E ON UE.assignmentID = E.assignmentID
-					INNER JOIN Users AS U ON UE.UserID = U.UserID
-				WHERE E.CanvasassignmentID = '${assignmentID}' AND U.CanvasUserID = '${userID}'
-					AND UE.UserID = UEO.UserID AND UE.assignmentID = UEO.assignmentID
-			` )
-			
-		await pool.end()
+	// Get the user id for the student
+	const student = await knex.select('*')
+		.from('users')
+		.where('canvas_user_id', userID)
+		.first()
+	if(!student) return res.send({response: "Invalid Submission - unknown student"})
 
-		// Respond a success message to the poster
-		res.send( {
-			"response": "Valid submission"
-		} )
-	}
+	// Get the exam id for the assignment
+	const exam = await knex.select('*')
+		.from('exams')
+		.where('canvas_assignment_id', assignmentID)
+		.first()
+	if(!exam) return res.send({response: "Invalid Submission - unknown exam"})
+
+	// Prepare the student responses for insertion in the database
+	const responses = req.body.map(response => {
+		if ( typeof response.value === "string" ) {
+			return {
+				question_id: response.questionId,
+				user_id: student.id,
+				is_text_response: true,
+				text_response: response.value
+			} 
+		} else {
+			return {
+				question_id: response.questionId,
+				user_id: student.id,
+				is_text_response: false,
+				answer_response: response.value
+			}
+		}
+	})
+
+	// Insert each response into the StudentResponse table
+	await knex('student_responses')
+		.insert(responses)
+
+	// Set the exam as taken 
+	await knex('exams_users')
+		.insert({
+			user_id: student.id,
+			exam_id: exam.id,
+			HasTaken: true
+		})
+		.onConflict(['exam_id', 'user_id'])
+		.merge()
+
+	// Respond a success message to the poster
+	res.send( {
+		"response": "Valid submission"
+	} )
 } )
 
 // Gets the instructor feedback for questions, used by both instructor and student view
@@ -234,18 +216,6 @@ router.get( "/feedback", async ( req, res ) => {
 		.where('users.canvas_user_id', userID)
 		.orderBy("question_id")
 
-		/*
-		// Queries the database for feedback for a particular user and exam
-		const results = await pool.query( `
-		SELECT SR.QuestionID, SR.InstructorFeedback
-		FROM StudentResponse SR 
-		INNER JOIN ExamQuestion EQ ON EQ.QuestionID = SR.QuestionID
-		INNER JOIN Exam E ON E.assignmentID = EQ.assignmentID
-		WHERE E.CanvasassignmentID = '${assignmentID}' AND SR.CanvasUserID = '${userID}'
-		ORDER BY SR.QuestionID
-	` )
-	*/
-
 	// Send an array of Responses to the Client
 	res.send({feedback})
 })
@@ -258,22 +228,15 @@ router.get( "/examtakers", instructorOnly, async( req, res ) => {
 	const knex = req.app.get('db')
 
 	//Query the database for the students that have taken a particular exam
-	const results = await knex.raw( `
-	SELECT U.Canvas_User_ID, U.Full_Name
-	FROM Exams E
-	INNER JOIN Exams_Users UE ON UE.Exam_ID = E.ID
-	INNER JOIN Users U ON U.ID = UE.User_ID
-	WHERE E.canvas_assignment_id = :assignmentID
-	ORDER BY U.Full_Name
-	`, { assignmentID } )
+	const users = await knex
+		.select(['canvas_user_id as canvasUserId', 'full_name as fullName'])
+		.from('exams_users')
+		.innerJoin('exams', 'exams.id', 'exams_users.exam_id')
+		.innerJoin('users', 'users.id', 'exams_users.user_id')
+		.where('canvas_assignment_id', assignmentID)
 
-		// Sends the list of users from the database
-		res.json( {
-			users: results.rows.map( row => ( {
-				canvasUserId: row.canvasuserid,
-				fullName: row.fullname
-			} ) )
-		} )
+	// Sends the list of users from the database
+	res.json({users})
 } )
 
 // Enters instructor feedback into the database
@@ -318,6 +281,15 @@ router.post( "/instructorfeedback", async( req, res ) => {
 	}
 } )
 
+// Gets a non-conflicting database id for a new question
+router.get( "/newquestionid", instructorOnly, async( req, res ) => {
+	const knex = req.app.get('db')
+	// Use the postgres nextval() function to grab a new value for examQuestions.id
+	// This also advances the corresponding sequence, so it will not be duplicated
+	const [nextID] = await knex.raw(`SELECT nextval(pg_get_serial_sequence('exam_questions', 'id')) as newID`)
+	res.send(nextID)
+})
+
 // Creates the questions for an exam when the instructor submits a question set
 router.post( "/createexam", instructorOnly, async( req, res ) => {
 	console.log( req.body )
@@ -340,7 +312,6 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 
 	// Create or update the exam questions 
 	for ( const question of req.body ) {
-console.log('question', question)
 		/* Determine answer data based on question type. 
 		 * Answer data is stored in a JSON column in the db
 		 */

@@ -1,6 +1,7 @@
 // Copyright 2022 under MIT License
 import { Label, TextArea } from "@blueprintjs/core"
 import * as React from "react"
+import ReactMarkdown from "react-markdown"
 import styled from "styled-components"
 import { Response, ComponentProps } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
@@ -45,7 +46,11 @@ export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
 	// Render the component
 	return (
 		<StyledShortAnswer>
-			<Label>{question?.text}</Label>
+			<Label>
+				<ReactMarkdown>
+					{question ? question?.text : ""}
+				</ReactMarkdown>
+			</Label>
 			<TextArea 
 				disabled={props.disabled}
 				large
