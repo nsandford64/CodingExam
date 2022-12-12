@@ -16,14 +16,14 @@ const credentials = require('../knexfile').connection
 router.use(async function(req, res, next) {
 	const token = req.headers.token
 	// Send an unauthorized request response if the request doesn't have a token
-	if ( !token ) res.status(403)
+	if ( !token ) res.sendStatus(403)
 	// Decodes the token and returns the role contained within it
 	// Store these in the req.session so they are available 
 	// in downstream methods
 	else jwt.verify( token, "token_secret", ( err, object ) => {
 		if(err) {
 			console.error(err);
-			res.status(403)
+			res.sendStatus(403)
 			return
 		}
 		req.session = {
