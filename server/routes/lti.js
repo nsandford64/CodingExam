@@ -103,10 +103,16 @@ router.post( "/", async ( req, res ) => {
 				userID: req.body.user_id,
 				roles: req.body.roles,
 				fullName: req.body.lis_person_name_full,
+				familyName: req.body.lis_person_name_family,
+				givenName: req.body.lis_person_name_given,
 				email: req.body.lis_person_contact_email_primary
 			}
-			await findOrCreateUser(knex, ltiData.userID, ltiData.fullName)
+			await findOrCreateUser(knex, ltiData)
 			if(ltiData.roles === "Instructor") await createExam(knex, ltiData.assignmentID)
+			// TODO: If student, create users_exams to start exam timer and save 
+			// passback url and result sourcedid so we can submit grades
+			// const resultSourcedid = req.body.lis_result_sourcedid;
+  		// const outcomeServiceUrl = req.body.lis_outcome_service_url;
 			const token = generateAccessToken(ltiData)
 			serveIndex(res, token)
 		}
@@ -154,18 +160,19 @@ async function createExam(knex, canvasAssignmentID){
  * @param {*} fullName 
  * @returns 
  */
-async function findOrCreateUser(knex, canvasUserId, fullName){
-	var user = await knex('users')
-		.where('canvas_user_id', canvasUserId)
-		.first()
-	console.log(user);
-	if(!user) user = await knex('users')
-		.returning('id')
+async function findOrCreateUser(knex, userData){
+	// TODO: Change to an UPSERT 
+	const [user] = await knex('exams')
 		.insert({
-			canvas_user_id: canvasUserId,
-			full_name: fullName
+			canvas_user_id: userData.userID,
+			full_name: userData.fullName,
+			family_name: userData.familyName,
+			given_name: userData.givenName,
+			email: userData.email 
 		})
-	console.log('result', setDefaultResultOrder)
+		.onConflict('canvas_user_id')
+		.merge()
+		.returning('*')
 	return user.id
 }
 	
