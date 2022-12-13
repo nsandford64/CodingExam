@@ -6,7 +6,7 @@ exports.up = function(knex) {
   return knex.schema
     .createTable('users', function(table){
       table.increments('id').primary()
-      table.string('canvas_user_id').index()
+      table.string('canvas_user_id').unique().index()
       table.string('full_name')
       table.string('family_name')
       table.string('given_name')
