@@ -107,6 +107,7 @@ router.post( "/", async ( req, res ) => {
 				givenName: req.body.lis_person_name_given,
 				email: req.body.lis_person_contact_email_primary
 			}
+			console.log(ltiData, req.body)
 			await findOrCreateUser(knex, ltiData)
 			if(ltiData.roles === "Instructor") await createExam(knex, ltiData.assignmentID)
 			// TODO: If student, create users_exams to start exam timer and save 
