@@ -161,6 +161,7 @@ export const InstructorView = React.memo( () => {
 					<ExamView 
 						disabled
 						feedback={true}
+						review={false}
 						canvasUserId={canvasUserId}
 					/>
 					<Button 

@@ -57,6 +57,7 @@ export const FeedbackBox = React.memo( ( props: FeedbackBoxProps ) => {
 			<Label>Feedback:</Label>
 			<TextArea 
 				large
+				readOnly={props.disabled}
 				onChange={handleChange}
 				value={feedback?.value || ""} 
 				fill

@@ -17,6 +17,7 @@ import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap,
 interface ExamViewProps {
 	disabled?: boolean
 	feedback?: boolean
+	review?: boolean
 	canvasUserId?: string
 }
 
@@ -217,6 +218,7 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 								<QuestionSwitch
 									disabled={props.disabled}
 									feedback={props.feedback}
+									review={props.review}
 									questionId={id}
 								/>
 							</StyledQuestionContainer>
@@ -253,6 +255,7 @@ ExamView.displayName = "ExamView"
 interface QuestionSwitchProps {
 	disabled?: boolean
 	feedback?: boolean
+	review?: boolean
 	questionId: number
 }
 
@@ -281,6 +284,7 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 				/>
 				{props.feedback && (
 					<FeedbackBox
+						disabled={props.review}
 						questionId={question.id}
 					/>
 				)}

@@ -241,44 +241,49 @@ router.get( "/examtakers", instructorOnly, async( req, res ) => {
 
 // Enters instructor feedback into the database
 router.post( "/instructorfeedback", async( req, res ) => {
-	// Returns an invalid request response if the request doesn't have a token
-	if ( !req.headers.token ) {
-		res.send( {
-			"response": "Invalid request"
-		} )
-	}
-	else {
-		// Decode the token to get the sender's role
-		const token = req.headers.token
-		let role
-
-		jwt.verify( token, "token_secret", ( err, object ) => {
-			role = object.roles     
-		} )
-		// if the sender isn't an instructor, return an invalid request response
-		if ( role != "Instructor" ) {
-			res.send( {
-				response: "Invalid request: not an instructor"
-			} )
-		}
-		else {
-			const userID = req.headers.userid
-			const pool = new Pool( credentials )
-
-			// Insert the feedback from the instructor into the database
-			await req.body.forEach( question => {
-				pool.query( `
-					UPDATE StudentResponse
-					SET InstructorFeedback = '${question.value}'
-					WHERE QuestionID = ${question.questionId} AND CanvasUserID = '${userID}'
-				` )
-			} )
-			// Send a valid submission response to the user
-			res.send( {
-				"response": "Valid submission"
-			} )
-		}
-	}
+	const {role, assignmentID} = req.session
+	const userID = req.headers.userid	
+	const knex = req.app.get('db')
+/*
+	// req.body.questionId is NOT actually the question id, 
+	// but rather the index of the question in an array
+	// of all exam questions. Thus, we must fetch all
+	// questions and identify the one we want.
+	const questionIndex = req.body.questionId
+	const questions = await knex
+		.from("exam_questions")
+		.innerJoin("exams", "exams.id", "exam_questions.exam_id")
+		.where('exams.canvas_assignment_id', assignmentID)
+	const question = questions[questionIndex]
+	console.log(
+		questionIndex,
+		question,
+		questions
+	)
+*/
+	// We must determine the student this feedback is for
+	const student = await knex('users')
+		.where('canvas_user_id', userID)
+		.first()
+		
+	// The req.body is an array of feedback
+	// insert it into the database one item 
+	// at a time, and don't send the response
+	// until all have been added
+	await Promise.all(req.body.map(async feedback => {
+		await knex
+			.update({instructor_feedback: feedback.value})
+			.from("student_responses")
+			.where({
+				question_id: feedback.questionId, 
+				user_id: student.id
+			})
+	}))
+			
+	// Send a valid submission response to the user
+	res.send( {
+		"response": "Valid submission"
+	} )
 } )
 
 // Gets a non-conflicting database id for a new question
