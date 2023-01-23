@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit"
-import { Feedback, Question, Response } from "../../App"
+import { Confidence, Feedback, Question, Response } from "../../App"
 import { RootState } from "../../app/store"
 import examReducer, { ExamState } from "../../slices/examSlice"
 
@@ -19,6 +19,8 @@ export const createMockStore = ( ( mockQuestion: Question ) => {
 		responseIds: [],
 		responsesMap: new Map<number, Response>(),
 		responseState: "",
+		confidenceIds: [],
+		confidenceMap: new Map<number, Confidence>(),
 		feedbackIds: [],
 		feedbackMap: new Map<number, Feedback>(),
 		nextQuestionId: 0,

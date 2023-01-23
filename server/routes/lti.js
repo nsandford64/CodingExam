@@ -162,7 +162,6 @@ async function createExam(knex, canvasAssignmentID){
  * @returns 
  */
 async function findOrCreateUser(knex, userData){
-	// TODO: Change to an UPSERT 
 	const [user] = await knex('users')
 		.insert({
 			canvas_user_id: userData.userID,

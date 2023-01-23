@@ -2,7 +2,7 @@
 
 import { createAsyncThunk, createSelector, createSlice } from "@reduxjs/toolkit"
 import type {PayloadAction, ThunkAction, AnyAction} from '@reduxjs/toolkit'
-import { Feedback, Question, Response } from "../App"
+import { Feedback, Question, Response, Confidence } from "../App"
 import type { AppThunk, RootState } from "../app/store"
 
 /**
@@ -64,6 +64,19 @@ const updateFeedback = ( state: ExamState, action: PayloadAction<Feedback> ) => 
 	state.feedbackMap.set( action.payload.questionId, action.payload )
 }
 
+// Set the confidenceIds array in the store
+const setConfidenceIds = ( state: ExamState, action: PayloadAction<number[]> ) => {
+	state.confidenceIds = action.payload
+}
+// Set the confidenceMap map in the store
+const setConfidenceMap = ( state:ExamState, action: PayloadAction<Map<number, Confidence>> ) => {
+	state.confidenceMap = action.payload
+}
+// Update the confidenceMap in the store to have the new Confidence
+const updateConfidence = ( state: ExamState, action: PayloadAction<Confidence> ) => {
+	state.confidenceMap.set( action.payload.questionId, action.payload )
+}
+
 // Increment the nextQuestionId
 const incrementNextQuestionId = ( state: ExamState ) => {
 	state.nextQuestionId++
@@ -89,6 +102,8 @@ const reInitializeStore = ( state: ExamState ) => {
 	state.responseState = initialState.responseState
 	state.feedbackIds = initialState.feedbackIds
 	state.feedbackMap = initialState.feedbackMap
+	state.confidenceIds = initialState.confidenceIds
+	state.confidenceMap = initialState.confidenceMap
 	state.nextQuestionId = initialState.nextQuestionId
 }
 
@@ -136,6 +151,17 @@ export const selectFeedbackById = createSelector(
 	selectFeedbackMap,
 	( state: RootState, id: number ) => id,
 	( feedbackMap, id ) => feedbackMap.get( id )
+)
+
+// Select the confidenceMap
+export const selectConfidenceMap = ( state: RootState ) => (
+	state.exam.confidenceMap
+)
+// Select a Confidence from the store with the given id
+export const selectConfidenceById = createSelector(
+	selectConfidenceMap,
+	( state: RootState, id: number ) => id,
+	( confidenceMap, id ) => confidenceMap.get( id )
 )
 
 // Select the next questionId
@@ -210,6 +236,8 @@ export interface ExamState {
 	responseState: string,
 	feedbackIds: number[],
 	feedbackMap: Map<number, Feedback>,
+	confidenceIds: number[],
+	confidenceMap: Map<number, Confidence>,
 	nextQuestionId: number,
 	token: string
 }
@@ -222,7 +250,9 @@ const initialState: ExamState = {
 	responseState: "",
 	feedbackIds: [],
 	feedbackMap: new Map<number, Feedback>(),
-	nextQuestionId: 0,
+	confidenceIds: [],
+	confidenceMap: new Map<number, Confidence>(),
+	nextQuestionId: 10,
 	token: ""
 }
 
@@ -241,6 +271,9 @@ export const examSlice = createSlice( {
 		setFeedbackIds,
 		setFeedbackMap,
 		updateFeedback,
+		setConfidenceIds,
+		setConfidenceMap,
+		updateConfidence,
 		incrementNextQuestionId,
 		advanceNextQuestionId,
 		setToken,

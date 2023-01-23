@@ -3,15 +3,16 @@ import { Button, Callout, Colors, Intent, Spinner } from "@blueprintjs/core"
 import * as React from "react"
 import { batch } from "react-redux"
 import styled from "styled-components"
-import { Feedback, Question, QuestionType, Response } from "../App"
+import { Feedback, Question, QuestionType, Response, Confidence } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { CodingAnswer } from "../components/codingAnswer"
+import { ConfidenceRating } from "../components/confidenceRating"
 import { FeedbackBox } from "../components/feedbackBox"
 import { MultipleChoice } from "../components/multipleChoice"
 import { ParsonsProblem } from "../components/parsonsProblem"
 import { ShortAnswer } from "../components/shortAnswer"
 import { TrueFalse } from "../components/trueFalse"
-import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap, selectToken, selectResponseState } from "../slices/examSlice"
+import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap, selectToken, selectResponseState, selectConfidenceMap } from "../slices/examSlice"
 
 // Props for the ExamView component
 interface ExamViewProps {
@@ -71,7 +72,7 @@ export const StyledQuestionHeader = styled.div`
  * form the exam. The Instructor can only view student responses and leave feedback, and the
  * Learner can only take the exam and submit their responses.
  */
-export const ExamView = React.memo( ( props: ExamViewProps ) => {
+export const ExamView = ( props: ExamViewProps ) => {
 
 	// Dispatch an event to the store
 	const dispatch = useAppDispatch()
@@ -82,6 +83,9 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 	const questionIds = useAppSelector( selectQuestionIds )
 	// Map of responses from the store
 	const responsesMap = useAppSelector( selectResponsesMap )
+	// Map of confidence ratings from the store
+	const confidenceMap = useAppSelector( selectConfidenceMap )
+	console.log({confidenceMap})
 	// token from the store
 	const token = useAppSelector( selectToken )
 
@@ -123,12 +127,32 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 			json = await data.json()
 			const responses: Response[] = json.responses
 
-			// Loop through responses and create ids and a map
+			// Loop through responses and create ids and a map 
+			// for responses and for confidence ratings
 			const newResponseIds: number[] = []
 			const newResponsesMap = new Map<number, Response>()
 			responses.forEach( response => {
 				newResponseIds.push( response.questionId )
 				newResponsesMap.set( response.questionId, response )
+			} )
+
+			// Fetch exam confidence ratings 
+			data = await fetch( "/api/confidence", {
+				headers: {
+					"token": token,
+					"userID": props.canvasUserId || ""
+				}
+			})
+
+			json = await data.json()
+			const confidence: Confidence[] = json.confidence
+
+			// Loop through the confidence and create ids and a map
+			const newConfidenceIds: number[] = []
+			const newConfidenceMap = new Map<number, Confidence>()
+			confidence.forEach( confidence => {
+				newConfidenceIds.push( confidence.questionId )
+				newConfidenceMap.set( confidence.questionId, confidence )
 			} )
 
 			// Fetch exam feedback
@@ -158,6 +182,8 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 				dispatch( examActions.setQuestionsMap( newQuestionsMap ) )
 				dispatch( examActions.setResponseIds( newResponseIds ) )
 				dispatch( examActions.setResponsesMap( newResponsesMap ) )
+				dispatch( examActions.setConfidenceIds( newConfidenceIds ))
+				dispatch( examActions.setConfidenceMap( newConfidenceMap ))
 			} )
 
 			setLoading( false )
@@ -175,15 +201,23 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 	 */
 	const submit = React.useCallback( async () => {
 		
+		const data = questionIds.map(id => ({
+			questionId: id,
+			value: responsesMap.get(id)?.value,
+			confidence: confidenceMap.get(id)?.value
+		}));		
+
+console.log({responsesMap})
+console.log({confidenceMap})
+console.log({data})
+
 		try {
 			const res = await fetch( "/api", {
 				// Adding method type
 				method: "POST",
 
 				// Adding body or contents to send
-				body: JSON.stringify(
-					Array.from( responsesMap.values() )
-				),
+				body: JSON.stringify(data),
      
 				// Adding headers to the request
 				headers: {
@@ -217,10 +251,14 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 								</StyledQuestionHeader>
 								<QuestionSwitch
 									disabled={props.disabled}
-									feedback={props.feedback}
-									review={props.review}
 									questionId={id}
 								/>
+								{props.feedback && (
+									<FeedbackBox
+										disabled={props.review}
+										questionId={id}
+									/>
+								)}
 							</StyledQuestionContainer>
 						) )}
 					</StyledQuestionsContainer>
@@ -246,7 +284,7 @@ export const ExamView = React.memo( ( props: ExamViewProps ) => {
 			)}
 		</StyledExamView>
 	)
-} )
+} 
 ExamView.displayName = "ExamView"
 
 /**
@@ -277,74 +315,38 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 	switch ( question?.type ) {
 	case QuestionType.MultipleChoice:
 		return (
-			<>
-				<MultipleChoice
-					disabled={props.disabled}
-					questionId={question.id}
-				/>
-				{props.feedback && (
-					<FeedbackBox
-						disabled={props.review}
-						questionId={question.id}
-					/>
-				)}
-			</>
+			<MultipleChoice
+				disabled={props.disabled}
+				questionId={question.id}
+			/>
 		)
 	case QuestionType.TrueFalse:
 		return (
-			<>
-				<TrueFalse
-					disabled={props.disabled}
-					questionId={question.id}
-				/>
-				{props.feedback && (
-					<FeedbackBox
-						questionId={question.id}
-					/>
-				)}
-			</>
+			<TrueFalse
+				disabled={props.disabled}
+				questionId={question.id}
+			/>
 		)
 	case QuestionType.ShortAnswer:
 		return (
-			<>
-				<ShortAnswer
-					disabled={props.disabled}
-					questionId={question.id}
-				/>
-				{props.feedback && (
-					<FeedbackBox
-						questionId={question.id}
-					/>
-				)}
-			</>
+			<ShortAnswer
+				disabled={props.disabled}
+				questionId={question.id}
+			/>
 		)
 	case QuestionType.CodingAnswer:
 		return (
-			<>
-				<CodingAnswer
-					disabled={props.disabled}
-					questionId={question.id}
-				/>
-				{props.feedback && (
-					<FeedbackBox
-						questionId={question.id}
-					/>
-				)}
-			</>
+			<CodingAnswer
+				disabled={props.disabled}
+				questionId={question.id}
+			/>
 		)
 	case QuestionType.ParsonsProblem:
 		return (
-			<>
-				<ParsonsProblem
-					disabled={props.disabled}
-					questionId={question.id}
-				/>
-				{props.feedback && (
-					<FeedbackBox
-						questionId={question.id}
-					/>
-				)}
-			</>
+			<ParsonsProblem
+				disabled={props.disabled}
+				questionId={question.id}
+			/>
 		)
 	default:
 		return null

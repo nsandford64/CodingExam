@@ -190,6 +190,17 @@ export type Feedback = {
 }
 
 /**
+ * Confidence Type
+ * 
+ * This type defines what confidence for the student's response should look like.
+ * Each confidence has a questionId and a value.
+ */
+export type Confidence = {
+	questionId: number
+	value: number
+}
+
+/**
  * User Type
  * 
  * This type allows a user's name to be associated with it canvasUserId that is stored

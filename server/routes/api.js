@@ -56,6 +56,8 @@ router.get( "/role", async function ( req, res ) {
 			.where('canvas_assignment_id', assignmentID)
 			.first()
 		if(response && response.HasTaken) taken = true
+		// If the student hasn't taken the exam, we need to "start the clock"
+		else await beginUserExam(knex, userID, assignmentID);
 	}
 
 	// Sends back the role of the client along with if they have taken the exam
@@ -155,22 +157,31 @@ router.post( "/", async ( req, res ) => {
 
 	// Prepare the student responses for insertion in the database
 	const responses = req.body.map(response => {
+		console.log({response})
 		if ( typeof response.value === "string" ) {
 			return {
 				question_id: response.questionId,
 				user_id: student.id,
 				is_text_response: true,
-				text_response: response.value
+				text_response: response.value,
+				confidence_rating: response.confidence
 			} 
 		} else {
 			return {
 				question_id: response.questionId,
 				user_id: student.id,
 				is_text_response: false,
-				answer_response: response.value
+				answer_response: response.value,
+				confidence_rating: response.confidence
 			}
 		}
 	})
+
+	console.log({responses})
+
+	// Insert each response into the StudentResponse table
+	await knex('student_responses')
+		.insert(responses)
 
 	// Insert each response into the StudentResponse table
 	await knex('student_responses')
@@ -181,7 +192,8 @@ router.post( "/", async ( req, res ) => {
 		.insert({
 			user_id: student.id,
 			exam_id: exam.id,
-			HasTaken: true
+			HasTaken: true,
+			finished_at: knex.fn.now()
 		})
 		.onConflict(['exam_id', 'user_id'])
 		.merge()
@@ -191,6 +203,34 @@ router.post( "/", async ( req, res ) => {
 		"response": "Valid submission"
 	} )
 } )
+
+// Gets the student confidence rating for responses, used by both instructor and student view
+router.get( "/confidence", async ( req, res ) => {
+	const {role, assignmentID} = req.session
+	let {userID} = req.session
+	const knex = req.app.get('db')
+
+	/* When in the instructor view, the userID from the token will be the instructors, but the feedback
+		will need to be the student whose feedback they are getting. Because of this, a userID header is
+		sent with the userID of the student they are viewing
+	*/
+	if ( role === "Instructor" ) {
+		userID = req.headers.userid
+	}
+
+	const confidence = await knex
+		.select("question_id as questionId", "confidence_rating as value")
+		.from("student_responses")
+		.innerJoin("exam_questions", "exam_questions.id", "student_responses.question_id")
+		.innerJoin("exams", "exams.id", "exam_questions.exam_id")
+		.innerJoin("users", "users.id", "student_responses.user_id")
+		.where('exams.canvas_assignment_id', assignmentID)
+		.where('users.canvas_user_id', userID)
+		.orderBy("question_id")
+
+	// Send an array of Responses to the Client
+	res.send({confidence})
+})
 
 // Gets the instructor feedback for questions, used by both instructor and student view
 router.get( "/feedback", async ( req, res ) => {
@@ -355,6 +395,37 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 		"response": "Valid submission"
 	} )
 } )
+
+// Logs the start of a user taking an exam 
+async function beginUserExam(knex, userId, assignmentId)
+{
+	// Get the database user id for the student
+	const student = await knex.select('id')
+		.from('users')
+		.where('canvas_user_id', userId)
+		.first();
+
+	// Get the exam id for the assignment 
+	const exam = await knex.select('id')
+		.from('exams')
+		.where('canvas_assignment_id', assignmentId)
+		.first();
+
+	// Create an entry to show the student started the exam now
+	// May be a duplicate if the student refreshes the page before 
+	// submitting the exam 
+	try {
+		await knex
+			.insert({
+				user_id: student.id,
+				exam_id: exam.id,
+				started_at: knex.fn.now()
+			})
+			.into('exams_users');
+	} catch( e ) {
+		console.error(e);
+	}
+}
 
 // Sends an invalid request message if the sender is not an instructor
 function instructorOnly(req, res, next) 

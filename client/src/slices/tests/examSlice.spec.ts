@@ -1,5 +1,5 @@
 import { enableMapSet } from "immer"
-import { Feedback, Question, QuestionType, Response } from "../../App"
+import { Confidence, Feedback, Question, QuestionType, Response } from "../../App"
 import examReducer, {
 	examActions,
 	ExamState
@@ -20,9 +20,11 @@ describe( "exam reducer", () => {
 		responseIds: [],
 		responsesMap: new Map<number, Response>(),
 		responseState: "",
+		confidenceIds: [],
+		confidenceMap: new Map<number, Confidence>(),
 		feedbackIds: [],
 		feedbackMap: new Map<number, Feedback>(),
-		nextQuestionId: 0,
+		nextQuestionId: 10,
 		token: ""
 	}
 
@@ -33,9 +35,11 @@ describe( "exam reducer", () => {
 			responseIds: [],
 			responsesMap: new Map<number, Response>(),
 			responseState: "",
+			confidenceIds: [],
+			confidenceMap: new Map<number, Confidence>(),
 			feedbackIds: [],
 			feedbackMap: new Map<number, Feedback>(),
-			nextQuestionId: 0,
+			nextQuestionId: 10,
 			token: ""
 		} )
 	} )
