@@ -6,11 +6,12 @@ const cookieParser = require( "cookie-parser" )
 const bodyParser = require( "body-parser" )
 const logger = require( "morgan" )
 const cors = require( "cors" )
+require( "dotenv" ).config()
 
 const app = express()
 
 // Turn off browser caching
-app.disable('etag')
+app.disable( "etag" )
 
 // Require routers
 const apiRouter = require( "./routes/api" )

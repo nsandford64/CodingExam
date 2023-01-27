@@ -1,6 +1,7 @@
 // Copyright 2022 under MIT License
 import { Button, Intent } from "@blueprintjs/core"
 import * as React from "react"
+import { initializeConnect } from "react-redux/es/components/connect"
 import styled from "styled-components"
 import { User } from "../App"
 import { useAppSelector } from "../app/hooks"
@@ -94,6 +95,20 @@ export const InstructorView = React.memo( () => {
 
 		setView( "studentListView" )
 	}, [ feedbackMap, canvasUserId ] )
+
+	const handleGradeClick = React.useCallback( async () => {
+		const grade = .65
+		const data = await fetch( "/api/grade", {
+			method: "POST",
+			body: JSON.stringify( { "gradepercentage": grade } ),
+			headers: {
+				"Content-type": "application/json; charset=UTF-8",
+				"token": token,
+				"userid": canvasUserId
+			}
+		} )
+		console.log( data )
+	}, [] )
 
 	/**
 	 * Called on render - pulls in the list of students that have taken

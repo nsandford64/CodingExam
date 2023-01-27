@@ -79,13 +79,13 @@ export const ExamView = ( props: ExamViewProps ) => {
 
 	// Exam response state
 	const responseState = useAppSelector( selectResponseState )
-		// Array of questionIds from the Redux store
+	// Array of questionIds from the Redux store
 	const questionIds = useAppSelector( selectQuestionIds )
 	// Map of responses from the store
 	const responsesMap = useAppSelector( selectResponsesMap )
 	// Map of confidence ratings from the store
 	const confidenceMap = useAppSelector( selectConfidenceMap )
-	console.log({confidenceMap})
+	console.log( {confidenceMap} )
 	// token from the store
 	const token = useAppSelector( selectToken )
 
@@ -142,7 +142,7 @@ export const ExamView = ( props: ExamViewProps ) => {
 					"token": token,
 					"userID": props.canvasUserId || ""
 				}
-			})
+			} )
 
 			json = await data.json()
 			const confidence: Confidence[] = json.confidence
@@ -182,8 +182,8 @@ export const ExamView = ( props: ExamViewProps ) => {
 				dispatch( examActions.setQuestionsMap( newQuestionsMap ) )
 				dispatch( examActions.setResponseIds( newResponseIds ) )
 				dispatch( examActions.setResponsesMap( newResponsesMap ) )
-				dispatch( examActions.setConfidenceIds( newConfidenceIds ))
-				dispatch( examActions.setConfidenceMap( newConfidenceMap ))
+				dispatch( examActions.setConfidenceIds( newConfidenceIds ) )
+				dispatch( examActions.setConfidenceMap( newConfidenceMap ) )
 			} )
 
 			setLoading( false )
@@ -201,15 +201,15 @@ export const ExamView = ( props: ExamViewProps ) => {
 	 */
 	const submit = React.useCallback( async () => {
 		
-		const data = questionIds.map(id => ({
+		const data = questionIds.map( id => ( {
 			questionId: id,
-			value: responsesMap.get(id)?.value,
-			confidence: confidenceMap.get(id)?.value
-		}));		
+			value: responsesMap.get( id )?.value,
+			confidence: confidenceMap.get( id )?.value
+		} ) )		
 
-console.log({responsesMap})
-console.log({confidenceMap})
-console.log({data})
+		console.log( {responsesMap} )
+		console.log( {confidenceMap} )
+		console.log( {data} )
 
 		try {
 			const res = await fetch( "/api", {
@@ -217,7 +217,7 @@ console.log({data})
 				method: "POST",
 
 				// Adding body or contents to send
-				body: JSON.stringify(data),
+				body: JSON.stringify( data ),
      
 				// Adding headers to the request
 				headers: {
@@ -270,12 +270,12 @@ console.log({data})
 							fill
 						/>
 					)}
-					{responseState && responseState.includes("Valid") && (
+					{responseState && responseState.includes( "Valid" ) && (
 						<Callout intent="success">
 							Success! Your exam was submitted.
 						</Callout>
 					)}
-					{responseState && responseState.includes("Invalid") && (
+					{responseState && responseState.includes( "Invalid" ) && (
 						<Callout intent="danger">
 							Oh no! There was a problem saving your exam.  Contact your instructor for help.
 						</Callout>
