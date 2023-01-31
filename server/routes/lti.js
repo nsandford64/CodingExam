@@ -18,7 +18,11 @@ const router = express.Router()
 // without a valid LTI connection)
 const key = process.env.CODING_EXAM_LTI_CLIENT_KEY
 const secret = process.env.CODING_EXAM_LTI_CLIENT_SECRET
-if( !( key && secret ) ) throw "Missing LTI client key and/or secret environment variables."
+
+if( !( key && secret ) ) {
+	throw "Missing LTI client key and/or secret environment variables."
+}
+
 const provider = new lti.Provider( key, secret )
 
 // Credentials for PostGres database
@@ -88,7 +92,12 @@ if( process.env.NODE_ENV == "development" ) {
  */ 
 router.post( "/", async ( req, res ) => {
 	const knex = req.app.get( "db" )
-
+	
+	//TODO: ASK NATHAN IF THIS IS OK TO HAVE FOR DEVELOPMENT
+	//TODO: ALSO ASK IF WE SHOULD STORE THE LIS STUFF IN LTI DATA
+	if ( process.env.NODE_ENV == "development" ) {
+		req.connection.encrypted = true
+	}
 	provider.valid_request( req, async ( err, isValid ) => {
 		// If the request is invalid, the console logs an error, else it returns a message to the LTI provider
 		if ( !isValid ) {
@@ -96,8 +105,9 @@ router.post( "/", async ( req, res ) => {
 			console.log( req.protocol )
 			console.log( req.headers )
 			console.error( req.body )
-			res.status( 401 ).send( "Unauthorized" )
-		}	else {
+			res.status( 401 ).send( "Unauthorized request" )
+		}	
+		else {
 			const ltiData = { 
 				assignmentID: req.body.ext_lti_assignment_id,
 				userID: req.body.user_id,
@@ -107,13 +117,20 @@ router.post( "/", async ( req, res ) => {
 				givenName: req.body.lis_person_name_given,
 				email: req.body.lis_person_contact_email_primary
 			}
-			console.log( ltiData, req.body )
 			await findOrCreateUser( knex, ltiData )
-			if( ltiData.roles === "Instructor" ) await createExam( knex, ltiData.assignmentID )
+			if( ltiData.roles === "Instructor" ) {
+				await createExam( knex, ltiData.assignmentID )
+			}
+			if ( ltiData.roles === "Learner" ) {
+				const resultSourcedid = req.body.lis_result_sourcedid
+				const outcomeServiceUrl = req.body.lis_outcome_service_url
+				await storeGradeInfo( knex, ltiData, resultSourcedid, outcomeServiceUrl )
+			}
+			
 			// TODO: If student, create users_exams to start exam timer and save 
 			// passback url and result sourcedid so we can submit grades
 			// const resultSourcedid = req.body.lis_result_sourcedid;
-  		// const outcomeServiceUrl = req.body.lis_outcome_service_url;
+			// const outcomeServiceUrl = req.body.lis_outcome_service_url;
 			const token = generateAccessToken( ltiData )
 			serveIndex( res, token )
 		}
@@ -137,6 +154,33 @@ async function serveIndex( res, token ) {
 		) )
 	} )
 }
+/**
+ * Stores the outcome service url and result sourcedid for grading later
+ * @param {*} knex - database connection
+ * @param {*} ltiData - provides canvas assignment and user ids
+ * @param {*} resultSourcedid - result sourcedid from launch request
+ * @param {*} outcomeServiceUrl - outcome service url from launch request
+ */
+async function storeGradeInfo( knex, ltiData, resultSourcedid, outcomeServiceUrl ) {
+	const filter = await knex
+		.select( "exam_id", "user_id" )
+		.from( "exams_users" )
+		.innerJoin( "exams", "exams.id", "exams_users.exam_id" )
+		.innerJoin( "users", "users.id", "exams_users.user_id" )
+		.where( {
+			canvas_assignment_id: ltiData.assignmentID,
+			canvas_user_id: ltiData.userID
+		} )
+
+	const result = await knex
+		.update( { result_sourcedid: resultSourcedid, outcome_service_url: outcomeServiceUrl } )
+		.where( { 
+			exam_id: filter[0].exam_id,
+			user_id: filter[0].user_id 
+		} )
+		.from( "exams_users" )
+	console.log( result )
+}
 
 /**
  * Create an exam for the canvas assignment, if one does not yet exist
@@ -150,6 +194,7 @@ async function createExam( knex, canvasAssignmentID ){
 		await knex( "exams" ).insert( {
 			canvas_assignment_id: canvasAssignmentID
 		} )
+	// eslint-disable-next-line no-empty
 	} catch( _err ) {}
 }
 

@@ -108,7 +108,7 @@ export const InstructorView = React.memo( () => {
 			}
 		} )
 		console.log( data )
-	}, [] )
+	}, [ canvasUserId ] )
 
 	/**
 	 * Called on render - pulls in the list of students that have taken
@@ -147,6 +147,14 @@ export const InstructorView = React.memo( () => {
 						<Button 
 							text="Create Exam"
 							onClick={() => setView( "createExamView" )}
+						/>
+					)}
+					{view !== "studentListView" && view !== "createExamView" && (
+						<Button
+							text="Grade"
+							minimal
+							intent={Intent.PRIMARY}
+							onClick={() => handleGradeClick()}
 						/>
 					)}
 				</StyledButtonContainer>
