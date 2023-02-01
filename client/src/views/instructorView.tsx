@@ -58,6 +58,8 @@ export const InstructorView = React.memo( () => {
 	const [ users, setUsers ] = React.useState( [] as User[] )
 	// State that determines which view should be shown to the user
 	const [ view, setView ] = React.useState( "studentListView" as View )
+	// State that holds any display messages
+	const [ displayStatus, setDisplayStatus ] = React.useState( "" )
 	// State that holds the selected student's canvasUserId
 	const [ canvasUserId, setCanvasUserId ] = React.useState( "" )
 
@@ -69,8 +71,15 @@ export const InstructorView = React.memo( () => {
 	 * to render that student's responses
 	 */
 	const handleStudentClick = React.useCallback( ( id: string ) => {
+		setDisplayStatus( "" )
 		setView( "examView" )
 		setCanvasUserId( id )
+	}, [] )
+
+	const handleCreateExamClick = React.useCallback( () => {
+		setDisplayStatus( "" )
+		setView( "createExamView" )
+
 	}, [] )
 
 	/**
@@ -94,21 +103,39 @@ export const InstructorView = React.memo( () => {
 		console.log( json )
 
 		setView( "studentListView" )
+
+		let status = "Feedback Submission Unsuccessful"
+		if( json.response == "Valid submission" ) {
+			status = "Feedback Submitted"
+		}
+		setDisplayStatus( status )
+
 	}, [ feedbackMap, canvasUserId ] )
 
 	const handleGradeClick = React.useCallback( async () => {
-		const grade = .65
+		const grade = 85
 		const data = await fetch( "/api/grade", {
 			method: "POST",
-			body: JSON.stringify( { "gradepercentage": grade } ),
+			body: JSON.stringify( { "grade": grade } ),
 			headers: {
 				"Content-type": "application/json; charset=UTF-8",
 				"token": token,
 				"userid": canvasUserId
 			}
 		} )
-		console.log( data )
-	}, [ canvasUserId ] )
+
+		const json = await data.json()
+		console.log( json )
+
+		setView( "studentListView" )
+
+		let status = "Grade Submission Unsuccessful"
+		if ( json.response == "Valid submission" ) {
+			status = "Grade Submitted"
+		}
+		setDisplayStatus( status )
+
+	}, [ displayStatus, canvasUserId ] )
 
 	/**
 	 * Called on render - pulls in the list of students that have taken
@@ -135,6 +162,9 @@ export const InstructorView = React.memo( () => {
 	return (
 		<StyledInstructorView>
 			<StyledHeaderContainer>
+				{displayStatus && (
+					<h2>{displayStatus}</h2>
+				)}	
 				<StyledButtonContainer>
 					<Button 
 						disabled={view === "studentListView"}
@@ -146,7 +176,7 @@ export const InstructorView = React.memo( () => {
 					{view === "studentListView" && (
 						<Button 
 							text="Create Exam"
-							onClick={() => setView( "createExamView" )}
+							onClick={() => handleCreateExamClick()}
 						/>
 					)}
 					{view !== "studentListView" && view !== "createExamView" && (

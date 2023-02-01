@@ -1,7 +1,9 @@
 // Copyright 2022 under MIT License
 const express = require( "express" )
+const axios = require( "axios" )
 const router = express.Router()
 const jwt = require( "jsonwebtoken" )
+const OAuth1Signature = require( "oauth1-signature" )
 const { default: knex } = require( "knex" )
 const { Pool } = require( "pg" )
 
@@ -31,7 +33,7 @@ router.use( async function( req, res, next ) {
 			assignmentID: object.assignmentID,
 			userID: object.userID
 		} 
-		console.log( "token session:", req.session )
+		//console.log( "token session:", req.session )
 		next()
 	} )
 } )
@@ -399,7 +401,7 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 router.post( "/grade", instructorOnly, async( req, res ) => {
 	const {role, assignmentID } = req.session
 	const userID = req.headers.userid
-	const gradePercent = req.body.gradepercentage
+	const grade = req.body.grade
 	const knex = req.app.get( "db" )
 
 	const filter = await knex
@@ -420,7 +422,62 @@ router.post( "/grade", instructorOnly, async( req, res ) => {
 			user_id: filter[0].user_id 
 		} )
 
-	console.log( gradeInfo )
+	const resultSourcedid = gradeInfo[0].result_sourcedid
+	const outcomeServiceURL = gradeInfo[0].outcome_service_url
+
+
+	const xml = `<?xml version="1.0" encoding="UTF-8"?>
+    <imsx_POXEnvelopeRequest xmlns="http://www.imsglobal.org/services/ltiv1p1/xsd/imsoms_v1p0">
+      <imsx_POXHeader>
+        <imsx_POXRequestHeaderInfo>
+          <imsx_version>V1.0</imsx_version>
+          <imsx_messageIdentifier>999999123</imsx_messageIdentifier>
+        </imsx_POXRequestHeaderInfo>
+      </imsx_POXHeader>
+      <imsx_POXBody>
+        <replaceResultRequest>
+          <resultRecord>
+            <sourcedGUID>
+              <sourcedId>${resultSourcedid}</sourcedId>
+            </sourcedGUID>
+            <result>
+              <resultScore>
+                <language>en</language>
+                <textString>${grade/100}</textString>
+              </resultScore>
+            </result>
+          </resultRecord>
+        </replaceResultRequest>
+      </imsx_POXBody>  
+    </imsx_POXEnvelopeRequest>`
+	
+	const signature = OAuth1Signature( {
+		consumerKey: process.env.CODING_EXAM_LTI_CLIENT_KEY,
+		consumerSecret: process.env.CODING_EXAM_LTI_CLIENT_SECRET,
+		url: outcomeServiceURL,
+		method: "POST",
+		queryParams: {} // if you need to post additional query params, do it here
+	} )
+
+	/* We use Axios instead of fetch API here for the HTTP request to the LTI provider
+	* This is done to simplify the URL parameters sent, as there are several
+	* Also, this code snippet was provided by Dr. Bean's Canvas Group Peer Evaluation repository, so we know it works
+	*/
+	const gradeResponse = await axios.request( {
+		url: outcomeServiceURL,
+		params: signature.params,
+		method: "post",
+		headers: { "Content-Type": "application/xml" },
+		data: xml,
+	} )
+
+	if ( gradeResponse.status == 200 ) {
+		res.send( { response: "Valid submission" } )
+	}
+	else {
+		res.send( { response: "Invalid submission" } )
+	}
+	
 } )
 
 // Logs the start of a user taking an exam 
