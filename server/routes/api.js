@@ -144,6 +144,7 @@ router.post( "/", async ( req, res ) => {
 	const knex = req.app.get( "db" )
 
 	// Get the user id for the student
+	console.log( "UserID: " + userID )
 	const student = await knex.select( "*" )
 		.from( "users" )
 		.where( "canvas_user_id", userID )
