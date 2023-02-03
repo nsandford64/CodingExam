@@ -19,15 +19,13 @@ const learnerToken = jwt.sign( { assignmentID: "example-exam",
 
 describe ( "/api/role endpoint tests", () => {
 
-	/*
 	it( "GET /api/role should return a role", async () => {
 		const res = await requestWithSupertest.get( "/api/role" )
-			.set( { token: instructorToken} )
+			.set( { token: learnerToken} )
 		expect( res.status ).toEqual( 200 )
 		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
 		expect( res.body ).toHaveProperty( "role" )
 	} )
-	*/
 	
 	it( "GET /api/role should return an invalid response if sent with no token", async () => {
 		const res = await requestWithSupertest.get( "/api/role" )
@@ -35,7 +33,6 @@ describe ( "/api/role endpoint tests", () => {
 		expect( res.type ).toEqual( expect.stringContaining( "text/plain" ) )
 	} )
 	
-	/*
 	it( "GET /api/role with a learner token should return the correct role", async () => {
 		const res = await requestWithSupertest.get( "/api/role" )
 			.set( { token: learnerToken} )
@@ -44,7 +41,6 @@ describe ( "/api/role endpoint tests", () => {
 		expect( res.body ).toHaveProperty( "role" )
 		expect( res.body.role ).toEqual( "Learner" )
 	} )
-	*/
 	
 	it( "GET /api/role with an instructor token should return the correct role", async () => {
 		const res = await requestWithSupertest.get( "/api/role" )
@@ -58,7 +54,6 @@ describe ( "/api/role endpoint tests", () => {
 
 describe( "/api/questions endpoint tests", () => {
 
-	
 	it( "GET /api/questions should return the list of questions", async () => {
 		const res = await requestWithSupertest.get( "/api/questions" )
 			.set( { token: learnerToken } )
@@ -66,7 +61,6 @@ describe( "/api/questions endpoint tests", () => {
 		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
 		expect( res.body ).toHaveProperty( "questions" )
 	} )
-	
 
 	it( "GET /api/questions body should have correct properties", async () => {
 		const res = await requestWithSupertest.get( "/api/questions" )
@@ -79,7 +73,6 @@ describe( "/api/questions endpoint tests", () => {
 			expect( question ).toHaveProperty( "type" )
 		} )
 	} )
-	
 
 	it ( "GET /api/questions should return invalid request without a token", async () => {
 		const res = await requestWithSupertest.get( "/api/questions" )
@@ -135,18 +128,6 @@ describe( "/api/responses endpoint tests", () => {
 
 describe( "/api endpoint tests", () => {
 
-	/*
-	it( "POST /api should return a valid submission response", async () => {
-		const res = await requestWithSupertest.post( "/api" )
-			.send( [ {"questionId":1,"isText":false,"value":2},{"questionId":2,"isText":false,"value":0},{"questionId":3,"isText":true,"value":"ok"} ] )
-			.set( { token: learnerToken } )
-		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
-		expect( res.status ).toEqual( 200 )
-		expect( res.body ).toHaveProperty( "response" )
-		expect( res.body.response ).toEqual( "Valid submission" )
-	} )
-	*/
-
 	it( "POST /api with no token should return invalid response", async () => {
 		const res = await requestWithSupertest.post( "/api" )
 			.send( [ {"questionId":1,"isText":false,"value":2},{"questionId":2,"isText":false,"value":0},{"questionId":3,"isText":true,"value":"ok"} ] )
@@ -162,7 +143,6 @@ describe( "/api/feedback endpoint tests", () => {
 		expect( res.status ).toEqual( 200 )
 		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
 		expect( res.body ).toHaveProperty( "feedback" )
-		expect( res.body.users ).not.toEqual( [] )
 	} )
 
 	it( "GET /api/feedback body should have correct properties", async () => {
@@ -171,7 +151,6 @@ describe( "/api/feedback endpoint tests", () => {
 		expect( res.status ).toEqual( 200 )
 		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
 		expect( res.body ).toHaveProperty( "feedback" )
-		expect( res.body.users ).not.toEqual( [] )
 		res.body.feedback.forEach( feedback => {
 			expect( feedback ).toHaveProperty( "questionId" )
 			expect( feedback ).toHaveProperty( "value" )
@@ -210,6 +189,7 @@ describe( "/api/examtakers endpoint tests", () => {
 		expect( res.status ).toEqual( 200 )
 		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
 		expect( res.body ).toHaveProperty( "users" )
+		expect( res.body.users ).not.toEqual( [] )
 	} )
 
 	it( "GET /api/examtakers body should have correct properties", async () => {
@@ -218,6 +198,7 @@ describe( "/api/examtakers endpoint tests", () => {
 		expect( res.status ).toEqual( 200 )
 		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
 		expect( res.body ).toHaveProperty( "users" )
+		expect( res.body.users ).not.toEqual( [] )
 		res.body.users.forEach( user => {
 			expect( user ).toHaveProperty( "canvasUserId" )
 			expect( user ).toHaveProperty( "fullName" )
