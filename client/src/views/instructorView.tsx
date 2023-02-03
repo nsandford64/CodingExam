@@ -1,8 +1,9 @@
 // Copyright 2022 under MIT License
-import { Button, Intent } from "@blueprintjs/core"
+import { Button, Intent, TextArea } from "@blueprintjs/core"
 import * as React from "react"
 import { initializeConnect } from "react-redux/es/components/connect"
 import styled from "styled-components"
+import { IndentStyle } from "typescript"
 import { User } from "../App"
 import { useAppSelector } from "../app/hooks"
 import { selectFeedbackMap, selectToken } from "../slices/examSlice"
@@ -62,6 +63,8 @@ export const InstructorView = React.memo( () => {
 	const [ displayStatus, setDisplayStatus ] = React.useState( "" )
 	// State that holds the selected student's canvasUserId
 	const [ canvasUserId, setCanvasUserId ] = React.useState( "" )
+	// State that holds the grade for the currently selected student
+	const [ grade, setGrade ] = React.useState( 0 )
 
 	// feedbackMap from the store
 	const feedbackMap = useAppSelector( selectFeedbackMap )
@@ -113,7 +116,6 @@ export const InstructorView = React.memo( () => {
 	}, [ feedbackMap, canvasUserId ] )
 
 	const handleGradeClick = React.useCallback( async () => {
-		const grade = 85
 		const data = await fetch( "/api/grade", {
 			method: "POST",
 			body: JSON.stringify( { "grade": grade } ),
@@ -133,9 +135,11 @@ export const InstructorView = React.memo( () => {
 		if ( json.response == "Valid submission" ) {
 			status = "Grade Submitted"
 		}
+		console.log( "Entered grade: " + grade )
+		setGrade( 0 )
 		setDisplayStatus( status )
 
-	}, [ displayStatus, canvasUserId ] )
+	}, [ displayStatus, canvasUserId, grade ] )
 
 	/**
 	 * Called on render - pulls in the list of students that have taken
@@ -180,12 +184,19 @@ export const InstructorView = React.memo( () => {
 						/>
 					)}
 					{view !== "studentListView" && view !== "createExamView" && (
-						<Button
-							text="Grade"
-							minimal
-							intent={Intent.PRIMARY}
-							onClick={() => handleGradeClick()}
-						/>
+						<>
+							<TextArea
+								style={{ maxHeight: "30px", resize: "none" }}
+								intent={Intent.PRIMARY}
+								onChange={e => setGrade( parseInt( e.target.value ) || 0 )}
+							/>
+							<Button
+								text="Grade"
+								minimal
+								intent={Intent.PRIMARY}
+								onClick={() => handleGradeClick()}
+							/>
+						</>
 					)}
 				</StyledButtonContainer>
 				{view === "studentListView" && (
