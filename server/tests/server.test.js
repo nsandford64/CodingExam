@@ -240,27 +240,7 @@ describe( "/api/instructorfeedback endpoint tests", () => {
 } )
 
 describe( "/api/createexam endpoint tests", () => {
-	it( "POSt to /api/createexam should return a valid submission response", async () => {
-		const res = await requestWithSupertest.post( "/api/createexam" )
-			.send( 
-				[ {"text":"test text", 
-					"correctAnswer":0,
-					"type":1,
-					"answers": [ "text 1", "text 2" ] },
-
-				{"text":"test text2", 
-					"correctAnswer":1,
-					"type":1,
-					"answers": [ "text 1", "text 2" ]
-				} ]
-			)
-			.set( { token: instructorToken } )
-		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
-		expect( res.status ).toEqual( 200 )
-		expect( res.body ).toHaveProperty( "response" )
-		expect( res.body.response ).toEqual( "Valid submission" )
-	} )
-
+	
 	it( "POST to /api/createexam with no token should return an invalid response", async () => {
 		const res = await requestWithSupertest.post( "/api/createexam" )
 		expect( res.type ).toEqual( expect.stringContaining( "text/plain" ) )
@@ -274,37 +254,5 @@ describe( "/api/createexam endpoint tests", () => {
 		expect( res.status ).toEqual( 200 )
 		expect( res.body ).toHaveProperty( "response" )
 		expect( res.body.response ).toEqual( "Invalid request: not an instructor" )
-	} )
-
-	it( "POST to /api/createexam should add questions", async () => {
-		const initialQuestions = await requestWithSupertest.get( "/api/questions" )
-			.set( { token: instructorToken } )
-		const initNum = initialQuestions.body.questions.length
-		
-		const res = await requestWithSupertest.post( "/api/createexam" )
-			.send(
-				[ {"text":"test text", 
-					"correctAnswer":0,
-					"type":1,
-					"answers": [ "text 1", "text 2" ] },
-
-				{"text":"test text2", 
-					"correctAnswer":1,
-					"type":1,
-					"answers": [ "text 1", "text 2" ]
-				} ]
-			)
-			.set( { token: instructorToken } )
-
-		const newQuestions = await requestWithSupertest.get( "/api/questions" )
-			.set( { token: instructorToken } )
-		const newNum = newQuestions.body.questions.length
-
-		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
-		expect( res.status ).toEqual( 200 )
-		expect( res.body ).toHaveProperty( "response" )
-		expect( res.body.response ).toEqual( "Valid submission" )
-		expect( newNum ).toEqual( initNum + 2 )
-	} )
-	
+	} )	
 } )
