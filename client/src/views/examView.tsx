@@ -85,7 +85,7 @@ export const ExamView = ( props: ExamViewProps ) => {
 	const responsesMap = useAppSelector( selectResponsesMap )
 	// Map of confidence ratings from the store
 	const confidenceMap = useAppSelector( selectConfidenceMap )
-	console.log( {confidenceMap} )
+	//console.log( {confidenceMap} )
 	// token from the store
 	const token = useAppSelector( selectToken )
 
@@ -207,9 +207,9 @@ export const ExamView = ( props: ExamViewProps ) => {
 			confidence: confidenceMap.get( id )?.value
 		} ) )		
 
-		console.log( {responsesMap} )
-		console.log( {confidenceMap} )
-		console.log( {data} )
+		//console.log( {responsesMap} )
+		//console.log( {confidenceMap} )
+		//console.log( {data} )
 
 		try {
 			const res = await fetch( "/api", {

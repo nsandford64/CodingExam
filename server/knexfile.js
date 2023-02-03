@@ -1,3 +1,4 @@
+// Copyright 2022 under MIT License
 // Update with your config settings.
 require( "dotenv" ).config()
 

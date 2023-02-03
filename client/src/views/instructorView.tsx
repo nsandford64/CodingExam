@@ -103,8 +103,9 @@ export const InstructorView = React.memo( () => {
 		} )
 
 		const json = await data.json()
-		console.log( json )
+		//console.log( json )
 
+		// Returns the view to the base student list view
 		setView( "studentListView" )
 
 		let status = "Feedback Submission Unsuccessful"
@@ -115,6 +116,10 @@ export const InstructorView = React.memo( () => {
 
 	}, [ feedbackMap, canvasUserId ] )
 
+	/**
+	 * Handles when the instructor clicks the grade button on a student's
+	 * submission. Uses the value entered in the grade box in the view
+	 */
 	const handleGradeClick = React.useCallback( async () => {
 		const data = await fetch( "/api/grade", {
 			method: "POST",
@@ -127,15 +132,15 @@ export const InstructorView = React.memo( () => {
 		} )
 
 		const json = await data.json()
-		console.log( json )
+		//console.log( json )
 
+		// Returns the view to the base student list view
 		setView( "studentListView" )
 
 		let status = "Grade Submission Unsuccessful"
 		if ( json.response == "Valid submission" ) {
 			status = "Grade Submitted"
 		}
-		console.log( "Entered grade: " + grade )
 		setGrade( 0 )
 		setDisplayStatus( status )
 

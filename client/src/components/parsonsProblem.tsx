@@ -95,6 +95,7 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 		} ) )
 	}, [] )
 
+	//Method needed for dragging
 	const onDragEnd = ( { source, destination }: DropResult ) => {
 		// Make sure we have a valid destination
 		if ( !destination ) return
@@ -207,6 +208,7 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 		}
 	}
 
+	//Returns the component
 	return (
 		<StyledParsonsProblem>
 			<Label>{question?.text}</Label>

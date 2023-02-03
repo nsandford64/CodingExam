@@ -28,11 +28,13 @@ const provider = new lti.Provider( key, secret )
 // Credentials for PostGres database
 const credentials = require( "../knexfile" ).connection
 
-/*
-	Some hard coded users and tokens for use in testing outside of canvas
-	Both tokens can have the roles property changed between "Learner"
-	and "Instructor" to switch between the student and instructor views
-*/
+/**
+ * Development entry point for the application
+ * If the app is in development mode, it will serve a basic HTML page
+ * that contains two links, one that leads to the instructor view and 
+ * one that leads to the learner view. These links will also generate
+ * an access token with some default values in the database.
+ */
 if( process.env.NODE_ENV == "development" ) {
 	
 	/*
@@ -58,6 +60,7 @@ if( process.env.NODE_ENV == "development" ) {
 			userID: "example-instructor",
 			roles: "Instructor"
 		}
+		// Creates the user and exam if either don't exist already
 		await findOrCreateUser( knex, ltiData.userID, ltiData.fullName )
 		await createExam( knex, ltiData.assignmentID )
 		const token = generateAccessToken( ltiData )
@@ -75,6 +78,7 @@ if( process.env.NODE_ENV == "development" ) {
 			userID: "example-learner",
 			roles: "Learner"
 		}
+		// Creates the user if it does not exist already
 		await findOrCreateUser( knex, ltiData.userID, ltiData.fullName )
 		const token = generateAccessToken( ltiData )
 		serveIndex( res, token )
@@ -87,14 +91,12 @@ if( process.env.NODE_ENV == "development" ) {
 	router.get( "/", ( req, res ) => res.sendStatus( 404 ) )
 }
 
-/*
+/**
  * Handles a POST request from the LTI consumer, in this case Canvas
  */ 
 router.post( "/", async ( req, res ) => {
 	const knex = req.app.get( "db" )
 	
-	//TODO: ASK NATHAN IF THIS IS OK TO HAVE FOR DEVELOPMENT
-	//TODO: ALSO ASK IF WE SHOULD STORE THE LIS STUFF IN LTI DATA
 	if ( process.env.NODE_ENV == "development" ) {
 		req.connection.encrypted = true
 	}
@@ -102,12 +104,13 @@ router.post( "/", async ( req, res ) => {
 		// If the request is invalid, the console logs an error, else it returns a message to the LTI provider
 		if ( !isValid ) {
 			console.error( err )
-			console.log( req.protocol )
-			console.log( req.headers )
+			//console.log( req.protocol )
+			//console.log( req.headers )
 			console.error( req.body )
 			res.status( 401 ).send( "Unauthorized request" )
 		}	
 		else {
+			// Creates LTI data object with data from the LTI launch request
 			const ltiData = { 
 				assignmentID: req.body.ext_lti_assignment_id,
 				userID: req.body.user_id,
@@ -117,6 +120,7 @@ router.post( "/", async ( req, res ) => {
 				givenName: req.body.lis_person_name_given,
 				email: req.body.lis_person_contact_email_primary
 			}
+			// Creates user and exam if they don't already exist
 			await findOrCreateUser( knex, ltiData )
 			if( ltiData.roles === "Instructor" ) {
 				await createExam( knex, ltiData.assignmentID )
@@ -124,13 +128,10 @@ router.post( "/", async ( req, res ) => {
 			if ( ltiData.roles === "Learner" ) {
 				const resultSourcedid = req.body.lis_result_sourcedid
 				const outcomeServiceUrl = req.body.lis_outcome_service_url
+				// Stores the LTI info needed for grading into the database
 				await storeGradeInfo( knex, ltiData, resultSourcedid, outcomeServiceUrl )
 			}
 			
-			// TODO: If student, create users_exams to start exam timer and save 
-			// passback url and result sourcedid so we can submit grades
-			// const resultSourcedid = req.body.lis_result_sourcedid;
-			// const outcomeServiceUrl = req.body.lis_outcome_service_url;
 			const token = generateAccessToken( ltiData )
 			serveIndex( res, token )
 		}
@@ -179,7 +180,7 @@ async function storeGradeInfo( knex, ltiData, resultSourcedid, outcomeServiceUrl
 			user_id: filter[0].user_id 
 		} )
 		.from( "exams_users" )
-	console.log( result )
+	//console.log( result )
 }
 
 /**

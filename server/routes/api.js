@@ -10,7 +10,7 @@ const { Pool } = require( "pg" )
 // Credentials for PostGres database
 const credentials = require( "../knexfile" ).connection
 
-/* All api calls require the request to have 
+/** All api calls require the request to have 
  * a valid token, so this middleware function
  * ensures that is the case, or serves a 403
  * Unauthorized error
@@ -61,7 +61,6 @@ router.get( "/role", async function ( req, res ) {
 		// If the student hasn't taken the exam, we need to "start the clock"
 		else await beginUserExam( knex, userID, assignmentID )
 	}
-
 	// Sends back the role of the client along with if they have taken the exam
 	res.json( {
 		role: role,
@@ -84,7 +83,7 @@ router.get( "/questions", async function( req, res ) {
 	// We need to 'rehydrate' questions that have answer data 
 	// and also limit what data is available depending on user role
 	questions.map( question => {
-		console.log( "answer_data", question.answer_data )
+		//console.log( "answer_data", question.answer_data )
 		// multiple choice
 		if( question.type === 1 ) {
 			question.answers = question.answer_data.answers 
@@ -144,7 +143,7 @@ router.post( "/", async ( req, res ) => {
 	const knex = req.app.get( "db" )
 
 	// Get the user id for the student
-	console.log( "UserID: " + userID )
+	//console.log( "UserID: " + userID )
 	const student = await knex.select( "*" )
 		.from( "users" )
 		.where( "canvas_user_id", userID )
@@ -160,7 +159,7 @@ router.post( "/", async ( req, res ) => {
 
 	// Prepare the student responses for insertion in the database
 	const responses = req.body.map( response => {
-		console.log( {response} )
+		//console.log( {response} )
 		if ( typeof response.value === "string" ) {
 			return {
 				question_id: response.questionId,
@@ -180,7 +179,7 @@ router.post( "/", async ( req, res ) => {
 		}
 	} )
 
-	console.log( {responses} )
+	//console.log( {responses} )
 
 	// Insert each response into the StudentResponse table
 	await knex( "student_responses" )
@@ -283,7 +282,7 @@ router.get( "/examtakers", instructorOnly, async( req, res ) => {
 } )
 
 // Enters instructor feedback into the database
-router.post( "/instructorfeedback", async( req, res ) => {
+router.post( "/instructorfeedback", instructorOnly, async( req, res ) => {
 	const {role, assignmentID} = req.session
 	const userID = req.headers.userid	
 	const knex = req.app.get( "db" )
@@ -340,7 +339,7 @@ router.get( "/newquestionid", instructorOnly, async( req, res ) => {
 
 // Creates the questions for an exam when the instructor submits a question set
 router.post( "/createexam", instructorOnly, async( req, res ) => {
-	console.log( req.body )
+	//console.log( req.body )
 	const {role, assignmentID, userID} = req.session
 	const knex = req.app.get( "db" )
 
@@ -389,7 +388,7 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 				answer_data: answerData
 			} )
 			.returning( "id" )
-		console.log( "result of exam creation:", result )
+		//console.log( "result of exam creation:", result )
 		
 	}
 			
@@ -399,12 +398,19 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 	} )
 } )
 
+/**
+ * Endpoint for sending a grade for a student's exam to Canvas (or LTI provider)
+ */
 router.post( "/grade", instructorOnly, async( req, res ) => {
 	const {role, assignmentID } = req.session
 	const userID = req.headers.userid
 	const grade = req.body.grade
 	const knex = req.app.get( "db" )
 
+	/**
+	 * Gets the database exam and user ID needed to filter the
+	 * exams_users table and get the desired row in that table
+	 */
 	const filter = await knex
 		.select( "exam_id", "user_id" )
 		.from( "exams_users" )
@@ -415,6 +421,10 @@ router.post( "/grade", instructorOnly, async( req, res ) => {
 			canvas_user_id: userID
 		} )
 
+	/**
+	 * Gets the outcome service URL and result sourcedid for the student's
+	 * assignment from the corresponding row in the exams_users table
+	 */
 	const gradeInfo = await knex
 		.select( "outcome_service_url", "result_sourcedid" )
 		.from( "exams_users" )
@@ -427,6 +437,9 @@ router.post( "/grade", instructorOnly, async( req, res ) => {
 	const outcomeServiceURL = gradeInfo[0].outcome_service_url
 
 
+	/**
+	 * XML message that Canvas expects when submitting a grade
+	 */
 	const xml = `<?xml version="1.0" encoding="UTF-8"?>
     <imsx_POXEnvelopeRequest xmlns="http://www.imsglobal.org/services/ltiv1p1/xsd/imsoms_v1p0">
       <imsx_POXHeader>
@@ -452,6 +465,7 @@ router.post( "/grade", instructorOnly, async( req, res ) => {
       </imsx_POXBody>  
     </imsx_POXEnvelopeRequest>`
 	
+	// Oauth signature that also needs to be sent with the grade
 	const signature = OAuth1Signature( {
 		consumerKey: process.env.CODING_EXAM_LTI_CLIENT_KEY,
 		consumerSecret: process.env.CODING_EXAM_LTI_CLIENT_SECRET,
@@ -512,7 +526,11 @@ async function beginUserExam( knex, userId, assignmentId )
 	}
 }
 
-// Sends an invalid request message if the sender is not an instructor
+/** 
+ * Middleware function that some of the Instructor only endpoints are
+ * passed through.
+ * Sends an invalid request message if the sender is not an instructor
+ * */
 function instructorOnly( req, res, next ) 
 {
 	const {role} = req.session

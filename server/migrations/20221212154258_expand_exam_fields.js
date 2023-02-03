@@ -1,3 +1,4 @@
+// Copyright 2022 under MIT License
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
