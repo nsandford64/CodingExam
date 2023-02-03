@@ -225,7 +225,7 @@ async function findOrCreateUser( knex, userData ){
  * Generates an access token using an object containing the encoded properties as the key 
  */
 function generateAccessToken( object ) {
-	return jwt.sign( object, "token_secret" )
+	return jwt.sign( object, process.env.TOKEN_SECRET )
 }
 
 module.exports = router

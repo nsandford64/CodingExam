@@ -19,6 +19,8 @@ services:
       # canvas LTI variables
       CODING_EXAM_LTI_CLIENT_KEY: Codekey
       CODING_EXAM_LTI_CLIENT_SECRET: Keysecret
+      # jwt encoding secret
+      TOKEN_SECRET: token_secret
     ports:
       - "9000:9000"
     #volumes:

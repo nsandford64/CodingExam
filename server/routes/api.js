@@ -22,7 +22,7 @@ router.use( async function( req, res, next ) {
 	// Decodes the token and returns the role contained within it
 	// Store these in the req.session so they are available 
 	// in downstream methods
-	else jwt.verify( token, "token_secret", ( err, object ) => {
+	else jwt.verify( token, process.env.TOKEN_SECRET, ( err, object ) => {
 		if( err ) {
 			console.error( err )
 			res.sendStatus( 403 )
