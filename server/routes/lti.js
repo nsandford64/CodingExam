@@ -163,24 +163,32 @@ async function serveIndex( res, token ) {
  * @param {*} outcomeServiceUrl - outcome service url from launch request
  */
 async function storeGradeInfo( knex, ltiData, resultSourcedid, outcomeServiceUrl ) {
-	const filter = await knex
-		.select( "exam_id", "user_id" )
-		.from( "exams_users" )
-		.innerJoin( "exams", "exams.id", "exams_users.exam_id" )
-		.innerJoin( "users", "users.id", "exams_users.user_id" )
-		.where( {
-			canvas_assignment_id: ltiData.assignmentID,
-			canvas_user_id: ltiData.userID
-		} )
+	console.log( "AssignmentID: " + ltiData.assignmentID )
+	console.log( "UserID: " + ltiData.userID )
 
-	const result = await knex
-		.update( { result_sourcedid: resultSourcedid, outcome_service_url: outcomeServiceUrl } )
-		.where( { 
-			exam_id: filter[0].exam_id,
-			user_id: filter[0].user_id 
+	/**
+	 * Gets the database ID for the student and exam and then
+	 * inserts them into the exams_users table
+	 */
+	const student = await knex.select( "*" )
+		.from( "users" )
+		.where( "canvas_user_id", ltiData.userID )
+		.first()
+		
+	const exam = await knex.select( "*" )
+		.from( "exams" )
+		.where( "canvas_assignment_id", ltiData.assignmentID )
+		.first()
+
+	await knex( "exams_users" )
+		.insert( {
+			user_id: student.id,
+			exam_id: exam.id,
+			result_sourcedid: resultSourcedid,
+			outcome_service_url: outcomeServiceUrl
 		} )
-		.from( "exams_users" )
-	//console.log( result )
+		.onConflict( [ "exam_id", "user_id" ] )
+		.merge()
 }
 
 /**
