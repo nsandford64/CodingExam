@@ -21,8 +21,9 @@ const secret = process.env.CODING_EXAM_LTI_CLIENT_SECRET
 if(!(key && secret)) throw 'Missing LTI client key and/or secret environment variables.'
 const provider = new lti.Provider(key, secret);
 
-// Credentials for PostGres database
-const credentials = require('../knexfile').connection
+// The secret for signing Json Web Tokens
+const jwtSecret = process.env.CODING_EXAM_JWT_SECRET
+
 
 /*
 	Some hard coded users and tokens for use in testing outside of canvas
@@ -180,7 +181,7 @@ async function findOrCreateUser(knex, userData){
  * Generates an access token using an object containing the encoded properties as the key 
  */
 function generateAccessToken( object ) {
-	return jwt.sign( object, "token_secret" )
+	return jwt.sign( object, jwtSecret )
 }
 
 module.exports = router

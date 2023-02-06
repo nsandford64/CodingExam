@@ -18,6 +18,8 @@ services:
       # canvas LTI variables
       CODING_EXAM_LTI_CLIENT_KEY: Codekey
       CODING_EXAM_LTI_CLIENT_SECRET: Keysecret
+      # jwt variables
+      CODING_EXAM_JWT_SECRET: JwtTokenSecret
     ports:
       - "9000:9000"
     #volumes:

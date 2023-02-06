@@ -3,10 +3,9 @@ const express = require( "express" )
 const router = express.Router()
 const jwt = require( "jsonwebtoken" )
 const { default: knex } = require("knex")
-const { Pool } = require( "pg" )
 
-// Credentials for PostGres database
-const credentials = require('../knexfile').connection
+// The secret for signing Json Web Tokens
+const jwtSecret = process.env.CODING_EXAM_JWT_SECRET
 
 /* All api calls require the request to have 
  * a valid token, so this middleware function
@@ -20,7 +19,7 @@ router.use(async function(req, res, next) {
 	// Decodes the token and returns the role contained within it
 	// Store these in the req.session so they are available 
 	// in downstream methods
-	else jwt.verify( token, "token_secret", ( err, object ) => {
+	else jwt.verify( token, jwtSecret, ( err, object ) => {
 		if(err) {
 			console.error(err);
 			res.sendStatus(403)
