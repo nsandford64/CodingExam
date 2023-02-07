@@ -399,7 +399,8 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 } )
 
 /**
- * Endpoint for sending a grade for a student's exam to Canvas (or LTI provider)
+ * Endpoint for entering a student's score into the database after an assignment
+ * has been graded
  */
 router.post( "/grade", instructorOnly, async( req, res ) => {
 	const {role, assignmentID } = req.session
@@ -411,88 +412,114 @@ router.post( "/grade", instructorOnly, async( req, res ) => {
 	 * Gets the database exam and user ID needed to filter the
 	 * exams_users table and get the desired row in that table
 	 */
-	const filter = await knex
-		.select( "exam_id", "user_id" )
-		.from( "exams_users" )
-		.innerJoin( "exams", "exams.id", "exams_users.exam_id" )
-		.innerJoin( "users", "users.id", "exams_users.user_id" )
-		.where( {
-			canvas_assignment_id: assignmentID,
-			canvas_user_id: userID
-		} )
+	const examUser = getExamsUsersRow( knex, userID, assignmentID )
 
 	/**
-	 * Gets the outcome service URL and result sourcedid for the student's
-	 * assignment from the corresponding row in the exams_users table
+	 * Updates the appropriate row in the exams users table with the user's score
 	 */
-	const gradeInfo = await knex
-		.select( "outcome_service_url", "result_sourcedid" )
+	await knex
+		.update( { ScoredPoints: grade } )
 		.from( "exams_users" )
 		.where( { 
-			exam_id: filter[0].exam_id,
-			user_id: filter[0].user_id 
+			exam_id: examUser.exam_id,
+			user_id: examUser.user_id 
 		} )
 
-	const resultSourcedid = gradeInfo[0].result_sourcedid
-	const outcomeServiceURL = gradeInfo[0].outcome_service_url
+	res.send( "Grade updated" )
+} )
 
+/**
+ * Submits the grades for a particular assignment
+ */
+router.post( "/submitgrades", instructorOnly, async( req, res ) => {
+	const {role, assignmentID } = req.session
+
+	const totalPoints = await knex
+		.select( "total_points" )
+		.from( "exams" )
+		.where( {canvasAssignmentID: assignmentID} )
+		.first()
 
 	/**
-	 * XML message that Canvas expects when submitting a grade
-	 */
-	const xml = `<?xml version="1.0" encoding="UTF-8"?>
-    <imsx_POXEnvelopeRequest xmlns="http://www.imsglobal.org/services/ltiv1p1/xsd/imsoms_v1p0">
-      <imsx_POXHeader>
-        <imsx_POXRequestHeaderInfo>
-          <imsx_version>V1.0</imsx_version>
-          <imsx_messageIdentifier>999999123</imsx_messageIdentifier>
-        </imsx_POXRequestHeaderInfo>
-      </imsx_POXHeader>
-      <imsx_POXBody>
-        <replaceResultRequest>
-          <resultRecord>
-            <sourcedGUID>
-              <sourcedId>${resultSourcedid}</sourcedId>
-            </sourcedGUID>
-            <result>
-              <resultScore>
-                <language>en</language>
-                <textString>${grade/100}</textString>
-              </resultScore>
-            </result>
-          </resultRecord>
-        </replaceResultRequest>
-      </imsx_POXBody>  
-    </imsx_POXEnvelopeRequest>`
-	
-	// Oauth signature that also needs to be sent with the grade
-	const signature = OAuth1Signature( {
-		consumerKey: process.env.CODING_EXAM_LTI_CLIENT_KEY,
-		consumerSecret: process.env.CODING_EXAM_LTI_CLIENT_SECRET,
-		url: outcomeServiceURL,
-		method: "POST",
-		queryParams: {} // if you need to post additional query params, do it here
-	} )
-
-	/* We use Axios instead of fetch API here for the HTTP request to the LTI provider
-	* This is done to simplify the URL parameters sent, as there are several
-	* Also, this code snippet was provided by Dr. Bean's Canvas Group Peer Evaluation repository, so we know it works
+	* Gets the outcome service URL and result sourcedid for the student's
+	* assignment from the corresponding row in the exams_users table
 	*/
-	const gradeResponse = await axios.request( {
-		url: outcomeServiceURL,
-		params: signature.params,
-		method: "post",
-		headers: { "Content-Type": "application/xml" },
-		data: xml,
-	} )
+	const gradeSubmissions = await knex
+		.select( "outcome_service_url", "result_sourcedid", "ScoredPoints" )
+		.from( "exams_users" )
+		.where( { 
+			exam_id: assignmentID,
+			HasTaken: true
+		} )
 
-	if ( gradeResponse.status == 200 ) {
-		res.send( { response: "Valid submission" } )
+	for ( const submission in gradeSubmissions ) {
+
+		/**
+		 * Makes sure the grade value being sent to canvas isn't over 100
+		 * Pretty sure it will mess with Canvas LTI
+		 */
+		let grade = submission.ScoredPoints/totalPoints
+		if ( grade > 1 ) {
+			grade = 1
+		}
+		/**
+		* XML message that Canvas expects when submitting a grade
+		*/
+		const xml = `<?xml version="1.0" encoding="UTF-8"?>
+			<imsx_POXEnvelopeRequest xmlns="http://www.imsglobal.org/services/ltiv1p1/xsd/imsoms_v1p0">
+			<imsx_POXHeader>
+			<imsx_POXRequestHeaderInfo>
+				<imsx_version>V1.0</imsx_version>
+				<imsx_messageIdentifier>999999123</imsx_messageIdentifier>
+			</imsx_POXRequestHeaderInfo>
+			</imsx_POXHeader>
+			<imsx_POXBody>
+			<replaceResultRequest>
+				<resultRecord>
+				<sourcedGUID>
+					<sourcedId>${submission.resultSourcedid}</sourcedId>
+				</sourcedGUID>
+				<result>
+					<resultScore>
+					<language>en</language>
+					<textString>${submission.ScoredPoints/totalPoints}</textString>
+					</resultScore>
+				</result>
+				</resultRecord>
+			</replaceResultRequest>
+			</imsx_POXBody>  
+		</imsx_POXEnvelopeRequest>`
+  
+
+		// Oauth signature that also needs to be sent with the grade
+		const signature = OAuth1Signature( {
+			consumerKey: process.env.CODING_EXAM_LTI_CLIENT_KEY,
+			consumerSecret: process.env.CODING_EXAM_LTI_CLIENT_SECRET,
+			url: submission.outcomeServiceURL,
+			method: "POST",
+			queryParams: {} // if you need to post additional query params, do it here
+		} )
+
+		/* We use Axios instead of fetch API here for the HTTP request to the LTI provider
+		* This is done to simplify the URL parameters sent, as there are several
+		* Also, this code snippet was provided by Dr. Bean's Canvas Group Peer Evaluation repository, so we know it works
+		*/
+		const gradeResponse = await axios.request( {
+			url: submission.outcomeServiceURL,
+			params: signature.params,
+			method: "post",
+			headers: { "Content-Type": "application/xml" },
+			data: xml,
+		} )
+
+		if ( gradeResponse.status == 200 ) {
+			res.send( { response: "Valid submission" } )
+		}
+		else {
+			res.send( { response: "Invalid submission" } )
+		}
 	}
-	else {
-		res.send( { response: "Invalid submission" } )
-	}
-	
+
 } )
 
 // Logs the start of a user taking an exam 
@@ -524,6 +551,19 @@ async function beginUserExam( knex, userId, assignmentId )
 	} catch( e ) {
 		console.error( e )
 	}
+}
+
+async function getExamsUsersRow( knex, canvasUserID, canvasAssignmentID ) {
+	const filter = await knex
+		.select( "exam_id", "user_id" )
+		.from( "exams_users" )
+		.innerJoin( "exams", "exams.id", "exams_users.exam_id" )
+		.innerJoin( "users", "users.id", "exams_users.user_id" )
+		.where( {
+			canvas_assignment_id: canvasAssignmentID,
+			canvas_user_id: canvasUserID
+		} )
+	return filter[0]
 }
 
 /** 
