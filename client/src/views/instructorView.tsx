@@ -90,7 +90,7 @@ export const InstructorView = React.memo( () => {
 	 * updates feedback in the store
 	 */
 	const handleFeedbackClick = React.useCallback( async () => {
-		const data = await fetch( "/api/instructorfeedback", {
+		const data = await fetch( "/api/instructor/feedback", {
 			method: "POST",
 			body: JSON.stringify(
 				Array.from( feedbackMap.values() )
@@ -116,12 +116,31 @@ export const InstructorView = React.memo( () => {
 
 	}, [ feedbackMap, canvasUserId ] )
 
+	const handleSubmitGradesClick = React.useCallback( async () => {
+		const data = await fetch( "/api/instructor/submitgrades", {
+			method: "POST",
+			headers: {
+				"Content-type": "application/json; charset=UTF-8",
+				"token": token
+			}
+		} )
+
+		const json = await data.json()
+		
+		let status = "Grade Submission Unsuccessful"
+		if ( json.response == "Valid submission" ) {
+			status = "Grades Submitted"
+		}
+
+		setDisplayStatus( status )
+	}, [] )
+
 	/**
 	 * Handles when the instructor clicks the grade button on a student's
 	 * submission. Uses the value entered in the grade box in the view
 	 */
-	const handleGradeClick = React.useCallback( async () => {
-		const data = await fetch( "/api/grade", {
+	const handleGradeStudentClick = React.useCallback( async () => {
+		const data = await fetch( "/api/instructor/grade", {
 			method: "POST",
 			body: JSON.stringify( { "grade": grade } ),
 			headers: {
@@ -131,14 +150,11 @@ export const InstructorView = React.memo( () => {
 			}
 		} )
 
-		const json = await data.json()
-		//console.log( json )
-
 		// Returns the view to the base student list view
 		setView( "studentListView" )
 
 		let status = "Grade Submission Unsuccessful"
-		if ( json.response == "Valid submission" ) {
+		if ( data.status == 200 ) {
 			status = "Grade Submitted"
 		}
 		setGrade( 0 )
@@ -152,7 +168,7 @@ export const InstructorView = React.memo( () => {
 	 */
 	React.useEffect( () => {
 		const initUsers = async () => {
-			const data = await fetch( "/api/examtakers", {
+			const data = await fetch( "/api/instructor/examtakers", {
 				headers: {
 					"token": token
 				}
@@ -183,6 +199,12 @@ export const InstructorView = React.memo( () => {
 						onClick={() => setView( "studentListView" )}
 					/>
 					{view === "studentListView" && (
+						<Button
+							text="Submit Grades"
+							onClick={() => handleSubmitGradesClick()}
+						/>
+					)}
+					{view === "studentListView" && (
 						<Button 
 							text="Create Exam"
 							onClick={() => handleCreateExamClick()}
@@ -199,7 +221,7 @@ export const InstructorView = React.memo( () => {
 								text="Grade"
 								minimal
 								intent={Intent.PRIMARY}
-								onClick={() => handleGradeClick()}
+								onClick={() => handleGradeStudentClick()}
 							/>
 						</>
 					)}

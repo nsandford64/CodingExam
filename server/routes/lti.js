@@ -120,10 +120,13 @@ router.post( "/", async ( req, res ) => {
 				givenName: req.body.lis_person_name_given,
 				email: req.body.lis_person_contact_email_primary
 			}
+
+			const totalPoints = req.body.custom_canvas_assignment_points_possible
+
 			// Creates user and exam if they don't already exist
 			await findOrCreateUser( knex, ltiData )
 			if( ltiData.roles === "Instructor" ) {
-				await createExam( knex, ltiData.assignmentID )
+				await createExam( knex, ltiData.assignmentID, totalPoints )
 			}
 			if ( ltiData.roles === "Learner" ) {
 				const resultSourcedid = req.body.lis_result_sourcedid
@@ -163,8 +166,6 @@ async function serveIndex( res, token ) {
  * @param {*} outcomeServiceUrl - outcome service url from launch request
  */
 async function storeGradeInfo( knex, ltiData, resultSourcedid, outcomeServiceUrl ) {
-	console.log( "AssignmentID: " + ltiData.assignmentID )
-	console.log( "UserID: " + ltiData.userID )
 
 	/**
 	 * Gets the database ID for the student and exam and then
@@ -196,12 +197,13 @@ async function storeGradeInfo( knex, ltiData, resultSourcedid, outcomeServiceUrl
  * @param {Knex} knex - the database connection
  * @param {int} canvasAssignmentID - the canvas assignment id
  */
-async function createExam( knex, canvasAssignmentID ){
+async function createExam( knex, canvasAssignmentID, totalPoints ){
 	// Try creating an exam. Since the column canvas_exam_id is unique
 	// if one already exists, this will fail
 	try {
 		await knex( "exams" ).insert( {
-			canvas_assignment_id: canvasAssignmentID
+			canvas_assignment_id: canvasAssignmentID,
+			total_points: totalPoints
 		} )
 	// eslint-disable-next-line no-empty
 	} catch( _err ) {}

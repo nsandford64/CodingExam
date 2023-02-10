@@ -1,7 +1,7 @@
 // Copyright 2022 under MIT License
 
 import { createAsyncThunk, createSelector, createSlice } from "@reduxjs/toolkit"
-import type {PayloadAction, ThunkAction, AnyAction} from '@reduxjs/toolkit'
+import type {PayloadAction, ThunkAction, AnyAction} from "@reduxjs/toolkit"
 import { Feedback, Question, Response, Confidence } from "../App"
 import type { AppThunk, RootState } from "../app/store"
 
@@ -206,7 +206,7 @@ export const createExamThunk: AppThunk<void> = async ( dispatch, getState ) => {
 		}
 	} )
 
-	const res = await fetch( "/api/createexam", {
+	const res = await fetch( "/api/instructor/createexam", {
 		// Adding method type
 		method: "POST",
 
