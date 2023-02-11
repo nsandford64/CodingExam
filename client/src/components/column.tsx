@@ -34,7 +34,7 @@ const StyledList = styled.div`
 	border: 1px solid ${Colors.BLACK};
 	border-radius: 2px;
 `
-
+// Renders the column for the parsons problem component
 const ParsonsColumn = React.memo( ( props: ParsonsColumnProps ) => {
 	return (
 		<Droppable droppableId={props.column.id}>

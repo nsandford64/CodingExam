@@ -252,7 +252,7 @@ const initialState: ExamState = {
 	feedbackMap: new Map<number, Feedback>(),
 	confidenceIds: [],
 	confidenceMap: new Map<number, Confidence>(),
-	nextQuestionId: 10,
+	nextQuestionId: 30,
 	token: ""
 }
 

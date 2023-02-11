@@ -10,7 +10,7 @@ const cors = require( "cors" )
 const app = express()
 
 // Turn off browser caching
-app.disable('etag')
+app.disable( "etag" )
 
 // Require routers
 const apiRouter = require( "./routes/api" )

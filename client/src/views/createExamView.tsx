@@ -37,7 +37,7 @@ export const CreateExamView = React.memo( () => {
 	const token = useAppSelector( selectToken )
 
 	// State to hold the selected QuestionType
-	const [ selectedQuestionType, setSelectedQuestionType] = React.useState( "" )
+	const [ selectedQuestionType, setSelectedQuestionType ] = React.useState( "" )
 	const [ loading, setLoading ] = React.useState( true )
 
 	// Called on render - reinitialize the store
@@ -62,19 +62,19 @@ export const CreateExamView = React.memo( () => {
 			} )
 
 			// Update the store
-			batch(()=>{
+			batch( ()=>{
 				dispatch( examActions.reInitializeStore() )
-				dispatch( examActions.setQuestionIds( newQuestionIds))
-			})
+				dispatch( examActions.setQuestionIds( newQuestionIds ) )
+			} )
 
 			setLoading( false )
 		}
 		// call async function
-		initQuestions();
+		initQuestions()
 	}, [] )
 
 	// Render the component
-	if(loading) return (
+	if( loading ) return (
 		<StyledCreateExamView>
 			<Spinner 
 				size={50}

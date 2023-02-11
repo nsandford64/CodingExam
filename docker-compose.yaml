@@ -3,7 +3,7 @@ services:
   app:
     build: .
     depends_on:
-      - postgres
+    - postgres
     environment:
       # trust proxy settings - use true or ip address when proxied
       #TRUST_PROXY: "true"
@@ -35,8 +35,8 @@ services:
       POSTGRES_USER: coding_exam_user 
       POSTGRES_PASSWORD: coding_exam_pass
       POSTGRES_DB: coding_exam
-    #healthcheck:
-    #  test: ["CMD-SHELL", "pg_isready", "-U", "coding_exam_user", "-d", "coding_exam"]
-    #  interval: 10s
-    #  timeout: 5s
-    #  retries: 5
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coding_exam_user -d coding_exam"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

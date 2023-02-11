@@ -5,12 +5,9 @@
  */
 exports.up = function( knex ) {
 	return knex.schema
-		.alterTable( "student_responses", table => {
-			table.decimal( "confidence_rating" )
-		} )
 		.alterTable( "exams_users", table => {
-			table.datetime( "started_at" ).defaultTo( knex.fn.now() )
-			table.datetime( "finished_at" )
+			table.string( "outcome_service_url" )
+			table.string( "result_sourcedid" )
 		} )
 }
 
@@ -20,11 +17,8 @@ exports.up = function( knex ) {
  */
 exports.down = function( knex ) {
 	return knex.schema
-		.alterTable( "student_responses", table => {
-			table.dropColumn( "confidence_rating" )
-		} )
 		.alterTable( "exams_users", table => {
-			table.dropColumn( "started_at" ).defaultTo( knex.fn.now() )
-			table.dropColumn( "finished_at" )
+			table.dropColumn( "outcome_service_url" )
+			table.dropColumn( "result_sourcedid" )
 		} )
 }
