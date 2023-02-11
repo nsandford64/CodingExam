@@ -3,8 +3,7 @@ services:
   app:
     build: .
     depends_on:
-      postgres:
-        condition: service_healthy
+    - postgres
     environment:
       # trust proxy settings - use true or ip address when proxied
       #TRUST_PROXY: "true"
