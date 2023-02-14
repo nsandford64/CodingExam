@@ -291,17 +291,4 @@ async function beginUserExam( knex, userId, assignmentId )
 	}
 }
 
-async function getExamsUsersRow( knex, canvasUserID, canvasAssignmentID ) {
-	const filter = await knex
-		.select( "exam_id", "user_id" )
-		.from( "exams_users" )
-		.innerJoin( "exams", "exams.id", "exams_users.exam_id" )
-		.innerJoin( "users", "users.id", "exams_users.user_id" )
-		.where( {
-			canvas_assignment_id: canvasAssignmentID,
-			canvas_user_id: canvasUserID
-		} )
-	return filter[0]
-}
-
 module.exports = router
