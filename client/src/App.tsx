@@ -60,6 +60,16 @@ export const App = React.memo( () => {
 	 * Runs on render - determines the user's role based on their JWT token
 	 */
 	React.useEffect( () => {
+		
+		const preventUnload = ( event: BeforeUnloadEvent ) => {
+			const message = "You are about to navigate away, and your entered data will not be saved. Are you sure you want to leave?"
+			event.preventDefault()
+			event.returnValue = message
+		}
+		
+		window.addEventListener( "beforeunload", preventUnload )
+		
+
 		// Gets the user's role depending on their token
 		const getRole = async () => {			
 			// Fetch role
