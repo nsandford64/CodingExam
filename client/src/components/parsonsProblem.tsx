@@ -81,7 +81,9 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 			sortedItems.push( item )
 		}
 
-		unsortedItems = unsortedItems.filter( item => !sortedItems.includes( item ) )
+		unsortedItems = unsortedItems.filter( unsortedItem => (
+			!sortedItems.find( sortedItem => sortedItem.id === unsortedItem.id )
+		) )
 
 		setColumns( prevState => ( {
 			unsorted: {

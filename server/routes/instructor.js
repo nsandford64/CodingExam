@@ -161,6 +161,7 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 
 	// Create or update the exam questions 
 	for ( const question of req.body ) {
+		console.log( question )
 		/* Determine answer data based on question type. 
 		 * Answer data is stored in a JSON column in the db
 		 */
@@ -179,6 +180,13 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 			answerData = {
 				correctAnswer: true && question.correctAnswer
 			}
+		}
+		// 5 is Parsons Problems
+		if ( question.type === 5 ) 
+		{
+			answerData = { 
+				answers: question.answers,
+				correctAnswer: question.parsonsAnswer }
 		}
 						
 		// Inserts the question into the database and returns the questionID for inserting potential answers
@@ -213,7 +221,7 @@ router.post( "/grade", instructorOnly, async( req, res ) => {
 		const score = submission.scoredPoints
 
 		await knex
-			.update( {scored_points: score.score} )
+			.update( {scored_points: score} )
 			.from( "student_responses" )
 			.where( {
 				question_id: questionID,

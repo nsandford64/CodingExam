@@ -91,6 +91,11 @@ router.get( "/questions", async function( req, res ) {
 		if( question.type === 3 && role == "Instructor" ) {
 			question.correctAnswer = question.answer_data.correctAnswer
 		}
+		// parsons
+		if( question.type === 5 ) {
+			question.answers = question.answer_data.answers
+			if ( role == "Instructor" ) question.parsonsAnswer = question.answer_data.parsonsAnswer
+		}
 		// remove the question_data property from the question
 		delete question.answer_data
 		// return the modified question

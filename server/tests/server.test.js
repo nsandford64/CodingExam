@@ -239,16 +239,16 @@ describe( "/api/instructor/feedback endpoint tests", () => {
 	} )
 } )
 
-describe( "/api/createexam endpoint tests", () => {
+describe( "/api/instructor/createexam endpoint tests", () => {
 	
-	it( "POST to /api/createexam with no token should return an invalid response", async () => {
-		const res = await requestWithSupertest.post( "/api/createexam" )
+	it( "POST to /api/instructor/createexam with no token should return an invalid response", async () => {
+		const res = await requestWithSupertest.post( "/api/instructor/createexam" )
 		expect( res.type ).toEqual( expect.stringContaining( "text/plain" ) )
 		expect( res.status ).toEqual( 403 )
 	} )
 
-	it( "POST to /api/createexam with a learner token should return an invalid response", async () => {
-		const res = await requestWithSupertest.post( "/api/createexam" )
+	it( "POST to /api/instructor/createexam with a learner token should return an invalid response", async () => {
+		const res = await requestWithSupertest.post( "/api/instructor/createexam" )
 			.set( { token: learnerToken } )
 		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
 		expect( res.status ).toEqual( 200 )
