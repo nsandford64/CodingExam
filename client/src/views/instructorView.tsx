@@ -121,28 +121,26 @@ export const InstructorView = React.memo( () => {
 	 * Handles when the instructor clicks the grade button on a student's
 	 * submission. Uses the value entered in the grade box in the view
 	 */
-	const handleGradeStudentClick = React.useCallback( async () => {
-		const data = await fetch( "/api/instructor/grade", {
+	const handleSubmitGradesClick = React.useCallback( async () => {
+		const data = await fetch( "/api/instructor/submitgrades", {
 			method: "POST",
-			body: JSON.stringify( { "grade": grade } ),
 			headers: {
 				"Content-type": "application/json; charset=UTF-8",
-				"token": token,
-				"userid": canvasUserId
+				"token": token
 			}
 		} )
 
-		// Returns the view to the base student list view
-		setView( "studentListView" )
-
+		const json = await data.json()
+		
 		let status = "Grade Submission Unsuccessful"
-		if ( data.status == 200 ) {
-			status = "Grade Submitted"
+		if ( json.response == "Valid submission" ) {
+			status = "Grades Submitted"
 		}
-		setGrade( 0 )
-		setDisplayStatus( status )
 
-	}, [ displayStatus, canvasUserId, grade ] )
+		setDisplayStatus( status )
+		
+
+	}, [ displayStatus ] )
 
 	/**
 	 * Called on render - pulls in the list of students that have taken
@@ -178,7 +176,10 @@ export const InstructorView = React.memo( () => {
 						text="Back"
 						minimal
 						intent={Intent.PRIMARY}
-						onClick={() => setView( "studentListView" )}
+						onClick={() => { 
+							setView( "studentListView" )
+							setDisplayStatus( "" )
+						}}
 					/>
 					{view === "studentListView" && (
 						<>
@@ -194,16 +195,11 @@ export const InstructorView = React.memo( () => {
 					)}
 					{view !== "studentListView" && view !== "createExamView" && (
 						<>
-							<TextArea
-								style={{ maxHeight: "30px", resize: "none" }}
-								intent={Intent.PRIMARY}
-								onChange={e => setGrade( parseInt( e.target.value ) || 0 )}
-							/>
 							<Button
 								text="Grade"
 								minimal
 								intent={Intent.PRIMARY}
-								onClick={() => handleGradeStudentClick()}
+								onClick={() => handleSubmitGradesClick()}
 							/>
 						</>
 					)}

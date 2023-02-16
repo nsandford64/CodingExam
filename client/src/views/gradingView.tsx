@@ -51,23 +51,6 @@ export const GradingView = React.memo( ( props: GradingViewProps ) => {
 	 */
 	const [ selectedIndex, setSelectedIndex ] = React.useState( 0 )
 
-	const handleSubmitGradesClick = React.useCallback( async () => {
-		const data = await fetch( "/api/instructor/submitgrades", {
-			method: "POST",
-			headers: {
-				"Content-type": "application/json; charset=UTF-8",
-				"token": token
-			}
-		} )
-
-		const json = await data.json()
-		
-		let status = "Grade Submission Unsuccessful"
-		if ( json.response == "Valid submission" ) {
-			status = "Grades Submitted"
-		}
-	}, [] )
-
 	React.useEffect( () => {
 		const initializeQuestions = async () => {
 			// Fetch exam questions

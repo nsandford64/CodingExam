@@ -321,6 +321,7 @@ router.post( "/submitgrades", instructorOnly, async( req, res ) => {
 			} )
 		}
 		catch( error ) {
+			console.log( "Error, are you running in canvas?" )
 			res.send( {response: "error"} )
 		}
 	}
