@@ -55,6 +55,21 @@ router.get( "/examtakers", instructorOnly, async( req, res ) => {
 	res.json( {users} )
 } )
 
+router.get( "/examquestions", instructorOnly, async( req, res ) => {
+	const {role, assignmentID, userID} = req.session
+	const knex = req.app.get( "db" )
+
+	const questions = await knex
+		.select( "exam_questions.id", "exam_questions.question_text", "exam_questions.question_type_id",
+			"exam_questions.exam_id", "exam_questions.answer_data" )
+		.from( "exam_questions" ) 
+		.innerJoin( "exams", "exams.id", "exam_questions.exam_id" )
+		.where( "exams.canvas_assignment_id", assignmentID )
+	
+	//sends the list of questions from the database for an exam
+	res.json( {questions} )
+} )
+
 // Enters instructor feedback into the database
 router.post( "/feedback", instructorOnly, async( req, res ) => {
 	const {role, assignmentID} = req.session
@@ -297,6 +312,14 @@ router.post( "/submitgrades", instructorOnly, async( req, res ) => {
 
 } )
 
+/**
+ * Retrieves the database exam ID and user ID for a given Canvas userID and assignmentID
+ * These values will correspond to a row in the exams_users table
+ * @param {*} knex Database connection
+ * @param {*} canvasUserID Canvas ID of the user
+ * @param {*} canvasAssignmentID Canvas ID of the assignment/exam
+ * @returns 
+ */
 async function getExamsUsersRow( knex, canvasUserID, canvasAssignmentID ) {
 	const filter = await knex
 		.select( "exam_id", "user_id" )

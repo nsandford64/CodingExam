@@ -117,8 +117,9 @@ export const InstructorView = React.memo( () => {
 	}, [ feedbackMap, canvasUserId ] )
 
 	const handleSubmitGradesClick = React.useCallback( async () => {
-		const data = await fetch( "/api/instructor/submitgrades", {
-			method: "POST",
+		//TODO CHANGE IT BACK TO POST SUBMITGRADES
+		const data = await fetch( "/api/instructor/examquestions", {
+			method: "GET",
 			headers: {
 				"Content-type": "application/json; charset=UTF-8",
 				"token": token
