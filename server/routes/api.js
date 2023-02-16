@@ -72,7 +72,7 @@ router.get( "/questions", async function( req, res ) {
 	const knex = req.app.get( "db" )
 
 	let questions = await knex
-		.select( "exam_questions.id as id", "question_text as text", "question_type_id as type", "answer_data" )
+		.select( "exam_questions.id as id", "question_text as text", "question_type_id as type", "answer_data", "points_possible" )
 		.from( "exam_questions" )
 		.leftJoin( "exams", "exams.id", "exam_questions.exam_id" )
 		.leftJoin( "question_types", "question_types.id", "exam_questions.question_type_id" )

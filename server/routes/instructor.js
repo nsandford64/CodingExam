@@ -62,21 +62,25 @@ router.get( "/responsesfromquestion", instructorOnly, async( req, res ) => {
 
 	const results = await knex
 		.select( "student_responses.id", "student_responses.is_text_response", "student_responses.text_response", 
-			"student_responses.answer_response", "student_responses.question_id", "student_responses.user_id" )
+			"student_responses.answer_response", "student_responses.question_id", "student_responses.user_id",
+			"users.full_name", "student_responses.scored_points" )
 		.from( "student_responses" )
 		.innerJoin( "exam_questions", "exam_questions.id", "student_responses.question_id" )
+		.innerJoin( "users", "users.id", "student_responses.user_id" )
 		.where( "exam_questions.id", questionID )
 
-	const responses = results.map( row => {
+	const submissions = results.map( row => {
 		return {
 			questionId: row.question_id,
 			isText: row.is_text_response,
 			value: row.is_text_response ? row.text_response : row.answer_response,
-			userId: row.user_id
+			userId: row.user_id,
+			fullName: row.full_name,
+			scored_points: row.scored_points || 0
 		}
 	} )
 
-	res.send( {responses} )
+	res.send( {submissions} )
 } )
 
 // Enters instructor feedback into the database
