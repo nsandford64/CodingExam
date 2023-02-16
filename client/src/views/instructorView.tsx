@@ -9,6 +9,7 @@ import { useAppSelector } from "../app/hooks"
 import { selectFeedbackMap, selectToken } from "../slices/examSlice"
 import { CreateExamView } from "./createExamView"
 import { ExamView } from "./examView"
+import { GradingView } from "./gradingView"
 
 /**
  * Style for InstructorView
@@ -116,25 +117,6 @@ export const InstructorView = React.memo( () => {
 
 	}, [ feedbackMap, canvasUserId ] )
 
-	const handleSubmitGradesClick = React.useCallback( async () => {
-		const data = await fetch( "/api/instructor/submitgrades", {
-			method: "POST",
-			headers: {
-				"Content-type": "application/json; charset=UTF-8",
-				"token": token
-			}
-		} )
-
-		const json = await data.json()
-		
-		let status = "Grade Submission Unsuccessful"
-		if ( json.response == "Valid submission" ) {
-			status = "Grades Submitted"
-		}
-
-		setDisplayStatus( status )
-	}, [] )
-
 	/**
 	 * Handles when the instructor clicks the grade button on a student's
 	 * submission. Uses the value entered in the grade box in the view
@@ -199,16 +181,16 @@ export const InstructorView = React.memo( () => {
 						onClick={() => setView( "studentListView" )}
 					/>
 					{view === "studentListView" && (
-						<Button
-							text="Submit Grades"
-							onClick={() => handleSubmitGradesClick()}
-						/>
-					)}
-					{view === "studentListView" && (
-						<Button 
-							text="Create Exam"
-							onClick={() => handleCreateExamClick()}
-						/>
+						<>
+							<Button 
+								text="Create Exam"
+								onClick={() => handleCreateExamClick()}
+							/>
+							<Button 
+								text="Grade Exams"
+								onClick={() => setView( "gradingView" )}
+							/>
+						</>
 					)}
 					{view !== "studentListView" && view !== "createExamView" && (
 						<>
@@ -262,6 +244,9 @@ export const InstructorView = React.memo( () => {
 					/>
 				</>
 			)}
+			{view === "gradingView" && (
+				<GradingView disabled={false} />
+			)}
 		</StyledInstructorView>
 	)
 } )
@@ -271,3 +256,4 @@ type View =
 	"studentListView" 
   | "examView"
   | "createExamView"
+  | "gradingView"

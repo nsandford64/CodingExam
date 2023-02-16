@@ -1,9 +1,11 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit"
 import examReducer from "../slices/examSlice"
+import gradingReducer from "../slices/gradingSlice"
 
 export const store = configureStore( {
 	reducer: {
-		exam: examReducer
+		exam: examReducer,
+		grading: gradingReducer
 	},
 	middleware( getDefaultMiddleware ) {
 		return getDefaultMiddleware( {

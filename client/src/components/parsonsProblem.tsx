@@ -54,6 +54,8 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 	} as { unsorted: Column, sorted: Column } )
 
 	React.useEffect( () => {
+		console.log( question )
+
 		const items: Item[] = []
 
 		question?.answers.map( ( answer, index ) => {

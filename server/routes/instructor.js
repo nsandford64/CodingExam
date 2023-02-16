@@ -76,7 +76,7 @@ router.get( "/responsesfromquestion", instructorOnly, async( req, res ) => {
 			value: row.is_text_response ? row.text_response : row.answer_response,
 			userId: row.user_id,
 			fullName: row.full_name,
-			scored_points: row.scored_points || 0
+			scoredPoints: row.scored_points || 0
 		}
 	} )
 
@@ -215,7 +215,7 @@ router.post( "/grade", instructorOnly, async( req, res ) => {
 	const {role, assignmentID } = req.session
 	const knex = req.app.get( "db" )
 
-	for ( const submission of req.body.submissions ) {
+	for ( const submission of req.body ) {
 		const userID = submission.userId
 		const questionID = submission.questionId
 		const score = submission.scoredPoints

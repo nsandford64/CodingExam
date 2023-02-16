@@ -48,10 +48,10 @@ export const App = React.memo( () => {
 	const [ taken, setTaken ] = React.useState( false )
 
 	// Stores the JWT token
-	const token = String( window.__INITIAL_DATA__ )
+	//const token = String( window.__INITIAL_DATA__ )
 
 	// Debug instructor token
-	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJleGFtcGxlLWV4YW0iLCJmdWxsTmFtZSI6IkV4YW1wbGUgSW5zdHJ1Y3RvciIsInVzZXJJRCI6ImV4YW1wbGUtaW5zdHJ1Y3RvciIsInJvbGVzIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTY3NTM3NzcxOH0.aH9JLLUHpRRJuhLQ-xmmEF2D1j6pu1iBXD5vP3mJxnE"
+	const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJleGFtcGxlLWV4YW0iLCJmdWxsTmFtZSI6IkV4YW1wbGUgSW5zdHJ1Y3RvciIsInVzZXJJRCI6ImV4YW1wbGUtaW5zdHJ1Y3RvciIsInJvbGVzIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTY3NTM3NzcxOH0.aH9JLLUHpRRJuhLQ-xmmEF2D1j6pu1iBXD5vP3mJxnE"
 	
 	// Debug learner token
 	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJleGFtcGxlLWV4YW0iLCJmdWxsTmFtZSI6IkV4YW1wbGUgTGVhcm5lciIsInVzZXJJRCI6ImV4YW1wbGUtbGVhcm5lciIsInJvbGVzIjoiTGVhcm5lciIsImlhdCI6MTY3NTM3NzYzOH0.HFMJmkONPDCcKVwAmfjhz0jllgG14S3yf4HmWjsJkhw"
@@ -186,6 +186,20 @@ export type Response = {
 	questionId: number // Specific questionId that this Response relates to
 	isText?: boolean // Whether this is a text Response
 	value: number | string // The actual value of the Response 
+}
+
+/**
+ * Submission Type
+ * 
+ * This type defines what submission should like for grading purposes
+ */
+export type Submission = {
+	questionId: number
+	isText?: boolean
+	value: number | string 
+	userId: number
+	fullName: string
+	scoredPoints: number
 }
 
 /**

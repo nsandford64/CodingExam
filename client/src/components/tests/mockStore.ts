@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit"
 import { Confidence, Feedback, Question, Response } from "../../App"
 import { RootState } from "../../app/store"
 import examReducer, { ExamState } from "../../slices/examSlice"
+import { GradingState } from "../../slices/gradingSlice"
 
 /**
  * CreateMockStore()
@@ -27,8 +28,14 @@ export const createMockStore = ( ( mockQuestion: Question ) => {
 		token: ""
 	}
 
+	const gradingState: GradingState = {
+		questions: [],
+		scoresMap: new Map<string, number>()
+	}
+
 	const rootState: RootState = {
-		exam: examState
+		exam: examState,
+		grading: gradingState
 	}
 	
 	return configureStore( {
