@@ -183,10 +183,6 @@ router.post( "/", async ( req, res ) => {
 	await knex( "student_responses" )
 		.insert( responses )
 
-	// Insert each response into the StudentResponse table
-	await knex( "student_responses" )
-		.insert( responses )
-
 	// Set the exam as taken 
 	await knex( "exams_users" )
 		.insert( {

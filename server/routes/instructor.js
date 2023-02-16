@@ -55,19 +55,28 @@ router.get( "/examtakers", instructorOnly, async( req, res ) => {
 	res.json( {users} )
 } )
 
-router.get( "/examquestions", instructorOnly, async( req, res ) => {
+router.get( "/responsesfromquestion", instructorOnly, async( req, res ) => {
 	const {role, assignmentID, userID} = req.session
+	const questionID = req.headers.questionid
 	const knex = req.app.get( "db" )
 
-	const questions = await knex
-		.select( "exam_questions.id", "exam_questions.question_text", "exam_questions.question_type_id",
-			"exam_questions.exam_id", "exam_questions.answer_data" )
-		.from( "exam_questions" ) 
-		.innerJoin( "exams", "exams.id", "exam_questions.exam_id" )
-		.where( "exams.canvas_assignment_id", assignmentID )
-	
-	//sends the list of questions from the database for an exam
-	res.json( {questions} )
+	const results = await knex
+		.select( "student_responses.id", "student_responses.is_text_response", "student_responses.text_response", 
+			"student_responses.answer_response", "student_responses.question_id", "student_responses.user_id" )
+		.from( "student_responses" )
+		.innerJoin( "exam_questions", "exam_questions.id", "student_responses.question_id" )
+		.where( "exam_questions.id", questionID )
+
+	const responses = results.map( row => {
+		return {
+			questionId: row.question_id,
+			isText: row.is_text_response,
+			value: row.is_text_response ? row.text_response : row.answer_response,
+			userId: row.user_id
+		}
+	} )
+
+	res.send( {responses} )
 } )
 
 // Enters instructor feedback into the database
