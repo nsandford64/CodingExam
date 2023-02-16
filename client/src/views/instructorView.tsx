@@ -118,8 +118,8 @@ export const InstructorView = React.memo( () => {
 
 	const handleSubmitGradesClick = React.useCallback( async () => {
 		//TODO CHANGE IT BACK TO POST SUBMITGRADES
-		const data = await fetch( "/api/instructor/examquestions", {
-			method: "GET",
+		const data = await fetch( "/api/instructor/submitgrades", {
+			method: "POST",
 			headers: {
 				"Content-type": "application/json; charset=UTF-8",
 				"token": token
