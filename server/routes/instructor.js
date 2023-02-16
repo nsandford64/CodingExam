@@ -201,31 +201,25 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 } )
 
 /**
- * Endpoint for entering a student's score into the database after an assignment
- * has been graded
+ * Endpoint for updating a student's score on a question after it has been graded
  */
 router.post( "/grade", instructorOnly, async( req, res ) => {
 	const {role, assignmentID } = req.session
-	const userID = req.headers.userid
-	const grade = req.body.grade
 	const knex = req.app.get( "db" )
 
-	/**
-	 * Gets the database exam and user ID needed to filter the
-	 * exams_users table and get the desired row in that table
-	 */
-	const examUser = await getExamsUsersRow( knex, userID, assignmentID )
+	for ( const submission of req.body.submissions ) {
+		const userID = submission.userId
+		const questionID = submission.questionId
+		const score = submission.scoredPoints
 
-	/**
-	 * Updates the appropriate row in the exams users table with the user's score
-	 */
-	await knex
-		.update( { ScoredPoints: grade } )
-		.from( "exams_users" )
-		.where( { 
-			exam_id: examUser.exam_id,
-			user_id: examUser.user_id 
-		} )
+		await knex
+			.update( {scored_points: score.score} )
+			.from( "student_responses" )
+			.where( {
+				question_id: questionID,
+				user_id: userID
+			} )
+	}
 
 	res.sendStatus( 200 )
 } )

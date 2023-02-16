@@ -182,9 +182,9 @@ describe( "/api/feedback endpoint tests", () => {
 	} )
 } )
 
-describe( "/api/examtakers endpoint tests", () => {
-	it( "GET /api/examtakers returns a list of users", async () => {
-		const res = await requestWithSupertest.get( "/api/examtakers" )
+describe( "/api/instructor/examtakers endpoint tests", () => {
+	it( "GET /api/instructor/examtakers returns a list of users", async () => {
+		const res = await requestWithSupertest.get( "/api/instructor/examtakers" )
 			.set( { token: instructorToken } )
 		expect( res.status ).toEqual( 200 )
 		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
@@ -192,8 +192,8 @@ describe( "/api/examtakers endpoint tests", () => {
 		expect( res.body.users ).not.toEqual( [] )
 	} )
 
-	it( "GET /api/examtakers body should have correct properties", async () => {
-		const res = await requestWithSupertest.get( "/api/examtakers" )
+	it( "GET /api/instructor/examtakers body should have correct properties", async () => {
+		const res = await requestWithSupertest.get( "/api/instructor/examtakers" )
 			.set( { token: instructorToken} )
 		expect( res.status ).toEqual( 200 )
 		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
@@ -205,14 +205,14 @@ describe( "/api/examtakers endpoint tests", () => {
 		} )
 	} )
 
-	it( "GET /api/examtakers should return an invalid response if there is no token", async () => {
-		const res = await requestWithSupertest.get( "/api/examtakers" )
+	it( "GET /api/instructor/examtakers should return an invalid response if there is no token", async () => {
+		const res = await requestWithSupertest.get( "/api/instructor/examtakers" )
 		expect( res.status ).toEqual( 403 )
 		expect( res.type ).toEqual( expect.stringContaining( "text/plain" ) )
 	} )
 
-	it( "GET /api/examtakers should return an invalid response if the user is not an instructor", async () => {
-		const res = await requestWithSupertest.get( "/api/examtakers" )
+	it( "GET /api/instructor/examtakers should return an invalid response if the user is not an instructor", async () => {
+		const res = await requestWithSupertest.get( "/api/instructor/examtakers" )
 			.set( { token: learnerToken} )
 		expect( res.status ).toEqual( 200 )
 		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
@@ -221,16 +221,16 @@ describe( "/api/examtakers endpoint tests", () => {
 	} )
 } )
 
-describe( "/api/instructorfeedback endpoint tests", () => {
+describe( "/api/instructor/feedback endpoint tests", () => {
 
-	it( "POST /api/instructorfeedback with no token should return an invalid response", async () => {
-		const res = await requestWithSupertest.post( "/api/instructorfeedback" )
+	it( "POST /api/instructor/feedback with no token should return an invalid response", async () => {
+		const res = await requestWithSupertest.post( "/api/instructor/feedback" )
 		expect( res.type ).toEqual( expect.stringContaining( "text/plain" ) )
 		expect( res.status ).toEqual( 403 )
 	} )
 
-	it( "POST /api/instructorfeedback with a learner token should return an invalid response", async () => {
-		const res = await requestWithSupertest.post( "/api/instructorfeedback" )
+	it( "POST /api/instructor/feedback with a learner token should return an invalid response", async () => {
+		const res = await requestWithSupertest.post( "/api/instructor/feedback" )
 			.set( { token: learnerToken } )
 		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
 		expect( res.status ).toEqual( 200 )
