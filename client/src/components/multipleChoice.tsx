@@ -21,20 +21,24 @@ const StyledMultipleChoice = styled.div`
  * They can select any one option from a list of answer choices
  */
 export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
-
+	/**
+	 * Selectors
+	 */
 	// Dispatches an event to the store
 	const dispatch = useAppDispatch()
-
 	// Question from the store
 	const question = useAppSelector( state => selectQuestionById( state, props.questionId ) )
 	// Response from the store
 	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
 
 	/**
-	 * Called when the user selects one of the radio buttons - it
-	 * calls the updateResponse delegate to update the state in the App
-	 * to reflect their choice.
+	 * Callbacks
 	 */
+	/*
+	Called when the user selects one of the radio buttons - it
+	calls the updateResponse delegate to update the state in the App
+	to reflect their choice.
+	*/
 	const handleChange = React.useCallback( ( e: React.FormEvent<HTMLInputElement> ) => {
 		// Create a new response object
 		const value = ( e.target as HTMLInputElement ).value
@@ -47,9 +51,15 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 		dispatch( examActions.updateResponse( newResponse ) )
 	}, [] )
 
+	/**
+	 * Render Variables
+	 */
+	// Ensures that markdown is supported for the question text
 	const label = question ? <ReactMarkdown>{question?.text}</ReactMarkdown> : ""
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (
 		<StyledMultipleChoice>
 			<RadioGroup

@@ -21,18 +21,22 @@ const StyledShortAnswer = styled.div`
  * are presented with a question and a text box area
  */
 export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
-
+	/**
+	 * Selectors
+	 */
 	// Dispatches an event to the store
 	const dispatch = useAppDispatch()
-
 	// Question from the store
 	const question = useAppSelector( state => selectQuestionById( state, props.questionId ) )
 	// Response from the Store
 	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
 
 	/**
-	 * Called when a new bubble is selected - updates the store with a new Response object
+	 * Callbacks
 	 */
+	/*
+	Called when a new bubble is selected - updates the store with a new Response object
+	*/
 	const handleChange = React.useCallback( ( e: React.ChangeEvent<HTMLTextAreaElement> ) => {
 		const newResponse: Response = {
 			questionId: props.questionId,
@@ -43,7 +47,9 @@ export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
 		dispatch( examActions.updateResponse( newResponse ) )
 	}, [] )
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (
 		<StyledShortAnswer>
 			<Label>

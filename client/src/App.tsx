@@ -37,9 +37,15 @@ const StyledViewContainer = styled.div`
  * be displayed to the user
  */
 export const App = React.memo( () => {
-
+	/**
+	 * Selectors
+	 */
+	// Dispatch an action to the store
 	const dispatch = useAppDispatch()
 
+	/**
+	 * State
+	 */
 	// State that determines if the App is in a loading state
 	const [ loading, setLoading ] = React.useState( true )
 	// State that holds whether the InstructorView or the StudentView should be rendered
@@ -57,18 +63,19 @@ export const App = React.memo( () => {
 	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJleGFtcGxlLWV4YW0iLCJmdWxsTmFtZSI6IkV4YW1wbGUgTGVhcm5lciIsInVzZXJJRCI6ImV4YW1wbGUtbGVhcm5lciIsInJvbGVzIjoiTGVhcm5lciIsImlhdCI6MTY3NTM3NzYzOH0.HFMJmkONPDCcKVwAmfjhz0jllgG14S3yf4HmWjsJkhw"
 	
 	/**
-	 * Runs on render - determines the user's role based on their JWT token
+	 * Effects
 	 */
+	/*
+	Runs on render - determines the user's role based on their JWT token
+	*/
 	React.useEffect( () => {
-		
+		// Prompts the user before letting them reload
 		const preventUnload = ( event: BeforeUnloadEvent ) => {
 			const message = "You are about to navigate away, and your entered data will not be saved. Are you sure you want to leave?"
 			event.preventDefault()
 			event.returnValue = message
 		}
-		
 		window.addEventListener( "beforeunload", preventUnload )
-		
 
 		// Gets the user's role depending on their token
 		const getRole = async () => {			
@@ -97,7 +104,9 @@ export const App = React.memo( () => {
 		dispatch( examActions.setToken( token ) )
 	}, [] )
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (
 		<StyledApp>
 			{!loading && (
@@ -134,7 +143,7 @@ export type Exam = {
  * Each component can be disabled and has a questionId
  */
 export interface ComponentProps {
-	disabled?: boolean
+	disabled?: boolean // Whether it should be disabled or not
 	questionId: number // Specific questionId of the given question
 }
 
@@ -150,7 +159,7 @@ export type Question = {
 	type: QuestionType // Type of the Question
 	answers: string[] // Array of answers choices to present to the user
 	correctAnswer?: number // Correct answer for the question
-	parsonsAnswer?: string
+	parsonsAnswer?: string // Correct answer for a Parson's Problem
 }
 
 /**
@@ -160,8 +169,8 @@ export type Question = {
 * Each item has an id and text to display
 */ 
 export type Item = {
-	id: number
-	text: string
+	id: number // Unique id for draggable
+	text: string // Text to be displayed in the Item
 }
 
 /**
@@ -171,9 +180,9 @@ export type Item = {
  * Each column has a list of items, a name, and an id
  */
 export type Column = {
-	list: Item[]
-	name: string
-	id: string
+	list: Item[] // List of Items to be displayed
+	name: string // Name to be displayed
+	id: string // Unique id to keep track of the column
 }
 
 /**
@@ -194,12 +203,12 @@ export type Response = {
  * This type defines what submission should like for grading purposes
  */
 export type Submission = {
-	questionId: number
-	isText?: boolean
-	value: number | string 
-	userId: number
-	fullName: string
-	scoredPoints: number
+	questionId: number // QuestionId in the DB that this submission relates to
+	isText?: boolean // Whether this Submission is a text submission or not
+	value: number | string // Value of the submission
+	userId: number // Id of the user that submitted this submission
+	fullName: string // Full name of the user
+	scoredPoints: number // Points that are entered by the instructor
 }
 
 /**
@@ -209,8 +218,8 @@ export type Submission = {
  * Each feedback has a questionId and a value.
  */
 export type Feedback = {
-	questionId: number
-	value: string
+	questionId: number // QuestionId that this feedback applies to
+	value: string // Value of the feedback
 }
 
 /**
@@ -220,8 +229,8 @@ export type Feedback = {
  * Each confidence has a questionId and a value.
  */
 export type Confidence = {
-	questionId: number
-	value: number
+	questionId: number // QuestionId that this confidence rating applies to
+	value: number // Value between 0 and 5
 }
 
 /**
@@ -232,8 +241,8 @@ export type Confidence = {
  * Each user has a canvasUserId and a fullName
  */
 export type User = {
-	canvasUserId: string
-	fullName: string
+	canvasUserId: string // UserId that ties this User to Canvas
+	fullName: string // Full name of the user
 }
 
 /**
@@ -251,6 +260,12 @@ export enum QuestionType {
 	ParsonsProblem = 5
 }
 
+/**
+ * LANGUAGE_CHOICES array
+ * 
+ * This is a list of valid language choices for the instructor to choose
+ * from when creating an exam
+ */
 export const LANGUAGE_CHOICES = [
 	"java",
 	"python",

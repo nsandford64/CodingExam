@@ -1,5 +1,4 @@
 // Copyright 2022 under MIT License
-
 import React from "react"
 import ColumnItem from "./columnItem"
 import { Droppable } from "react-beautiful-dnd"
@@ -7,9 +6,10 @@ import styled from "styled-components"
 import { Colors, Label } from "@blueprintjs/core"
 import { Column } from "../App"
 
-/** Interface for the Column objects containing the id and a list of 
-*	strings containing the code fragments.
-*/
+/**
+ * Interface for the Column objects containing the id and a list of 
+ * strings containing the code fragments.
+ */
 interface ParsonsColumnProps {
 	column: Column
 	disabled?: boolean
@@ -34,8 +34,17 @@ const StyledList = styled.div`
 	border: 1px solid ${Colors.BLACK};
 	border-radius: 2px;
 `
-// Renders the column for the parsons problem component
+
+/**
+ * ParsonsColumn
+ * 
+ * This component represents a draggable colun in the Parson's Problem component.
+ * It represents a "bucket" that the user is able to drag answers into.
+ */
 const ParsonsColumn = React.memo( ( props: ParsonsColumnProps ) => {
+	/**
+	 * Render
+	 */
 	return (
 		<Droppable droppableId={props.column.id}>
 			{( provided ) => (

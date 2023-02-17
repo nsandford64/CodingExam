@@ -2,7 +2,6 @@
 import { Button, InputGroup, Intent, Label, MenuItem, Spinner, TextArea } from "@blueprintjs/core"
 import { Select2 } from "@blueprintjs/select"
 import * as React from "react"
-import { useState, useEffect } from "react"
 import { batch } from "react-redux"
 import styled from "styled-components"
 import { LANGUAGE_CHOICES, Question, QuestionType } from "../App"
@@ -27,19 +26,27 @@ const StyledCreateExamView = styled.div`
  * an exam using a GUI instead of the database
  */
 export const CreateExamView = React.memo( () => {
-
+	/**
+	 * Selectors
+	 */
 	// Dispatch an action to the store
 	const dispatch = useAppDispatch()
-
 	// questionIds from the store
 	const questionIds = useAppSelector( selectQuestionIds )
 	// token from the store
 	const token = useAppSelector( selectToken )
 
+	/**
+	 * State
+	 */
 	// State to hold the selected QuestionType
 	const [ selectedQuestionType, setSelectedQuestionType ] = React.useState( "" )
+	// State that holds if the page is loading or not
 	const [ loading, setLoading ] = React.useState( true )
 
+	/**
+	 * Effects
+	 */
 	// Called on render - reinitialize the store
 	React.useEffect( () => {
 		const initQuestions = async () => {
@@ -69,11 +76,13 @@ export const CreateExamView = React.memo( () => {
 
 			setLoading( false )
 		}
-		// call async function
+		// Call async function
 		initQuestions()
 	}, [] )
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	if( loading ) return (
 		<StyledCreateExamView>
 			<Spinner 
@@ -132,14 +141,20 @@ interface QuestionDisplayProps {
 }
 
 /**
- * QuestionDisplay
+ * QuestionDisplay Component
  * 
  * This component renders a question along with
  * a button to delete it
  */
 const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
+	/**
+	 * Selectors
+	 */
 	const dispatch = useAppDispatch()
 
+	/**
+	 * Render
+	 */
 	return (
 		<StyledQuestionContainer>
 			<StyledQuestionHeader>
@@ -180,14 +195,18 @@ interface QuestionDropdownProps {
  * the available QuestionTypes and create an exam question
  */
 const QuestionDropdown = React.memo( ( props: QuestionDropdownProps ) => {
-
+	/**
+	 * Render Variables
+	 */
 	// String representation of the enum values so they can be displayed
 	const items = Object.keys( QuestionType ).filter( item => (
 		isNaN( Number( item ) ) 
 		&& item !== "None"
 	) )
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (
 		<Select2<string> 
 			items={items}
@@ -225,10 +244,15 @@ interface CreateQuestionSwitchProps {
  * in order for the user to create a new question
  */
 const CreateQuestionSwitch = React.memo( ( props: CreateQuestionSwitchProps ) => {
-
+	/**
+	 * Selectors
+	 */
 	// Dispatch at action to the store
 	const dispatch = useAppDispatch()
 
+	/**
+	 * Memos
+	 */
 	// Converted string value to enum value
 	const questionTypeEnum = React.useMemo( () => {
 		switch( props.questionType ) {
@@ -248,18 +272,22 @@ const CreateQuestionSwitch = React.memo( ( props: CreateQuestionSwitchProps ) =>
 	}, [ props.questionType ] )
 
 	/**
-	 * Called when the user clicks the "Add" button - this creates
-	 * a new Question in the store and tells it increment its counter
+	 * Callbacks
 	 */
+	/*
+	Called when the user clicks the "Add" button - this creates
+	a new Question in the store and tells it increment its counter
+	*/
 	const createQuestion = React.useCallback( ( question: Question ) => {
 		props.setSelectedQuestionType( "" )
-
-
 
 		dispatch( examActions.updateQuestion( question ) )
 		dispatch( examActions.incrementNextQuestionId() )
 	}, [] )
 
+	/**
+	 * Render
+	 */
 	// Render the component based on its questionTypeEnum
 	switch( questionTypeEnum ) {
 	case QuestionType.MultipleChoice:
@@ -322,10 +350,15 @@ const StyledButtonContainer = styled.div`
  * question
  */
 const CreateMultipleChoice = React.memo( ( props: CreateQuestionComponentProps ) => {
-
+	/**
+	 * Selectors
+	 */
 	// nextQuestionId from the store
 	const nextQuestionId = useAppSelector( selectNextQuestionId )
 
+	/**
+	 * State
+	 */
 	// State to hold the currently modified question
 	const [ question, setQuestion ] = React.useState( {
 		answers: [ "" ],
@@ -336,9 +369,12 @@ const CreateMultipleChoice = React.memo( ( props: CreateQuestionComponentProps )
 	} as Question )
 
 	/**
-	 * Called when the user modifies an answer value - this ensures
-	 * the question state is kept up to date
+	 * Callbacks
 	 */
+	/*
+	Called when the user modifies an answer value - this ensures
+	the question state is kept up to date
+	*/
 	const handleChange = React.useCallback( ( index: number, value: string ) => {
 		const newAnswers = [ ...question.answers ]
 		newAnswers[index] = value
@@ -348,9 +384,9 @@ const CreateMultipleChoice = React.memo( ( props: CreateQuestionComponentProps )
 		} )
 	}, [ question ] )
 
-	/**
-	 * Called when the user wants to add another answer choice
-	 */
+	/*
+	Called when the user wants to add another answer choice
+	*/
 	const handleAdd = React.useCallback( () => {
 		const newAnswers = [ ...question.answers, "" ]
 		setQuestion( {
@@ -359,9 +395,9 @@ const CreateMultipleChoice = React.memo( ( props: CreateQuestionComponentProps )
 		} )
 	}, [ question ] )
 
-	/**
-	 * Called when the user wants to delete an answer choice
-	 */
+	/*
+	Called when the user wants to delete an answer choice
+	*/
 	const handleRemove = React.useCallback( () => {
 		const newAnswers = [ ...question.answers ]
 		newAnswers.pop()
@@ -372,7 +408,9 @@ const CreateMultipleChoice = React.memo( ( props: CreateQuestionComponentProps )
 		} )
 	}, [ question ] )
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (
 		<>
 			<StyledRow>
@@ -438,10 +476,15 @@ CreateMultipleChoice.displayName = "CreateMultipleChoice"
  * This component allows the user to create a TrueFalse question
  */
 const CreateTrueFalse = React.memo( ( props: CreateQuestionComponentProps ) => {
-
+	/**
+	 * Selectors
+	 */
 	// nextQuestionId from the store
 	const nextQuestionId = useAppSelector( selectNextQuestionId )
 
+	/**
+	 * State
+	 */
 	// State to hold the currently modified question
 	const [ question, setQuestion ] = React.useState( {
 		answers: [ "False", "True" ],
@@ -451,7 +494,9 @@ const CreateTrueFalse = React.memo( ( props: CreateQuestionComponentProps ) => {
 		correctAnswer: 0
 	} as Question )
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (
 		<>
 			<StyledRow>
@@ -497,10 +542,15 @@ CreateTrueFalse.displayName = "CreateTrueFalse"
  * question
  */
 const CreateParsonsProblem = React.memo( ( props: CreateQuestionComponentProps ) => {
-
+	/**
+	 * Selectors
+	 */
 	// nextQuestionId from the store
 	const nextQuestionId = useAppSelector( selectNextQuestionId )
 
+	/**
+	 * State
+	 */
 	// State to hold the currently modified question
 	const [ question, setQuestion ] = React.useState( {
 		answers: [ "" ],
@@ -511,9 +561,12 @@ const CreateParsonsProblem = React.memo( ( props: CreateQuestionComponentProps )
 	} as Question )
 
 	/**
-	 * Called when the user modifies an answer value - this ensures
-	 * the question state is kept up to date
+	 * Callbacks
 	 */
+	/*
+	Called when the user modifies an answer value - this ensures
+	the question state is kept up to date
+	*/
 	const handleChange = React.useCallback( ( index: number, value: string ) => {
 		const newAnswers = [ ...question.answers ]
 		newAnswers[index] = value
@@ -523,9 +576,9 @@ const CreateParsonsProblem = React.memo( ( props: CreateQuestionComponentProps )
 		} )
 	}, [ question ] )
 
-	/**
-	 * Called when the user wants to add another answer choice
-	 */
+	/*
+	Called when the user wants to add another answer choice
+	*/
 	const handleAdd = React.useCallback( () => {
 		const newAnswers = [ ...question.answers, "" ]
 		setQuestion( {
@@ -534,9 +587,9 @@ const CreateParsonsProblem = React.memo( ( props: CreateQuestionComponentProps )
 		} )
 	}, [ question ] )
 
-	/**
-	 * Called when the user wants to delete an answer choice
-	 */
+	/*
+	Called when the user wants to delete an answer choice
+	*/
 	const handleRemove = React.useCallback( () => {
 		const newAnswers = [ ...question.answers ]
 		newAnswers.pop()
@@ -547,7 +600,9 @@ const CreateParsonsProblem = React.memo( ( props: CreateQuestionComponentProps )
 		} )
 	}, [ question ] )
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (
 		<>
 			<StyledRow>
@@ -603,7 +658,6 @@ const CreateParsonsProblem = React.memo( ( props: CreateQuestionComponentProps )
 } )
 CreateParsonsProblem.displayName = "CreateParsonsProblem"
 
-
 /**
  * Props for CreateGeneric
  */
@@ -619,10 +673,15 @@ interface CreateGenericProps {
  * includes ShortAnswer and CodingAnswer
  */
 const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
-
+	/**
+	 * Selectors
+	 */
 	// nextQuestionId from the store
 	const nextQuestionId = useAppSelector( selectNextQuestionId )
 
+	/**
+	 * State
+	 */
 	// State to hold the currently updated question
 	const [ question, setQuestion ] = React.useState( {
 		answers: [],
@@ -634,6 +693,9 @@ const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
 	// State to hold the language, if this is a CodingAnswer question
 	const [ language, setLanguage ] = React.useState( "" )
 
+	/**
+	 * Callbacks
+	 */
 	// Called when the Add button is pressed - creates a new Question 
 	const handleAdd = React.useCallback( () => {
 		if ( question.type === QuestionType.CodingAnswer ) {
@@ -647,7 +709,9 @@ const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
 		}
 	}, [ question, language ] )
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (	
 		<>
 			<StyledRow>

@@ -6,16 +6,7 @@ import styled from "styled-components"
 import { Question } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { GradingGrid } from "../components/gradingGrid"
-import { examActions, selectQuestionIds, selectResponseState, selectToken } from "../slices/examSlice"
-import { initializeQuestions, selectQuestions } from "../slices/gradingSlice"
-import { ExamView } from "./examView"
-
-/**
- * Props for GradingView
- */
-interface GradingViewProps {
-	disabled: boolean
-}
+import { examActions, selectQuestionIds, selectToken } from "../slices/examSlice"
 
 /**
  * Style for GradingView
@@ -26,6 +17,9 @@ const StyledGradingView = styled.div`
 	align-items: center;
 `
 
+/**
+ * Style for the questions container
+ */
 const StyledQuestionsContainer = styled.div`
 	width: 300px;
 `
@@ -35,11 +29,11 @@ const StyledQuestionsContainer = styled.div`
  * 
  * Renders all the questions for an exam and allows the instructor to grade each one a per-student basis
  */
-export const GradingView = React.memo( ( props: GradingViewProps ) => {
+export const GradingView = React.memo( () => {
 	/**
 	 * Selectors
 	 */
-	// Dispatch
+	// Dispatch an action to the store
 	const dispatch = useAppDispatch()
 	// Token from the store
 	const token = useAppSelector( selectToken )
@@ -51,6 +45,9 @@ export const GradingView = React.memo( ( props: GradingViewProps ) => {
 	 */
 	const [ selectedIndex, setSelectedIndex ] = React.useState( 0 )
 
+	/**
+	 * Effects
+	 */
 	React.useEffect( () => {
 		const initializeQuestions = async () => {
 			// Fetch exam questions
@@ -76,11 +73,13 @@ export const GradingView = React.memo( ( props: GradingViewProps ) => {
 				dispatch( examActions.setQuestionsMap( newQuestionsMap ) )
 			} )
 		}
-
+		// Call the async function
 		initializeQuestions()
 	}, [] )
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (
 		<StyledGradingView>	
 			<StyledQuestionsContainer>
