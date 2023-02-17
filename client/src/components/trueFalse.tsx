@@ -21,15 +21,19 @@ const StyledTrueFalse = styled.div`
  * must select between true or false
  */
 export const TrueFalse = React.memo( ( props: ComponentProps ) => {
-
+	/**
+	 * Selectors
+	 */
 	// Dispatches an event to the store
 	const dispatch = useAppDispatch()
-
 	// Question from the store
 	const question = useAppSelector( state => selectQuestionById( state, props.questionId ) )
 	// Response from the store
 	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
 
+	/**
+	 * Callbacks
+	 */
 	// Called when the user selects between true or false - updates the App's responsesMap
 	const handleChange = React.useCallback( ( e: React.FormEvent<HTMLInputElement> ) => {
 		const value = ( e.target as HTMLInputElement ).value
@@ -43,7 +47,9 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 	// Format markdown in the question text
 	const label = question ? <ReactMarkdown>{question?.text}</ReactMarkdown> : ""
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (
 		<StyledTrueFalse>
 			<RadioGroup

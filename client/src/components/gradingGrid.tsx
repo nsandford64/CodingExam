@@ -1,12 +1,14 @@
 // Copyright 2022 under MIT License
-import { Colors, InputGroup, Label, TextArea } from "@blueprintjs/core"
+import { Colors, InputGroup } from "@blueprintjs/core"
 import * as React from "react"
-import ReactMarkdown from "react-markdown"
 import styled from "styled-components"
-import { Response, ComponentProps, Question, Submission } from "../App"
-import { useAppDispatch, useAppSelector } from "../app/hooks"
-import { examActions, selectQuestionById, selectResponseById, selectToken } from "../slices/examSlice"
+import { Submission } from "../App"
+import { useAppSelector } from "../app/hooks"
+import { selectQuestionById, selectToken } from "../slices/examSlice"
 
+/**
+ * Props for the GradingGrid component
+ */
 interface GradingGridProps {
 	questionId: number
 }
@@ -31,13 +33,13 @@ const StyledGradingGrid = styled.div`
  * GradingGrid Component
  * 
  * This component displays a grid of students and their responses
- * for a given question
+ * for a given question. It also allows the Instructor to 
+ * submit grades to the database for each question and student
  */
 export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 	/**
 	 * Selectors
 	 */
-	// Dispatches an event to the store
 	// Question from the store
 	const question = useAppSelector( state => selectQuestionById( state, props.questionId ) )
 	// Token from the store
@@ -46,8 +48,13 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 	/**
 	 * State
 	 */
+	// The array of submissions stored in the database that need to be updated and displayed
 	const [ submissions, setSubmissions ] = React.useState( [] as Submission[] )
 
+	/**
+	 * Callbacks
+	 */
+	// Called whenever a new score is inputted - updates submissions to reflect the change
 	const updateSubmission = React.useCallback( ( index: number, score: number ) => {
 		const newSubmissions = [ ...submissions ]
 		newSubmissions[index] = { ...newSubmissions[index], scoredPoints: score}
@@ -55,6 +62,7 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 		setSubmissions( newSubmissions )
 	}, [ submissions ] )
 
+	// Updates the submissions in the database
 	const updateDatabase = React.useCallback( async () => {
 		await fetch( "/api/instructor/grade", {
 			method: "POST",
@@ -67,6 +75,10 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 		} )
 	}, [ submissions ] )
 
+	/**
+	 * Effects
+	 */
+	// Called whenever the question changes - populates the submissions state from the database
 	React.useEffect( () => {
 		const fetchSubmissions = async () => {
 			const res = await fetch( "/api/instructor/responsesfromquestion", {
@@ -86,7 +98,9 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 		fetchSubmissions()
 	}, [ question ] )
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (
 		<StyledGradingGrid>
 			<table>

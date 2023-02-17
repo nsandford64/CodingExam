@@ -25,13 +25,14 @@ const StyledFeedbackBox = styled.div`
  * FeedbackBox Component
  * 
  * This component renders a textbox that contains
- * feedback that the instructor has left for a student
+ * feedback that the instructor has left for a student.
  */
 export const FeedbackBox = React.memo( ( props: FeedbackBoxProps ) => {
-
+	/**
+	 * Selectors
+	 */
 	// Dispatches an event to the store
 	const dispatch = useAppDispatch()
-    
 	// Feedback from the store
 	const feedback = useAppSelector( state => selectFeedbackById(
 		state,
@@ -39,19 +40,25 @@ export const FeedbackBox = React.memo( ( props: FeedbackBoxProps ) => {
 	) )
 
 	/**
-	 * Called when the text in the TextArea is changed - updates the Feedback
-	 * object in the store
+	 * Callbacks
 	 */
+	/*
+	Called when the text in the TextArea is changed - updates the Feedback
+	object in the store
+	*/
 	const handleChange = React.useCallback( ( e: React.ChangeEvent<HTMLTextAreaElement> ) => {
 		const newFeedback: Feedback = {
 			questionId: props.questionId,
 			value: e.target.value
 		}
 
+		// Update the Feedback object in the store
 		dispatch( examActions.updateFeedback( newFeedback ) )
 	}, [] )
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (
 		<StyledFeedbackBox>
 			<Label>Feedback:</Label>

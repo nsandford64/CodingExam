@@ -31,15 +31,20 @@ const StyledColumns = styled.div`
  * for the user to sort correctly
  */
 export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
-	
+	/**
+	 * Selectors
+	 */
 	// Dispatches an event to the store
 	const dispatch = useAppDispatch()
-
 	// Question from the store
 	const question = useAppSelector( state => selectQuestionById( state, props.questionId ) )
 	// Response from the Store
 	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
 
+	/**
+	 * State
+	 */
+	// Sorted and unsorted columns for the user to construct their answer in
 	const [ columns, setColumns ] = React.useState( {
 		unsorted: {
 			id: "unsorted",
@@ -53,11 +58,12 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 		}
 	} as { unsorted: Column, sorted: Column } )
 
+	/**
+	 * Effects
+	 */
+	// Called on initial render - ensures that the student's response is accurately rendered
 	React.useEffect( () => {
-		console.log( question )
-
 		const items: Item[] = []
-
 		question?.answers.map( ( answer, index ) => {
 			const item: Item = {
 				id: index,
@@ -87,6 +93,7 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 			!sortedItems.find( sortedItem => sortedItem.id === unsortedItem.id )
 		) )
 
+		// Update the state to represent sorted and unsorted items
 		setColumns( prevState => ( {
 			unsorted: {
 				...prevState.unsorted,
@@ -99,7 +106,7 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 		} ) )
 	}, [] )
 
-	//Method needed for dragging
+	// Called when a user drops an item into a bucket - updates the state
 	const onDragEnd = ( { source, destination }: DropResult ) => {
 		// Make sure we have a valid destination
 		if ( !destination ) return
@@ -118,8 +125,10 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 
 		// If start is the same as end, we're in the same column
 		if ( start === end ) {
-			// Move the item within the list
-			// Start by making a new list without the dragged item
+			/*
+			Move the item within the list
+			Start by making a new list without the dragged item
+			*/
 			const newList = start.list.filter(
 				( _, idx: number ) => idx !== source.index
 			)
@@ -157,8 +166,10 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 			}
 		} 
 		else {
-			// If start is different from end, we need to update multiple columns
-			// Filter the start list like before
+			/*
+			If start is different from end, we need to update multiple columns
+			Filter the start list like before
+			*/
 			const newStartList = start.list.filter(
 				( _, idx: number ) => idx !== source.index
 			)
@@ -212,7 +223,9 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 		}
 	}
 
-	//Returns the component
+	/**
+	 * Render
+	 */
 	return (
 		<StyledParsonsProblem>
 			<Label>{question?.text}</Label>
