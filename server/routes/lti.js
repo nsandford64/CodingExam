@@ -64,7 +64,6 @@ if( process.env.NODE_ENV == "development" ) {
 		await findOrCreateUser( knex, ltiData.userID, ltiData.fullName )
 		await createExam( knex, ltiData.assignmentID )
 		const token = generateAccessToken( ltiData )
-		console.log( token )
 		serveIndex( res, token )
 	} )
 

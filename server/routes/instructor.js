@@ -144,6 +144,8 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 	//console.log( req.body )
 	const {role, assignmentID, userID} = req.session
 	const knex = req.app.get( "db" )
+	//TODO: set individual point values for each question, default is now 5
+	const point_value = 5
 
 	/*
 		Get the internal database exam.id based on the Canvas assignmentID
@@ -161,7 +163,6 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 
 	// Create or update the exam questions 
 	for ( const question of req.body ) {
-		console.log( question )
 		/* Determine answer data based on question type. 
 		 * Answer data is stored in a JSON column in the db
 		 */
@@ -195,7 +196,8 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 				question_text: question.text,
 				question_type_id: question.type,
 				exam_id: exam.id,
-				answer_data: answerData
+				answer_data: answerData,
+				points_possible: point_value
 			} )
 			.returning( "id" )
 		//console.log( "result of exam creation:", result )
@@ -240,6 +242,8 @@ router.post( "/submitgrades", instructorOnly, async( req, res ) => {
 	const {role, assignmentID } = req.session
 	const knex = req.app.get( "db" )
 
+	await updateGrades( knex, assignmentID )
+
 	const examData = await knex
 		.select( "total_points", "id" )
 		.from( "exams" )
@@ -251,19 +255,19 @@ router.post( "/submitgrades", instructorOnly, async( req, res ) => {
 	* assignment from the corresponding row in the exams_users table
 	*/
 	const gradeSubmissions = await knex
-		.select( "outcome_service_url", "result_sourcedid", "ScoredPoints" )
+		.select( "outcome_service_url", "result_sourcedid", "exams_users.ScoredPoints" )
 		.from( "exams_users" )
 		.where( { 
 			exam_id: examData.id,
 			HasTaken: true
 		} )
-	
+
 	for ( const submission of gradeSubmissions ) {
+
 		/**
-		 * Makes sure the grade value being sent to canvas isn't over 100
+		 * Makes sure the grade value being sent to canvas isn't over 100%
 		 * Pretty sure it will mess with Canvas LTI
 		 */
-
 		let grade = submission.ScoredPoints / examData.total_points
 		if ( grade > 1 ) {
 			grade = 1
@@ -275,27 +279,27 @@ router.post( "/submitgrades", instructorOnly, async( req, res ) => {
 		const xml = `<?xml version="1.0" encoding="UTF-8"?>
 			<imsx_POXEnvelopeRequest xmlns="http://www.imsglobal.org/services/ltiv1p1/xsd/imsoms_v1p0">
 			<imsx_POXHeader>
-			<imsx_POXRequestHeaderInfo>
+				<imsx_POXRequestHeaderInfo>
 				<imsx_version>V1.0</imsx_version>
 				<imsx_messageIdentifier>999999123</imsx_messageIdentifier>
-			</imsx_POXRequestHeaderInfo>
+				</imsx_POXRequestHeaderInfo>
 			</imsx_POXHeader>
 			<imsx_POXBody>
-			<replaceResultRequest>
+				<replaceResultRequest>
 				<resultRecord>
-				<sourcedGUID>
+					<sourcedGUID>
 					<sourcedId>${submission.result_sourcedid}</sourcedId>
-				</sourcedGUID>
-				<result>
+					</sourcedGUID>
+					<result>
 					<resultScore>
-					<language>en</language>
-					<textString>${grade}</textString>
+						<language>en</language>
+						<textString>${grade}</textString>
 					</resultScore>
-				</result>
+					</result>
 				</resultRecord>
-			</replaceResultRequest>
+				</replaceResultRequest>
 			</imsx_POXBody>  
-		</imsx_POXEnvelopeRequest>`
+			</imsx_POXEnvelopeRequest>`
   
 
 		// Oauth signature that also needs to be sent with the grade
@@ -322,11 +326,47 @@ router.post( "/submitgrades", instructorOnly, async( req, res ) => {
 		}
 		catch( error ) {
 			console.log( "Error, are you running in canvas?" )
+			console.log( error )
 			res.send( {response: "error"} )
 		}
 	}
-
+	res.send( { status: 200 } )
 } )
+
+async function updateGrades( knex, assignmentID ) {
+	const totalPoints = await knex
+		.select( "exams.id" )
+		.sum( { points_possible: "points_possible" } )
+		.from( "exam_questions" )
+		.innerJoin( "exams", "exams.id", "exam_questions.exam_id" )
+		.where( "exams.canvas_assignment_id", assignmentID )
+		.groupBy( "exams.id" )
+		.first()
+
+	const examID = totalPoints.id
+	
+	await knex
+		.update( { total_points: parseInt( totalPoints.points_possible ) } )
+		.from( "exams" )
+		.where( "canvas_assignment_id", assignmentID )
+
+	const scoredPoints = await knex
+		.select( "student_responses.user_id" )
+		.sum( {scored_points: "scored_points"} )
+		.from( "student_responses" )
+		.innerJoin( "exam_questions", "exam_questions.id", "student_responses.question_id" )
+		.innerJoin( "exams", "exams.id", "exam_questions.exam_id" )
+		.where( "exams.canvas_assignment_id", assignmentID )
+		.groupBy( "student_responses.user_id" )
+
+	for( const score of scoredPoints ){
+		await knex
+			.update( { ScoredPoints: score.scored_points } )
+			.from( "exams_users" )
+			.where( "user_id", score.user_id )
+			.where( "exam_id", examID )
+	}
+}
 
 /**
  * Retrieves the database exam ID and user ID for a given Canvas userID and assignmentID

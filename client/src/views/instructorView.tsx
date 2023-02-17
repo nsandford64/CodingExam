@@ -133,7 +133,7 @@ export const InstructorView = React.memo( () => {
 		const json = await data.json()
 		
 		let status = "Grade Submission Unsuccessful"
-		if ( json.response == "Valid submission" ) {
+		if ( json.status == 200 ) {
 			status = "Grades Submitted"
 		}
 
