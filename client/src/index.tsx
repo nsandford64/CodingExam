@@ -12,6 +12,7 @@ const container = document.getElementById( "root" )!
 const root = createRoot( container )
 enableMapSet()
 
+// Renders the App in the DOM
 root.render(
 	<Provider store={store}>
 		<App />
