@@ -1,9 +1,7 @@
 // Copyright 2022 under MIT License
-import { Button, Intent, TextArea } from "@blueprintjs/core"
+import { Button, Intent } from "@blueprintjs/core"
 import * as React from "react"
-import { initializeConnect } from "react-redux/es/components/connect"
 import styled from "styled-components"
-import { IndentStyle } from "typescript"
 import { User } from "../App"
 import { useAppSelector } from "../app/hooks"
 import { selectFeedbackMap, selectToken } from "../slices/examSlice"
@@ -53,9 +51,17 @@ const StyledStudentListContainer = styled.div`
  * feedback.
  */
 export const InstructorView = React.memo( () => {
-
+	/**
+	 * Selectors
+	 */
+	// Token from the store
 	const token = useAppSelector( selectToken )
+	// feedbackMap from the store
+	const feedbackMap = useAppSelector( selectFeedbackMap )
 
+	/**
+	 * State
+	 */
 	// State that holds the array of Users
 	const [ users, setUsers ] = React.useState( [] as User[] )
 	// State that determines which view should be shown to the user
@@ -64,32 +70,30 @@ export const InstructorView = React.memo( () => {
 	const [ displayStatus, setDisplayStatus ] = React.useState( "" )
 	// State that holds the selected student's canvasUserId
 	const [ canvasUserId, setCanvasUserId ] = React.useState( "" )
-	// State that holds the grade for the currently selected student
-	const [ grade, setGrade ] = React.useState( 0 )
-
-	// feedbackMap from the store
-	const feedbackMap = useAppSelector( selectFeedbackMap )
 
 	/**
-	 * Called when a student is clicked - tells the InstructorView
-	 * to render that student's responses
+	 * Callbacks
 	 */
+	/*
+	Called when a student is clicked - tells the InstructorView
+	to render that student's responses
+	*/
 	const handleStudentClick = React.useCallback( ( id: string ) => {
 		setDisplayStatus( "" )
 		setView( "examView" )
 		setCanvasUserId( id )
 	}, [] )
 
+	// Called when the user clicks the "Create Exam" button - navigates to the createExamView
 	const handleCreateExamClick = React.useCallback( () => {
 		setDisplayStatus( "" )
 		setView( "createExamView" )
-
 	}, [] )
 
-	/**
-	 * Called when the Instructor clicks the "Submit Feedback" button -
-	 * updates feedback in the store
-	 */
+	/*
+	Called when the Instructor clicks the "Submit Feedback" button -
+	updates feedback in the store
+	*/
 	const handleFeedbackClick = React.useCallback( async () => {
 		const data = await fetch( "/api/instructor/feedback", {
 			method: "POST",
@@ -104,7 +108,6 @@ export const InstructorView = React.memo( () => {
 		} )
 
 		const json = await data.json()
-		//console.log( json )
 
 		// Returns the view to the base student list view
 		setView( "studentListView" )
@@ -114,13 +117,12 @@ export const InstructorView = React.memo( () => {
 			status = "Feedback Submitted"
 		}
 		setDisplayStatus( status )
-
 	}, [ feedbackMap, canvasUserId ] )
 
-	/**
-	 * Handles when the instructor clicks the grade button on a student's
-	 * submission. Uses the value entered in the grade box in the view
-	 */
+	/*
+	Handles when the instructor clicks the grade button on a student's
+	submission. Uses the value entered in the grade box in the view
+	*/
 	const handleSubmitGradesClick = React.useCallback( async () => {
 		const data = await fetch( "/api/instructor/submitgrades", {
 			method: "POST",
@@ -143,9 +145,12 @@ export const InstructorView = React.memo( () => {
 	}, [ displayStatus ] )
 
 	/**
-	 * Called on render - pulls in the list of students that have taken
-	 * the exam
+	 * Effects
 	 */
+	/*
+	Called on render - pulls in the list of students that have taken
+	the exam
+	*/
 	React.useEffect( () => {
 		const initUsers = async () => {
 			const data = await fetch( "/api/instructor/examtakers", {
@@ -159,11 +164,13 @@ export const InstructorView = React.memo( () => {
 
 			setUsers( users )
 		}
-
+		// Call the async function
 		initUsers()
 	}, [] )
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (
 		<StyledInstructorView>
 			<StyledHeaderContainer>
@@ -241,13 +248,18 @@ export const InstructorView = React.memo( () => {
 				</>
 			)}
 			{view === "gradingView" && (
-				<GradingView disabled={false} />
+				<GradingView />
 			)}
 		</StyledInstructorView>
 	)
 } )
 InstructorView.displayName = "InstructorView"
 
+/**
+ * View Type
+ * 
+ * This view ensures that only valid views are presented to the user
+ */
 type View = 
 	"studentListView" 
   | "examView"

@@ -1,6 +1,5 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit"
 import examReducer from "../slices/examSlice"
-import gradingReducer from "../slices/gradingSlice"
 
 /**
  * Configures the store with all the necessary reducers, including
@@ -9,7 +8,6 @@ import gradingReducer from "../slices/gradingSlice"
 export const store = configureStore( {
 	reducer: {
 		exam: examReducer,
-		grading: gradingReducer
 	},
 	middleware( getDefaultMiddleware ) {
 		// Ensures that non JSON-serializable objects can be stored in the store

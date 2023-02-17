@@ -6,7 +6,6 @@ import styled from "styled-components"
 import { Feedback, Question, QuestionType, Response, Confidence } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { CodingAnswer } from "../components/codingAnswer"
-import { ConfidenceRating } from "../components/confidenceRating"
 import { FeedbackBox } from "../components/feedbackBox"
 import { MultipleChoice } from "../components/multipleChoice"
 import { ParsonsProblem } from "../components/parsonsProblem"
@@ -73,10 +72,11 @@ export const StyledQuestionHeader = styled.div`
  * Learner can only take the exam and submit their responses.
  */
 export const ExamView = ( props: ExamViewProps ) => {
-
+	/**
+	 * Selectors
+	 */
 	// Dispatch an event to the store
 	const dispatch = useAppDispatch()
-
 	// Exam response state
 	const responseState = useAppSelector( selectResponseState )
 	// Array of questionIds from the Redux store
@@ -85,17 +85,22 @@ export const ExamView = ( props: ExamViewProps ) => {
 	const responsesMap = useAppSelector( selectResponsesMap )
 	// Map of confidence ratings from the store
 	const confidenceMap = useAppSelector( selectConfidenceMap )
-	//console.log( {confidenceMap} )
 	// token from the store
 	const token = useAppSelector( selectToken )
 
+	/**
+	 * State
+	 */
 	// State that determines if the ExamView is in a loading state
 	const [ loading, setLoading ] = React.useState( true )
 
 	/**
-	 * Called on render - initializes the questions and responses
-	 * in the store
+	 * Callbacks
 	 */
+	/*
+	Called on render - initializes the questions and responses
+	in the store
+	*/
 	React.useEffect( () => {
 		const initQuestions = async () => {
 			// Fetch exam questions
@@ -127,8 +132,10 @@ export const ExamView = ( props: ExamViewProps ) => {
 			json = await data.json()
 			const responses: Response[] = json.responses
 
-			// Loop through responses and create ids and a map 
-			// for responses and for confidence ratings
+			/*
+			Loop through responses and create ids and a map 
+			for responses and for confidence ratings
+			*/
 			const newResponseIds: number[] = []
 			const newResponsesMap = new Map<number, Response>()
 			responses.forEach( response => {
@@ -193,23 +200,17 @@ export const ExamView = ( props: ExamViewProps ) => {
 		initQuestions()
 	}, [] )
 
-	const [ submitted, setSubmitted ] = React.useState( false )
-
-	/**
-	 * Runs when the submit button is pressed - posts each
-	 * response in the responsesMap to update the database
-	 */
+	/*
+	Runs when the submit button is pressed - posts each
+	response in the responsesMap to update the database
+	*/
 	const submit = React.useCallback( async () => {
 		
 		const data = questionIds.map( id => ( {
 			questionId: id,
 			value: responsesMap.get( id )?.value,
 			confidence: confidenceMap.get( id )?.value
-		} ) )		
-
-		//console.log( {responsesMap} )
-		//console.log( {confidenceMap} )
-		//console.log( {data} )
+		} ) )
 
 		try {
 			const res = await fetch( "/api", {
@@ -233,6 +234,9 @@ export const ExamView = ( props: ExamViewProps ) => {
 		}
 	}, [ responsesMap ] )
 
+	/**
+	 * Render
+	 */
 	return (
 		<StyledExamView>
 			{loading && (
@@ -304,14 +308,19 @@ interface QuestionSwitchProps {
  * returns a component of its corresponding type
  */
 export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
-
+	/**
+	 * Selectors
+	 */
 	// Question from the store
 	const question = useAppSelector( state => selectQuestionById( 
 		state, 
 		props.questionId 
 	) )
 
-	// Render the right component
+	/**
+	 * Render
+	 */
+	// Render the component based on the question's type
 	switch ( question?.type ) {
 	case QuestionType.MultipleChoice:
 		return (

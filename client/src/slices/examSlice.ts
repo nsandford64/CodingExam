@@ -1,14 +1,12 @@
 // Copyright 2022 under MIT License
-
-import { createAsyncThunk, createSelector, createSlice } from "@reduxjs/toolkit"
-import type {PayloadAction, ThunkAction, AnyAction} from "@reduxjs/toolkit"
+import { createSelector, createSlice } from "@reduxjs/toolkit"
+import type { PayloadAction } from "@reduxjs/toolkit"
 import { Feedback, Question, Response, Confidence } from "../App"
 import type { AppThunk, RootState } from "../app/store"
 
 /**
  * Reducers
  */
-
 // Set the questionIds array in the store
 const setQuestionIds = ( state: ExamState, action: PayloadAction<number[]> ) => {
 	state.questionIds = action.payload
@@ -282,5 +280,4 @@ export const examSlice = createSlice( {
 } )
 
 export const examActions = examSlice.actions
-
 export default examSlice.reducer

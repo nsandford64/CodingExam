@@ -28,11 +28,15 @@ const StyledStudentView = styled.div`
  * the exam
  */
 export const StudentView = React.memo( ( props: StudentViewProps ) => {
-
+	/**
+	 * Selectors
+	 */
 	// responseState from the store
 	const responseState = useAppSelector( selectResponseState )
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (
 		<StyledStudentView>
 			{responseState && (
@@ -47,4 +51,3 @@ export const StudentView = React.memo( ( props: StudentViewProps ) => {
 	)
 } )
 StudentView.displayName = "StudentView"
-
