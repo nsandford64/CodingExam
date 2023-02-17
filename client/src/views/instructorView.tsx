@@ -193,7 +193,7 @@ export const InstructorView = React.memo( () => {
 							/>
 						</>
 					)}
-					{view !== "studentListView" && view !== "createExamView" && (
+					{view === "gradingView" && (
 						<>
 							<Button
 								text="Grade"

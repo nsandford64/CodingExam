@@ -55,11 +55,15 @@ router.get( "/examtakers", instructorOnly, async( req, res ) => {
 	res.json( {users} )
 } )
 
+/**
+ * Gets the student responses for a particular question for grading purposes
+ */
 router.get( "/responsesfromquestion", instructorOnly, async( req, res ) => {
 	const {role, assignmentID, userID} = req.session
 	const questionID = req.headers.questionid
 	const knex = req.app.get( "db" )
 
+	// Gets the appropriate rows from the student responses table
 	const results = await knex
 		.select( "student_responses.id", "student_responses.is_text_response", "student_responses.text_response", 
 			"student_responses.answer_response", "student_responses.question_id", "student_responses.user_id",
@@ -69,6 +73,7 @@ router.get( "/responsesfromquestion", instructorOnly, async( req, res ) => {
 		.innerJoin( "users", "users.id", "student_responses.user_id" )
 		.where( "exam_questions.id", questionID )
 
+	// Sends the rows back in the form of a submissions typescript object
 	const submissions = results.map( row => {
 		return {
 			questionId: row.question_id,
@@ -242,8 +247,10 @@ router.post( "/submitgrades", instructorOnly, async( req, res ) => {
 	const {role, assignmentID } = req.session
 	const knex = req.app.get( "db" )
 
+	// Updates the grades for a particular assignment (recalculates scored points for the students)
 	await updateGrades( knex, assignmentID )
 
+	// Gets the exam ID and total points of the exam grades are being submitted for
 	const examData = await knex
 		.select( "total_points", "id" )
 		.from( "exams" )
@@ -333,7 +340,18 @@ router.post( "/submitgrades", instructorOnly, async( req, res ) => {
 	res.send( { status: 200 } )
 } )
 
+/**
+ * Updates the total_points field in the exams table (in the case that new questions are added) as 
+ * well as the ScoredPoints field in the exams_users table (in the case that a student's exam has
+ * been graded)
+ * @param {*} knex database connection
+ * @param {*} assignmentID Canvas assignment ID for the current exam
+ */
 async function updateGrades( knex, assignmentID ) {
+	/**  
+	 * Sums the points_possible value from the exam_questions table for the rows
+	 * that belong to a particular exam
+	 */
 	const totalPoints = await knex
 		.select( "exams.id" )
 		.sum( { points_possible: "points_possible" } )
@@ -343,13 +361,21 @@ async function updateGrades( knex, assignmentID ) {
 		.groupBy( "exams.id" )
 		.first()
 
+	// Database id of the exam
 	const examID = totalPoints.id
 	
+	/**
+	 * Updates the total_points row for the exam that was summed in the previous query
+	 */
 	await knex
 		.update( { total_points: parseInt( totalPoints.points_possible ) } )
 		.from( "exams" )
 		.where( "canvas_assignment_id", assignmentID )
 
+	/**
+	 * Sums the scored_points value for each sstudent from the student_responses table
+	 * Also gets the corresponding database user ID for each sum
+	 */
 	const scoredPoints = await knex
 		.select( "student_responses.user_id" )
 		.sum( {scored_points: "scored_points"} )
@@ -359,6 +385,10 @@ async function updateGrades( knex, assignmentID ) {
 		.where( "exams.canvas_assignment_id", assignmentID )
 		.groupBy( "student_responses.user_id" )
 
+	/**
+	 * For each of the students that have taken the exam, update the ScoredPoints 
+	 * field in the exams_users table for the corresponding student
+	 */
 	for( const score of scoredPoints ){
 		await knex
 			.update( { ScoredPoints: score.scored_points } )
@@ -366,27 +396,6 @@ async function updateGrades( knex, assignmentID ) {
 			.where( "user_id", score.user_id )
 			.where( "exam_id", examID )
 	}
-}
-
-/**
- * Retrieves the database exam ID and user ID for a given Canvas userID and assignmentID
- * These values will correspond to a row in the exams_users table
- * @param {*} knex Database connection
- * @param {*} canvasUserID Canvas ID of the user
- * @param {*} canvasAssignmentID Canvas ID of the assignment/exam
- * @returns 
- */
-async function getExamsUsersRow( knex, canvasUserID, canvasAssignmentID ) {
-	const filter = await knex
-		.select( "exam_id", "user_id" )
-		.from( "exams_users" )
-		.innerJoin( "exams", "exams.id", "exams_users.exam_id" )
-		.innerJoin( "users", "users.id", "exams_users.user_id" )
-		.where( {
-			canvas_assignment_id: canvasAssignmentID,
-			canvas_user_id: canvasUserID
-		} )
-	return filter[0]
 }
 
 /** 
