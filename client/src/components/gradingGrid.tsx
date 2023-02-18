@@ -115,7 +115,7 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 					{submissions.map( ( submission, index ) => (
 						<tr key={index}>
 							<td>{submission.fullName}</td>
-							<td>{submission.isText ? submission.value : ( question?.answers ? question?.answers[submission.value as number] : "" )}</td>
+							<td>{submission.isText ? submission.value : ( question?.answers ? question?.answers[submission.value as number] : submission.value )}</td>
 							<td>
 								<InputGroup 
 									value={submission.scoredPoints.toString()}
