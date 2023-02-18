@@ -1,4 +1,7 @@
 // Copyright 2022 under MIT License
+// NOTE: The grading enpoints are not tested as they depend on information
+// from the Canvas LTI launch request
+
 /* eslint-disable no-undef */
 const server = require( "../server.js" )
 const supertest = require( "supertest" )
