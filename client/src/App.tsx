@@ -27,7 +27,9 @@ const StyledApp = styled.div`
  * Style to control the width of each View
  */
 const StyledViewContainer = styled.div`
-	width: 600px;
+	width: 90%;
+	min-width: 600px;
+	max-widht: 1028px;
 `
 
 /**
