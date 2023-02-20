@@ -56,6 +56,17 @@ export const App = React.memo( () => {
 	// Debug learner token
 	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJleGFtcGxlLWV4YW0iLCJmdWxsTmFtZSI6IkV4YW1wbGUgTGVhcm5lciIsInVzZXJJRCI6ImV4YW1wbGUtbGVhcm5lciIsInJvbGVzIjoiTGVhcm5lciIsImlhdCI6MTY3NTM3NzYzOH0.HFMJmkONPDCcKVwAmfjhz0jllgG14S3yf4HmWjsJkhw"
 	
+	// Runs on render - determines the user's role based on their JWT token
+	React.useEffect( () => {
+		// Prompts the user before letting them reload
+		const preventUnload = ( event: BeforeUnloadEvent ) => {
+			const message = "You are about to navigate away, and your entered data will not be saved. Are you sure you want to leave?"
+			event.preventDefault()
+			event.returnValue = message
+		}
+		window.addEventListener( "beforeunload", preventUnload )
+	});
+
 	/**
 	 * Runs on render - determines the user's role based on their JWT token
 	 */
