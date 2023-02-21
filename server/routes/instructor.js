@@ -149,8 +149,6 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 	//console.log( req.body )
 	const {role, assignmentID, userID} = req.session
 	const knex = req.app.get( "db" )
-	//TODO: set individual point values for each question, default is now 5
-	const point_value = 5
 
 	/*
 		Get the internal database exam.id based on the Canvas assignmentID
@@ -202,7 +200,7 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 				question_type_id: question.type,
 				exam_id: exam.id,
 				answer_data: answerData,
-				points_possible: point_value
+				points_possible: question.pointsPossible
 			} )
 			.returning( "id" )
 		//console.log( "result of exam creation:", result )
