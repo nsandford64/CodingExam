@@ -72,6 +72,7 @@ export const CreateExamView = React.memo( () => {
 			batch( ()=>{
 				dispatch( examActions.reInitializeStore() )
 				dispatch( examActions.setQuestionIds( newQuestionIds ) )
+				dispatch( examActions.setQuestionsMap( newQuestionsMap ) )
 			} )
 
 			setLoading( false )
