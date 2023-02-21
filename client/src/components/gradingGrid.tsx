@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Colors, InputGroup } from "@blueprintjs/core"
+import { Colors, InputGroup, Tag } from "@blueprintjs/core"
 import * as React from "react"
 import styled from "styled-components"
 import { Submission } from "../App"
@@ -124,7 +124,11 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 									value={submission.scoredPoints.toString()}
 									onChange={e => updateSubmission( index, parseInt( e.target.value ) || 0 )}
 									onBlur={updateDatabase}
-									style={{ textAlign: "right" }}
+									style={{ textAlign: "right", position: "relative" }}
+									rightElement={
+										<Tag minimal>/ {question?.pointsPossible}</Tag>
+									}
+									
 								/>
 							</td>
 						</tr>
