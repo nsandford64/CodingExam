@@ -128,7 +128,6 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 									rightElement={
 										<Tag minimal>/ {question?.pointsPossible}</Tag>
 									}
-									
 								/>
 							</td>
 						</tr>

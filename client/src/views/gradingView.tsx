@@ -23,6 +23,8 @@ const StyledGradingView = styled.div`
 const StyledQuestionsContainer = styled.div`
 	padding: 10px;
 	border: 1px solid ${Colors.LIGHT_GRAY3};
+	display: flex;
+	flex-direction: column;
 `
 
 /**
@@ -91,7 +93,6 @@ export const GradingView = React.memo( () => {
 						minimal
 						intent={Intent.NONE}
 						alignText="left"
-						style={{ width: "100%"}}
 						onClick={() => setSelectedIndex( index )}
 					/>
 				) )}
