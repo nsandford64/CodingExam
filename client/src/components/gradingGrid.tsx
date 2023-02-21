@@ -18,6 +18,8 @@ interface GradingGridProps {
  */
 const StyledGradingGrid = styled.div`
 	display: grid;
+	margin-left: 10px;
+	flex: 1;
 
 	& table, th, td {
 		border: 1px solid ${Colors.LIGHT_GRAY3};
@@ -103,6 +105,7 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 	 */
 	return (
 		<StyledGradingGrid>
+			<h3>{question?.text}</h3>
 			<table>
 				<thead>
 					<tr>
@@ -116,11 +119,12 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 						<tr key={index}>
 							<td>{submission.fullName}</td>
 							<td>{submission.isText ? submission.value : ( question?.answers ? question?.answers[submission.value as number] : submission.value )}</td>
-							<td>
+							<td style={{ width: 100 }}>
 								<InputGroup 
 									value={submission.scoredPoints.toString()}
 									onChange={e => updateSubmission( index, parseInt( e.target.value ) || 0 )}
 									onBlur={updateDatabase}
+									style={{ textAlign: "right" }}
 								/>
 							</td>
 						</tr>

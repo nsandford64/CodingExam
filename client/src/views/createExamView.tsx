@@ -365,7 +365,8 @@ const CreateMultipleChoice = React.memo( ( props: CreateQuestionComponentProps )
 		id: nextQuestionId,
 		text: "",
 		type: QuestionType.MultipleChoice,
-		correctAnswer: 0
+		correctAnswer: 0,
+		pointsPossible: 0
 	} as Question )
 
 	/**
@@ -460,6 +461,16 @@ const CreateMultipleChoice = React.memo( ( props: CreateQuestionComponentProps )
 					} )}
 				/>
 			</StyledRow>
+			<StyledRow>
+				<Label style={{ fontWeight: "bold" }}>Points Possible</Label>
+				<InputGroup
+					value={question.pointsPossible.toString()}
+					onChange={e => setQuestion( {
+						...question,
+						pointsPossible: parseInt( e.target.value ) || 0
+					} )}
+				/>
+			</StyledRow>
 			<Button 
 				text="Add"
 				intent={Intent.PRIMARY}
@@ -491,7 +502,8 @@ const CreateTrueFalse = React.memo( ( props: CreateQuestionComponentProps ) => {
 		id: nextQuestionId,
 		text: "",
 		type: QuestionType.TrueFalse,
-		correctAnswer: 0
+		correctAnswer: 0,
+		pointsPossible: 0
 	} as Question )
 
 	/**
@@ -522,6 +534,16 @@ const CreateTrueFalse = React.memo( ( props: CreateQuestionComponentProps ) => {
 					onChange={e => setQuestion( {
 						...question,
 						correctAnswer: parseInt( e.target.value ) || 0
+					} )}
+				/>
+			</StyledRow>
+			<StyledRow>
+				<Label style={{ fontWeight: "bold" }}>Points Possible</Label>
+				<InputGroup
+					value={question.pointsPossible.toString()}
+					onChange={e => setQuestion( {
+						...question,
+						pointsPossible: parseInt( e.target.value ) || 0
 					} )}
 				/>
 			</StyledRow>
@@ -557,7 +579,8 @@ const CreateParsonsProblem = React.memo( ( props: CreateQuestionComponentProps )
 		id: nextQuestionId,
 		text: "",
 		type: QuestionType.ParsonsProblem,
-		parsonsAnswer: ""
+		parsonsAnswer: "",
+		pointsPossible: 0
 	} as Question )
 
 	/**
@@ -648,6 +671,16 @@ const CreateParsonsProblem = React.memo( ( props: CreateQuestionComponentProps )
 					} )}
 				/>
 			</StyledRow>
+			<StyledRow>
+				<Label style={{ fontWeight: "bold" }}>Points Possible</Label>
+				<InputGroup
+					value={question.pointsPossible.toString()}
+					onChange={e => setQuestion( {
+						...question,
+						pointsPossible: parseInt( e.target.value ) || 0
+					} )}
+				/>
+			</StyledRow>
 			<Button 
 				text="Add"
 				intent={Intent.PRIMARY}
@@ -688,7 +721,8 @@ const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
 		id: nextQuestionId,
 		text: "",
 		type: props.questionType,
-		correctAnswer: 0
+		correctAnswer: 0,
+		pointsPossible: 0
 	} as Question )
 	// State to hold the language, if this is a CodingAnswer question
 	const [ language, setLanguage ] = React.useState( "" )
@@ -748,6 +782,16 @@ const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
 					</Select2>
 				</StyledRow>
 			)}
+			<StyledRow>
+				<Label style={{ fontWeight: "bold" }}>Points Possible</Label>
+				<InputGroup
+					value={question.pointsPossible.toString()}
+					onChange={e => setQuestion( {
+						...question,
+						pointsPossible: parseInt( e.target.value ) || 0
+					} )}
+				/>
+			</StyledRow>
 			<Button 
 				text="Add"
 				intent={Intent.PRIMARY}

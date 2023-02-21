@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Button, Intent } from "@blueprintjs/core"
+import { Button, Colors, Intent } from "@blueprintjs/core"
 import * as React from "react"
 import { batch } from "react-redux"
 import styled from "styled-components"
@@ -14,14 +14,15 @@ import { examActions, selectQuestionIds, selectToken } from "../slices/examSlice
 const StyledGradingView = styled.div`
 	display: flex;
 	flex-direction: row;
-	align-items: center;
+	width: 100%;
 `
 
 /**
  * Style for the questions container
  */
 const StyledQuestionsContainer = styled.div`
-	width: 300px;
+	padding: 10px;
+	border: 1px solid ${Colors.LIGHT_GRAY3};
 `
 
 /**
