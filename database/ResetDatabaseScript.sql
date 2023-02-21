@@ -3,3 +3,5 @@
 
 DROP DATABASE coding_exam;
 CREATE DATABASE coding_exam;
+
+CREATE USER coding_exam_user WITH PASSWORD 'coding_exam_pass'
