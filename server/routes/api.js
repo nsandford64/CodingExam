@@ -81,7 +81,8 @@ router.get( "/questions", async function( req, res ) {
 	// We need to 'rehydrate' questions that have answer data 
 	// and also limit what data is available depending on user role
 	questions.map( question => {
-		//console.log( "answer_data", question.answer_data )
+		question.pointsPossible = question.points_possible
+
 		// multiple choice
 		if( question.type === 1 ) {
 			question.answers = question.answer_data.answers 

@@ -61,6 +61,8 @@ export const GradingView = React.memo( () => {
 			} )
 			
 			const json  = await data.json()
+			console.log( json.questions )
+
 			const questions: Question[] = json.questions
 
 			// Loop through questions and create ids and a map
