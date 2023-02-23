@@ -107,7 +107,7 @@ router.get( "/questions", async function( req, res ) {
 } )
 
 // Get a list of responses for a given assignmentID and CanvasUserID
-router.get( "/responses", async ( req, res ) => {
+router.get( "/submissions", async ( req, res ) => {
 	const {role, assignmentID} = req.session
 	let {userID} = req.session
 	const knex = req.app.get( "db" )
@@ -133,7 +133,10 @@ router.get( "/responses", async ( req, res ) => {
 		return {
 			questionId: row.question_id,
 			isText: row.is_text_response,
-			value: row.is_text_response ? row.text_response : row.answer_response
+			value: row.is_text_response ? row.text_response : row.answer_response,
+			canvasUserId: row.canvas_user_id,
+			fullName: row.full_name,
+			scoredPoints: row.scored_points || 0
 		}
 	} )
 
