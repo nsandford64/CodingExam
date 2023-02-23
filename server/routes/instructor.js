@@ -58,7 +58,7 @@ router.get( "/examtakers", instructorOnly, async( req, res ) => {
 /**
  * Gets the student responses for a particular question for grading purposes
  */
-router.get( "/responsesfromquestion", instructorOnly, async( req, res ) => {
+router.get( "/allsubmissions", instructorOnly, async( req, res ) => {
 	const {role, assignmentID, userID} = req.session
 	const questionID = req.headers.questionid
 	const knex = req.app.get( "db" )
@@ -70,8 +70,9 @@ router.get( "/responsesfromquestion", instructorOnly, async( req, res ) => {
 			"users.full_name", "student_responses.scored_points" )
 		.from( "student_responses" )
 		.innerJoin( "exam_questions", "exam_questions.id", "student_responses.question_id" )
+		.innerJoin( "exams", "exams.id", "exam_questions.exam_id" )
 		.innerJoin( "users", "users.id", "student_responses.user_id" )
-		.where( "exam_questions.id", questionID )
+		.where( "exam.canvas_assignment_id", assignmentID )
 
 	// Sends the rows back in the form of a submissions typescript object
 	const submissions = results.map( row => {
