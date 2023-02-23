@@ -1,4 +1,6 @@
 // Copyright 2022 under MIT License
+//This is the entry point for testing the app through Jest
+// /bin/www is the entry point for the app in production/development
 
 // Create the app
 const app = require( "./app" )
