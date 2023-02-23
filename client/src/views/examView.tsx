@@ -317,8 +317,6 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 		props.questionId 
 	) )
 
-	console.log( question )
-
 	/**
 	 * Render
 	 */
