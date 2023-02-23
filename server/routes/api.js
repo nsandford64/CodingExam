@@ -128,8 +128,8 @@ router.get( "/submissions", async ( req, res ) => {
 		.where( "exams.canvas_assignment_id", assignmentID )
 		.where( "users.canvas_user_id", userID )
 
-	// Map all result rows into an array of Response objects
-	const responses = results.map( row => {
+	// Map all result rows into an array of Submissions objects
+	const submissions = results.map( row => {
 		return {
 			questionId: row.question_id,
 			isText: row.is_text_response,
@@ -141,7 +141,7 @@ router.get( "/submissions", async ( req, res ) => {
 	} )
 
 	// Send an array of Responses to the Client
-	res.send( {responses} )
+	res.send( {submissions} )
 } )
 
 // Inserts an answer into the StudentResponse table in the database
