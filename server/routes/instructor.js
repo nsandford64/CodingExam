@@ -66,7 +66,7 @@ router.get( "/responsesfromquestion", instructorOnly, async( req, res ) => {
 	// Gets the appropriate rows from the student responses table
 	const results = await knex
 		.select( "student_responses.id", "student_responses.is_text_response", "student_responses.text_response", 
-			"student_responses.answer_response", "student_responses.question_id", "student_responses.user_id",
+			"student_responses.answer_response", "student_responses.question_id", "users.canvas_user_id",
 			"users.full_name", "student_responses.scored_points" )
 		.from( "student_responses" )
 		.innerJoin( "exam_questions", "exam_questions.id", "student_responses.question_id" )
@@ -79,7 +79,7 @@ router.get( "/responsesfromquestion", instructorOnly, async( req, res ) => {
 			questionId: row.question_id,
 			isText: row.is_text_response,
 			value: row.is_text_response ? row.text_response : row.answer_response,
-			userId: row.user_id,
+			canvasUserId: row.canvas_user_id,
 			fullName: row.full_name,
 			scoredPoints: row.scored_points || 0
 		}
@@ -221,9 +221,15 @@ router.post( "/grade", instructorOnly, async( req, res ) => {
 	const knex = req.app.get( "db" )
 
 	for ( const submission of req.body ) {
-		const userID = submission.userId
+		const canvasUserID = submission.canvasUserId
 		const questionID = submission.questionId
 		const score = submission.scoredPoints
+
+		const userID = await knex
+			.select( "id" )
+			.from( "users" )
+			.where( "canvas_user_id", canvasUserID )
+			.first()
 
 		await knex
 			.update( {scored_points: score} )
