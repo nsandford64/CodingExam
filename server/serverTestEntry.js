@@ -3,7 +3,23 @@
 // Create the app
 const app = require( "./app" )
 const knex = require( "knex" )
-const knexConfig = require( "./knexfile" )
+const knexConfig = {
+	client: "pg",
+	connection: {
+		host: process.env.CODING_EXAM_DB_HOST || "localhost",
+		port: 6543,
+		user: process.env.CODING_EXAM_DB_TEST_USER,
+		password: process.env.CODING_EXAM_DB_TEST_PASSWORD,
+		database: process.env.CODING_EXAM_TESTDB_NAME
+	},
+	pool: {
+		min: 2,
+		max: 10
+	},
+	migrations: {
+		tableName: "migrations"
+	}
+}
 
 async function setup() {
 	const db = knex( knexConfig )

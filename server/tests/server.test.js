@@ -3,7 +3,7 @@
 // from the Canvas LTI launch request
 
 /* eslint-disable no-undef */
-const server = require( "../server.js" )
+const server = require( "../serverTestEntry.js" )
 const supertest = require( "supertest" )
 const requestWithSupertest = supertest( server )
 const jwt = require( "jsonwebtoken" )
