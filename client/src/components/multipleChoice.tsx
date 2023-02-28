@@ -3,9 +3,9 @@ import { Radio, RadioGroup } from "@blueprintjs/core"
 import * as React from "react"
 import ReactMarkdown from "react-markdown"
 import styled from "styled-components"
-import { Response, ComponentProps } from "../App"
+import { ComponentProps, Submission } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
-import { examActions, selectQuestionById, selectResponseById } from "../slices/examSlice"
+import { examActions, selectQuestionById, selectSubmissionByUserIdAndQuestionId } from "../slices/examSlice"
 
 /**
  * Style for the MultipleChoice component
@@ -28,8 +28,8 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 	const dispatch = useAppDispatch()
 	// Question from the store
 	const question = useAppSelector( state => selectQuestionById( state, props.questionId ) )
-	// Response from the store
-	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
+	// Submission from the store
+	const submission = useAppSelector( state => selectSubmissionByUserIdAndQuestionId( state, props.questionId, props.canvasUserId ) )
 
 	/**
 	 * Callbacks
@@ -42,13 +42,14 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 	const handleChange = React.useCallback( ( e: React.FormEvent<HTMLInputElement> ) => {
 		// Create a new response object
 		const value = ( e.target as HTMLInputElement ).value
-		const newResponse: Response = {
-			questionId: props.questionId,
-			value: parseInt( value )
+
+		const newSubmission: Submission = {
+			value: parseInt( value ),
+			questionId: props.questionId
 		}
 
 		// Update the response in the store
-		dispatch( examActions.updateResponse( newResponse ) )
+		dispatch( examActions.updateSubmission( newSubmission ) )
 	}, [] )
 
 	/**
@@ -66,7 +67,7 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 				label={label}
 				disabled={props.disabled}
 				onChange={handleChange}
-				selectedValue={response?.value}
+				selectedValue={submission?.value}
 			>
 				{question?.answers.map( ( choice, index ) => (
 					<Radio 

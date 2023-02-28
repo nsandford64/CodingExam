@@ -3,8 +3,8 @@ import { Button, Intent } from "@blueprintjs/core"
 import * as React from "react"
 import styled from "styled-components"
 import { User } from "../App"
-import { useAppSelector } from "../app/hooks"
-import { selectFeedbackMap, selectToken } from "../slices/examSlice"
+import { useAppDispatch, useAppSelector } from "../app/hooks"
+import { initializeQuestions, selectFeedbackMap, selectToken } from "../slices/examSlice"
 import { CreateExamView } from "./createExamView"
 import { ExamView } from "./examView"
 import { GradingView } from "./gradingView"
@@ -54,6 +54,7 @@ export const InstructorView = React.memo( () => {
 	/**
 	 * Selectors
 	 */
+	const dispatch = useAppDispatch()
 	// Token from the store
 	const token = useAppSelector( selectToken )
 	// feedbackMap from the store
@@ -165,7 +166,7 @@ export const InstructorView = React.memo( () => {
 			setUsers( users )
 		}
 		// Call the async function
-		initUsers()
+		initUsers()	
 	}, [] )
 
 	/**

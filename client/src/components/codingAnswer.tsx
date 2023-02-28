@@ -4,9 +4,9 @@ import * as React from "react"
 import AceEditor from "react-ace"
 import ReactMarkdown from "react-markdown"
 import styled from "styled-components"
-import { Response, ComponentProps } from "../App"
+import { ComponentProps, Submission } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
-import { examActions, selectQuestionById, selectResponseById } from "../slices/examSlice"
+import { examActions, selectQuestionById, selectSubmissionByUserIdAndQuestionId } from "../slices/examSlice"
 // Language modes for the ACE editor
 import "brace/mode/java"
 import "brace/mode/csharp"
@@ -34,22 +34,22 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 	const dispatch = useAppDispatch()
 	// Question from the store
 	const question = useAppSelector( state => selectQuestionById( state, props.questionId ) )
-	// Response from the Store
-	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
+	// Submission from the store
+	const submission = useAppSelector( state => selectSubmissionByUserIdAndQuestionId( state, props.questionId, props.canvasUserId ) )
 
 	/**
 	 * Callbacks
 	 */
 	//Called whenever the code editor text is changed -- Updates the store with a new Response object
 	const handleChange = React.useCallback( ( value: string ) => {
-		const newResponse: Response = {
+		const newSubmission: Submission = {
 			questionId: props.questionId,
+			value: value,
 			isText: true,
-			value: value
 		}
 
 		// Updates the response in the store
-		dispatch( examActions.updateResponse( newResponse ) )
+		dispatch( examActions.updateSubmission( newSubmission ) )
 	}, [] )
 
 	/**
@@ -82,7 +82,7 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 				theme="sqlserver"
 				onChange={handleChange}
 				name="editor"
-				defaultValue={`${response?.value || ""}`}
+				defaultValue={`${submission?.value || ""}`}
 				width="100%"
 			/>
 		</StyledCodingAnswer>

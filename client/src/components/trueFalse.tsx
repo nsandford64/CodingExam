@@ -3,9 +3,9 @@ import { Radio, RadioGroup } from "@blueprintjs/core"
 import * as React from "react"
 import ReactMarkdown from "react-markdown"
 import styled from "styled-components"
-import { Response, ComponentProps } from "../App"
+import { ComponentProps, Submission } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
-import { examActions, selectQuestionById, selectResponseById } from "../slices/examSlice"
+import { examActions, selectQuestionById, selectSubmissionByUserIdAndQuestionId } from "../slices/examSlice"
 
 /**
  * Style for the TrueFalse component
@@ -28,8 +28,8 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 	const dispatch = useAppDispatch()
 	// Question from the store
 	const question = useAppSelector( state => selectQuestionById( state, props.questionId ) )
-	// Response from the store
-	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
+	// Submission from the store
+	const submission = useAppSelector( state => selectSubmissionByUserIdAndQuestionId( state, props.questionId, props.canvasUserId ) )
 
 	/**
 	 * Callbacks
@@ -37,12 +37,12 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 	// Called when the user selects between true or false - updates the App's responsesMap
 	const handleChange = React.useCallback( ( e: React.FormEvent<HTMLInputElement> ) => {
 		const value = ( e.target as HTMLInputElement ).value
-		const newResponse: Response = {
+		const newSubmission: Submission = {
 			questionId: props.questionId,
 			value: parseInt( value )
 		}
 
-		dispatch( examActions.updateResponse( newResponse ) )
+		dispatch( examActions.updateSubmission( newSubmission ) )
 	}, [] )
 	// Format markdown in the question text
 	const label = question ? <ReactMarkdown>{question?.text}</ReactMarkdown> : ""
@@ -56,7 +56,7 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 				disabled={props.disabled}
 				label={label}
 				onChange={handleChange}
-				selectedValue={response?.value}
+				selectedValue={submission?.value}
 			>
 				<Radio label="False" value={0} />
 				<Radio label="True" value={1} />

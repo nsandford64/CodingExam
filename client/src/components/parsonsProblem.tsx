@@ -1,11 +1,11 @@
 // Copyright 2022 under MIT License
 // Taken from Josh Ellis's article: CodeAlong: Multi-Column Drag and Drop in React
 import React from "react"
-import { Response, ComponentProps, Column, Item } from "../App"
+import { ComponentProps, Column, Item, Submission } from "../App"
 import styled from "styled-components"
 import { DragDropContext, DropResult } from "react-beautiful-dnd"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
-import { examActions, selectQuestionById, selectResponseById } from "../slices/examSlice"
+import { examActions, selectQuestionById, selectSubmissionByUserIdAndQuestionId } from "../slices/examSlice"
 import { Label } from "@blueprintjs/core"
 import ParsonsColumn from "./column"
 
@@ -38,8 +38,8 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 	const dispatch = useAppDispatch()
 	// Question from the store
 	const question = useAppSelector( state => selectQuestionById( state, props.questionId ) )
-	// Response from the Store
-	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
+	// Submission from the store
+	const submission = useAppSelector( state => selectSubmissionByUserIdAndQuestionId( state, props.questionId, props.canvasUserId ) )
 
 	/**
 	 * State
@@ -75,7 +75,7 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 
 		let unsortedItems = items
 		
-		const values = response?.value.toString() || ""
+		const values = submission?.value.toString() || ""
 		const sortedItems: Item[] = []
 
 		for( const char of values ) {
@@ -156,13 +156,13 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 					currentResponse += item.id.toString()
 				} )
 
-				const newResponse: Response = {
+				const newSubmission: Submission = {
 					questionId: props.questionId,
 					isText: true,
-					value: currentResponse
+					value: currentResponse,
 				}
 
-				dispatch( examActions.updateResponse( newResponse ) )
+				dispatch( examActions.updateSubmission( newSubmission ) )
 			}
 		} 
 		else {
@@ -213,13 +213,13 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 				} )
 			}
 
-			const newResponse: Response = {
+			const newSubmission: Submission = {
 				questionId: props.questionId,
 				isText: true,
-				value: currentResponse
+				value: currentResponse,
 			}
 
-			dispatch( examActions.updateResponse( newResponse ) )
+			dispatch( examActions.updateSubmission( newSubmission ) )
 		}
 	}
 

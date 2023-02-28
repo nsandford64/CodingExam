@@ -1,9 +1,8 @@
 // Copyright 2022 under MIT License
 import { Button, Callout, Colors, Intent, Spinner } from "@blueprintjs/core"
 import * as React from "react"
-import { batch } from "react-redux"
 import styled from "styled-components"
-import { Feedback, Question, QuestionType, Response, Confidence } from "../App"
+import { QuestionType } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { CodingAnswer } from "../components/codingAnswer"
 import { FeedbackBox } from "../components/feedbackBox"
@@ -11,7 +10,7 @@ import { MultipleChoice } from "../components/multipleChoice"
 import { ParsonsProblem } from "../components/parsonsProblem"
 import { ShortAnswer } from "../components/shortAnswer"
 import { TrueFalse } from "../components/trueFalse"
-import { examActions, selectQuestionById, selectQuestionIds, selectResponsesMap, selectToken, selectResponseState, selectConfidenceMap } from "../slices/examSlice"
+import { examActions, selectQuestionById, selectQuestionIds, selectToken, selectResponseState, selectConfidenceMap, selectSubmissionsMap, initializeQuestions } from "../slices/examSlice"
 
 // Props for the ExamView component
 interface ExamViewProps {
@@ -81,8 +80,8 @@ export const ExamView = ( props: ExamViewProps ) => {
 	const responseState = useAppSelector( selectResponseState )
 	// Array of questionIds from the Redux store
 	const questionIds = useAppSelector( selectQuestionIds )
-	// Map of responses from the store
-	const responsesMap = useAppSelector( selectResponsesMap )
+	// Map of submissions from the store
+	const submissionsMap = useAppSelector( selectSubmissionsMap )
 	// Map of confidence ratings from the store
 	const confidenceMap = useAppSelector( selectConfidenceMap )
 	// token from the store
@@ -103,100 +102,11 @@ export const ExamView = ( props: ExamViewProps ) => {
 	*/
 	React.useEffect( () => {
 		const initQuestions = async () => {
-			// Fetch exam questions
-			let data = await fetch( "/api/questions", {
-				headers: {
-					"token": token
-				} 
-			} )
-			
-			let json  = await data.json()
-			const questions: Question[] = json.questions
-
-			// Loop through questions and create ids and a map
-			const newQuestionIds: number[] = []
-			const newQuestionsMap = new Map<number, Question>()
-			questions.forEach( question => {
-				newQuestionIds.push( question.id )
-				newQuestionsMap.set( question.id, question )
-			} )
-
-			// Fetch exam responses (if there are any)
-			data = await fetch( "/api/responses", {
-				headers: {
-					"token": token,
-					"userID": props.canvasUserId || ""
-				}
-			} )
-
-			json = await data.json()
-			const responses: Response[] = json.responses
-
-			/*
-			Loop through responses and create ids and a map 
-			for responses and for confidence ratings
-			*/
-			const newResponseIds: number[] = []
-			const newResponsesMap = new Map<number, Response>()
-			responses.forEach( response => {
-				newResponseIds.push( response.questionId )
-				newResponsesMap.set( response.questionId, response )
-			} )
-
-			// Fetch exam confidence ratings 
-			data = await fetch( "/api/confidence", {
-				headers: {
-					"token": token,
-					"userID": props.canvasUserId || ""
-				}
-			} )
-
-			json = await data.json()
-			const confidence: Confidence[] = json.confidence
-
-			// Loop through the confidence and create ids and a map
-			const newConfidenceIds: number[] = []
-			const newConfidenceMap = new Map<number, Confidence>()
-			confidence.forEach( confidence => {
-				newConfidenceIds.push( confidence.questionId )
-				newConfidenceMap.set( confidence.questionId, confidence )
-			} )
-
-			// Fetch exam feedback
-			data = await fetch( "/api/feedback", {
-				headers: {
-					"token": token,
-					"userID": props.canvasUserId || ""
-				}
-			} )
-
-			json = await data.json()
-			const feedback: Feedback[] = json.feedback
-
-			// Loop through the feedback and create ids and a map
-			const newFeedbackIds: number[] = []
-			const newFeedbackMap = new Map<number, Feedback>()
-			feedback.forEach( feedback => {
-				newFeedbackIds.push( feedback.questionId )
-				newFeedbackMap.set( feedback.questionId, feedback )
-			} )
-
-			// Update the store
-			batch( () => {
-				dispatch( examActions.setFeedbackIds( newFeedbackIds ) )
-				dispatch( examActions.setFeedbackMap( newFeedbackMap ) )
-				dispatch( examActions.setQuestionIds( newQuestionIds ) )
-				dispatch( examActions.setQuestionsMap( newQuestionsMap ) )
-				dispatch( examActions.setResponseIds( newResponseIds ) )
-				dispatch( examActions.setResponsesMap( newResponsesMap ) )
-				dispatch( examActions.setConfidenceIds( newConfidenceIds ) )
-				dispatch( examActions.setConfidenceMap( newConfidenceMap ) )
-			} )
+			await dispatch( initializeQuestions( props.canvasUserId ) )
 
 			setLoading( false )
 		}
 
-		// Call async function
 		initQuestions()
 	}, [] )
 
@@ -205,12 +115,15 @@ export const ExamView = ( props: ExamViewProps ) => {
 	response in the responsesMap to update the database
 	*/
 	const submit = React.useCallback( async () => {
-		
-		const data = questionIds.map( id => ( {
-			questionId: id,
-			value: responsesMap.get( id )?.value,
-			confidence: confidenceMap.get( id )?.value
-		} ) )
+		const data = questionIds.map( id => {
+			const value = submissionsMap.get( "student" )?.get( id )?.value
+
+			return {
+				questionId: id,
+				value,
+				confidence: confidenceMap.get( id )?.value
+			}
+		} )
 
 		try {
 			const res = await fetch( "/api", {
@@ -232,7 +145,7 @@ export const ExamView = ( props: ExamViewProps ) => {
 		catch( e ) {
 			console.error( e )
 		}
-	}, [ responsesMap ] )
+	}, [] )
 
 	/**
 	 * Render

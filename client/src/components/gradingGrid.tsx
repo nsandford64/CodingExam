@@ -121,7 +121,7 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 							<td>{submission.isText ? submission.value : ( question?.answers ? question?.answers[submission.value as number] : submission.value )}</td>
 							<td style={{ width: 100 }}>
 								<InputGroup 
-									value={submission.scoredPoints.toString()}
+									value={submission.scoredPoints?.toString() || "0"}
 									onChange={e => updateSubmission( index, parseInt( e.target.value ) || 0 )}
 									onBlur={updateDatabase}
 									style={{ textAlign: "right", position: "relative" }}

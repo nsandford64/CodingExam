@@ -3,9 +3,9 @@ import { Label, TextArea } from "@blueprintjs/core"
 import * as React from "react"
 import ReactMarkdown from "react-markdown"
 import styled from "styled-components"
-import { Response, ComponentProps } from "../App"
+import { ComponentProps, Submission } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
-import { examActions, selectQuestionById, selectResponseById } from "../slices/examSlice"
+import { examActions, selectQuestionById, selectSubmissionByUserIdAndQuestionId } from "../slices/examSlice"
 
 /**
  * Style for the ShortAnswer component
@@ -28,8 +28,8 @@ export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
 	const dispatch = useAppDispatch()
 	// Question from the store
 	const question = useAppSelector( state => selectQuestionById( state, props.questionId ) )
-	// Response from the Store
-	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
+	// Submission from the store
+	const submission = useAppSelector( state => selectSubmissionByUserIdAndQuestionId( state, props.questionId, props.canvasUserId ) )
 
 	/**
 	 * Callbacks
@@ -38,13 +38,13 @@ export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
 	Called when a new bubble is selected - updates the store with a new Response object
 	*/
 	const handleChange = React.useCallback( ( e: React.ChangeEvent<HTMLTextAreaElement> ) => {
-		const newResponse: Response = {
+		const newSubmission: Submission = {
 			questionId: props.questionId,
 			isText: true,
-			value: e.target.value
+			value: e.target.value,
 		}
 
-		dispatch( examActions.updateResponse( newResponse ) )
+		dispatch( examActions.updateSubmission( newSubmission ) )
 	}, [] )
 
 	/**
@@ -61,7 +61,7 @@ export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
 				disabled={props.disabled}
 				large
 				onChange={handleChange}
-				value={response?.value} 
+				value={submission?.value} 
 				fill
 				growVertically
 				style={{ minHeight: "100px", resize: "none" }}
