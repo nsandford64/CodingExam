@@ -59,6 +59,7 @@ export const CreateExamView = React.memo( () => {
 			
 			const json  = await data.json()
 			const questions: Question[] = json.questions
+			console.log( questions )
 
 			// Loop through questions and create ids and a map
 			const newQuestionIds: number[] = []
@@ -68,9 +69,19 @@ export const CreateExamView = React.memo( () => {
 				newQuestionsMap.set( question.id, question )
 			} )
 
+			// Gets the next question ID from the server
+			const newId = await fetch( "/api/instructor/newquestionid", {
+				headers: {
+					"token": token
+				} 
+			} )
+
+			const questionId = await newId.json()
+
 			// Update the store
 			batch( ()=>{
-				dispatch( examActions.reInitializeStore() )
+				dispatch( examActions.setNextQuestionId( questionId.newid ) ) 
+				dispatch( examActions.reInitializeStore( questionId.newid ) )
 				dispatch( examActions.setQuestionIds( newQuestionIds ) )
 				dispatch( examActions.setQuestionsMap( newQuestionsMap ) )
 			} )
@@ -79,6 +90,7 @@ export const CreateExamView = React.memo( () => {
 		}
 		// Call async function
 		initQuestions()
+
 	}, [] )
 
 	/**
@@ -251,6 +263,9 @@ const CreateQuestionSwitch = React.memo( ( props: CreateQuestionSwitchProps ) =>
 	// Dispatch at action to the store
 	const dispatch = useAppDispatch()
 
+	// Gets the token from the store
+	const token = useAppSelector( selectToken )
+
 	/**
 	 * Memos
 	 */
@@ -279,11 +294,23 @@ const CreateQuestionSwitch = React.memo( ( props: CreateQuestionSwitchProps ) =>
 	Called when the user clicks the "Add" button - this creates
 	a new Question in the store and tells it increment its counter
 	*/
-	const createQuestion = React.useCallback( ( question: Question ) => {
+	const createQuestion = React.useCallback( async ( question: Question ) => {
 		props.setSelectedQuestionType( "" )
 
-		dispatch( examActions.updateQuestion( question ) )
-		dispatch( examActions.incrementNextQuestionId() )
+		// Gets the next question ID from the server
+		const data = await fetch( "/api/instructor/newquestionid", {
+			headers: {
+				"token": token
+			} 
+		} )
+
+		const json  = await data.json()
+
+		batch( () => {
+			dispatch( examActions.setNextQuestionId( json.newid ) )
+			dispatch( examActions.updateQuestion( question ) )
+		} )
+		
 	}, [] )
 
 	/**
