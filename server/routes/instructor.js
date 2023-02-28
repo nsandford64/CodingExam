@@ -70,8 +70,9 @@ router.get( "/responsesfromquestion", instructorOnly, async( req, res ) => {
 			"users.full_name", "student_responses.scored_points" )
 		.from( "student_responses" )
 		.innerJoin( "exam_questions", "exam_questions.id", "student_responses.question_id" )
+		.innerJoin( "exams", "exams.id", "exam_questions.exam_id" )
 		.innerJoin( "users", "users.id", "student_responses.user_id" )
-		.where( "exam_questions.id", questionID )
+		.where( "exams.canvas_assignment_id", assignmentID )
 
 	// Sends the rows back in the form of a submissions typescript object
 	const submissions = results.map( row => {
@@ -84,6 +85,8 @@ router.get( "/responsesfromquestion", instructorOnly, async( req, res ) => {
 			scoredPoints: row.scored_points || 0
 		}
 	} )
+
+	console.log( submissions )
 
 	res.send( {submissions} )
 } )
@@ -140,8 +143,8 @@ router.get( "/newquestionid", instructorOnly, async( req, res ) => {
 	const knex = req.app.get( "db" )
 	// Use the postgres nextval() function to grab a new value for examQuestions.id
 	// This also advances the corresponding sequence, so it will not be duplicated
-	const [ nextID ] = await knex.raw( "SELECT nextval(pg_get_serial_sequence('exam_questions', 'id')) as newID" )
-	res.send( nextID )
+	const nextID = await knex.raw( "SELECT nextval(pg_get_serial_sequence('exam_questions', 'id')) as newID" )
+	res.send( nextID.rows[0] )
 } )
 
 // Creates the questions for an exam when the instructor submits a question set
@@ -196,14 +199,17 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 		// Inserts the question into the database and returns the questionID for inserting potential answers
 		const result = await knex( "exam_questions" )
 			.insert( {
+				id: question.id,
 				question_text: question.text,
 				question_type_id: question.type,
 				exam_id: exam.id,
 				answer_data: answerData,
 				points_possible: question.pointsPossible
 			} )
+			.onConflict( "id" )
+			.merge()
 			.returning( "id" )
-		//console.log( "result of exam creation:", result )
+		console.log( "result of exam creation:", result )
 		
 	}
 			

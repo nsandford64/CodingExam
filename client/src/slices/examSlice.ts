@@ -75,13 +75,8 @@ const updateConfidence = ( state: ExamState, action: PayloadAction<Confidence> )
 	state.confidenceMap.set( action.payload.questionId, action.payload )
 }
 
-// Increment the nextQuestionId
-const incrementNextQuestionId = ( state: ExamState ) => {
-	state.nextQuestionId++
-}
-
-// Advance the NextQuestionId to the specified amount
-const advanceNextQuestionId = ( state: ExamState, action: PayloadAction<number> ) => {
+// Set next question ID based on response from server
+const setNextQuestionId = ( state: ExamState, action: PayloadAction<number> ) => {
 	state.nextQuestionId = action.payload
 }
 
@@ -91,7 +86,7 @@ const setToken = ( state: ExamState, action: PayloadAction<string> ) => {
 }
 
 // Re-initializes the store
-const reInitializeStore = ( state: ExamState ) => {
+const reInitializeStore = ( state: ExamState, action: PayloadAction<number> ) => {
 	// Reset everything besides the token
 	state.questionIds = initialState.questionIds
 	state.questionsMap = initialState.questionsMap
@@ -102,7 +97,7 @@ const reInitializeStore = ( state: ExamState ) => {
 	state.feedbackMap = initialState.feedbackMap
 	state.confidenceIds = initialState.confidenceIds
 	state.confidenceMap = initialState.confidenceMap
-	state.nextQuestionId = initialState.nextQuestionId
+	state.nextQuestionId = action.payload
 }
 
 /**
@@ -236,7 +231,7 @@ export interface ExamState {
 	feedbackMap: Map<number, Feedback>,
 	confidenceIds: number[],
 	confidenceMap: Map<number, Confidence>,
-	nextQuestionId: number,
+	nextQuestionId?: number,
 	token: string
 }
 
@@ -250,7 +245,6 @@ const initialState: ExamState = {
 	feedbackMap: new Map<number, Feedback>(),
 	confidenceIds: [],
 	confidenceMap: new Map<number, Confidence>(),
-	nextQuestionId: 10,
 	token: ""
 }
 
@@ -272,8 +266,7 @@ export const examSlice = createSlice( {
 		setConfidenceIds,
 		setConfidenceMap,
 		updateConfidence,
-		incrementNextQuestionId,
-		advanceNextQuestionId,
+		setNextQuestionId,
 		setToken,
 		reInitializeStore
 	}
