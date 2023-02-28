@@ -102,7 +102,7 @@ export const ExamView = ( props: ExamViewProps ) => {
 	*/
 	React.useEffect( () => {
 		const initQuestions = async () => {
-			await dispatch( initializeQuestions( props.canvasUserId ) )
+			await dispatch( initializeQuestions() )
 
 			setLoading( false )
 		}
@@ -145,7 +145,7 @@ export const ExamView = ( props: ExamViewProps ) => {
 		catch( e ) {
 			console.error( e )
 		}
-	}, [] )
+	}, [ submissionsMap ] )
 
 	/**
 	 * Render

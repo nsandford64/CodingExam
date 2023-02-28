@@ -132,8 +132,6 @@ export const selectSubmissionByUserIdAndQuestionId = createSelector(
 	( _: RootState, questionId: number ) => questionId,
 	( _: RootState , __: number, canvasUserId?: string ) => canvasUserId || "student",
 	( submissionsMap, questionId, canvasUserId ) => {
-		console.log( submissionsMap, canvasUserId, questionId )
-
 		const submissions = submissionsMap.get( canvasUserId )
 		return submissions?.get( questionId )
 	}
