@@ -71,11 +71,13 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 	 */
 	return (
 		<StyledCodingAnswer>
-			<Label>
-				<ReactMarkdown>
-					{text}	
-				</ReactMarkdown>
-			</Label>
+			{props.headerShown && (
+				<Label>
+					<ReactMarkdown>
+						{text}	
+					</ReactMarkdown>
+				</Label>
+			)}
 			<AceEditor
 				readOnly={props.disabled}
 				mode={mode}

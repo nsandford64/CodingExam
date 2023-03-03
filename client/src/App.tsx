@@ -144,7 +144,8 @@ export type Exam = {
 export interface ComponentProps {
 	disabled?: boolean // Whether it should be disabled or not
 	questionId: number // Specific questionId of the given question
-	canvasUserId?: string
+	canvasUserId?: string // The canvasUserId that should be pulled from the DB
+	headerShown?: boolean // Whether the header should be shown or not
 }
 
 /**

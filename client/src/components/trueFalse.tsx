@@ -54,7 +54,7 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 		<StyledTrueFalse>
 			<RadioGroup
 				disabled={props.disabled}
-				label={label}
+				label={props.headerShown ? label : undefined}
 				onChange={handleChange}
 				selectedValue={submission?.value}
 			>

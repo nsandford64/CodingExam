@@ -59,7 +59,6 @@ export const CreateExamView = React.memo( () => {
 			
 			const json  = await data.json()
 			const questions: Question[] = json.questions
-			console.log( questions )
 
 			// Loop through questions and create ids and a map
 			const newQuestionIds: number[] = []
@@ -188,6 +187,7 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 			<QuestionSwitch
 				questionId={props.questionId}
 				disabled
+				headerShown
 			/>
 		</StyledQuestionContainer>
 	)

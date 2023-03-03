@@ -171,6 +171,7 @@ export const ExamView = ( props: ExamViewProps ) => {
 									disabled={props.disabled}
 									questionId={id}
 									canvasUserId={props.canvasUserId}
+									headerShown
 								/>
 								{props.feedback && (
 									<FeedbackBox
@@ -215,6 +216,7 @@ interface QuestionSwitchProps {
 	review?: boolean
 	questionId: number
 	canvasUserId?: string
+	headerShown?: boolean
 }
 
 /**
@@ -244,6 +246,7 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 				disabled={props.disabled}
 				questionId={question.id}
 				canvasUserId={props.canvasUserId}
+				headerShown={props.headerShown}
 			/>
 		)
 	case QuestionType.TrueFalse:
@@ -252,6 +255,7 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 				disabled={props.disabled}
 				questionId={question.id}
 				canvasUserId={props.canvasUserId}
+				headerShown={props.headerShown}
 			/>
 		)
 	case QuestionType.ShortAnswer:
@@ -260,6 +264,7 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 				disabled={props.disabled}
 				questionId={question.id}
 				canvasUserId={props.canvasUserId}
+				headerShown={props.headerShown}
 			/>
 		)
 	case QuestionType.CodingAnswer:
@@ -268,6 +273,7 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 				disabled={props.disabled}
 				questionId={question.id}
 				canvasUserId={props.canvasUserId}
+				headerShown={props.headerShown}
 			/>
 		)
 	case QuestionType.ParsonsProblem:
@@ -276,6 +282,7 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 				disabled={props.disabled}
 				questionId={question.id}
 				canvasUserId={props.canvasUserId}
+				headerShown={props.headerShown}
 			/>
 		)
 	default:
