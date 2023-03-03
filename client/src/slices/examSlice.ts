@@ -29,10 +29,6 @@ const deleteQuestion = ( state: ExamState, action: PayloadAction<number> ) => {
 	state.questionsMap.delete( action.payload )
 }
 
-// Set the canvasUserIds array in the store
-const setCanvasUserIds = ( state: ExamState, action: PayloadAction<string[]> ) => {
-	state.canvasUserIds = action.payload
-}
 // Set the submissionsMap map in the store
 const setSubmissionsMap = ( state: ExamState, action: PayloadAction<Map<string, Map<number, Submission>>> ) => {
 	state.submissionsMap = action.payload
@@ -94,7 +90,6 @@ const reInitializeStore = ( state: ExamState, action: PayloadAction<number> ) =>
 	state.questionIds = initialState.questionIds
 	state.questionsMap = initialState.questionsMap
 	state.submissionsMap = initialState.submissionsMap
-	state.canvasUserIds = initialState.canvasUserIds
 	state.responseState = initialState.responseState
 	state.feedbackIds = initialState.feedbackIds
 	state.feedbackMap = initialState.feedbackMap
@@ -106,7 +101,6 @@ const reInitializeStore = ( state: ExamState, action: PayloadAction<number> ) =>
 /**
  * Selectors
  */
-
 // Select all questionIds
 export const selectQuestionIds = ( state: RootState ) => (
 	state.exam.questionIds
@@ -197,8 +191,9 @@ export const selectToken = ( state: RootState ) => (
  * Thunks
  */
 export const initializeQuestions = ( canvasUserId?: string ): AppThunk<Promise<void>> => async ( dispatch, getState ) => {
+	// Current state of the Redux store
 	const state = getState()
-
+	// Token from the store
 	const token = selectToken( state )
 
 	// Fetch exam questions
@@ -346,7 +341,6 @@ export const createExamThunk: AppThunk<void> = async ( dispatch, getState ) => {
 export interface ExamState {
 	questionIds: number[]
 	questionsMap: Map<number, Question>
-	canvasUserIds: string[]
 	submissionsMap: Map<string, Map<number, Submission>>
 	responseState: string,
 	feedbackIds: number[],
@@ -360,7 +354,6 @@ export interface ExamState {
 const initialState: ExamState = {
 	questionIds: [],
 	questionsMap: new Map<number, Question>(),
-	canvasUserIds: [],
 	submissionsMap: new Map<string, Map<number, Submission>>(),
 	responseState: "",
 	feedbackIds: [],
@@ -378,7 +371,6 @@ export const examSlice = createSlice( {
 		setQuestionsMap,
 		updateQuestion,
 		deleteQuestion,
-		setCanvasUserIds,
 		setSubmissionsMap,
 		updateSubmission,
 		setResponseState,
