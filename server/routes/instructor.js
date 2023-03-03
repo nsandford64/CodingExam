@@ -86,8 +86,6 @@ router.get( "/allsubmissions", instructorOnly, async( req, res ) => {
 		}
 	} )
 
-	console.log( submissions )
-
 	res.send( {submissions} )
 } )
 
@@ -242,7 +240,7 @@ router.post( "/grade", instructorOnly, async( req, res ) => {
 			.from( "student_responses" )
 			.where( {
 				question_id: questionID,
-				user_id: userID
+				user_id: userID.id
 			} )
 	}
 

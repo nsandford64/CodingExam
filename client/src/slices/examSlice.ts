@@ -133,7 +133,26 @@ export const selectSubmissionByUserIdAndQuestionId = createSelector(
 	( _: RootState , __: number, canvasUserId?: string ) => canvasUserId || "student",
 	( submissionsMap, questionId, canvasUserId ) => {
 		const submissions = submissionsMap.get( canvasUserId )
+		
 		return submissions?.get( questionId )
+	}
+)
+// Selects a list of submissions from a questionId
+export const selectSubmissionsByQuestionId = createSelector(
+	selectSubmissionsMap,
+	( _: RootState, questionId: number ) => questionId,
+	( submissionsMap, questionId ) => {
+		const maps = Array.from( submissionsMap.values() )
+
+		const submissions: Submission[] = []
+		maps.forEach( map => {
+			const submission = map.get( questionId )
+			if ( submission ) {
+				submissions.push( submission )
+			}
+		} )
+
+		return submissions
 	}
 )
 
@@ -217,12 +236,10 @@ export const initializeQuestions = ( canvasUserId?: string ): AppThunk<Promise<v
 	*/
 	const newSubmissionsMap = new Map<string, Map<number, Submission>>()
 	submissions.forEach( submission => {
-		const canvasUserId = "student"
-
-		const currentSubmissions = newSubmissionsMap.get( canvasUserId ) || new Map<number, Submission>()
+		const currentSubmissions = newSubmissionsMap.get( canvasUserId || "student" ) || new Map<number, Submission>()
 		currentSubmissions.set( submission.questionId, submission )
 
-		newSubmissionsMap.set( canvasUserId, currentSubmissions )
+		newSubmissionsMap.set( canvasUserId || "student", currentSubmissions )
 	} )
 
 	// Fetch exam confidence ratings 

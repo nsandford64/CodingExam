@@ -46,6 +46,7 @@ export const StyledQuestionContainer = styled.div`
 	border: 1px solid ${Colors.BLACK};
 	border-radius: 2px;
 	margin-bottom: 25px;
+	width: 600px;
 `
 
 /**
@@ -102,7 +103,7 @@ export const ExamView = ( props: ExamViewProps ) => {
 	*/
 	React.useEffect( () => {
 		const initQuestions = async () => {
-			await dispatch( initializeQuestions() )
+			await dispatch( initializeQuestions( props.canvasUserId ) )
 
 			setLoading( false )
 		}
@@ -169,6 +170,7 @@ export const ExamView = ( props: ExamViewProps ) => {
 								<QuestionSwitch
 									disabled={props.disabled}
 									questionId={id}
+									canvasUserId={props.canvasUserId}
 								/>
 								{props.feedback && (
 									<FeedbackBox
@@ -212,6 +214,7 @@ interface QuestionSwitchProps {
 	feedback?: boolean
 	review?: boolean
 	questionId: number
+	canvasUserId?: string
 }
 
 /**
@@ -240,6 +243,7 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 			<MultipleChoice
 				disabled={props.disabled}
 				questionId={question.id}
+				canvasUserId={props.canvasUserId}
 			/>
 		)
 	case QuestionType.TrueFalse:
@@ -247,6 +251,7 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 			<TrueFalse
 				disabled={props.disabled}
 				questionId={question.id}
+				canvasUserId={props.canvasUserId}
 			/>
 		)
 	case QuestionType.ShortAnswer:
@@ -254,6 +259,7 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 			<ShortAnswer
 				disabled={props.disabled}
 				questionId={question.id}
+				canvasUserId={props.canvasUserId}
 			/>
 		)
 	case QuestionType.CodingAnswer:
@@ -261,6 +267,7 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 			<CodingAnswer
 				disabled={props.disabled}
 				questionId={question.id}
+				canvasUserId={props.canvasUserId}
 			/>
 		)
 	case QuestionType.ParsonsProblem:
@@ -268,6 +275,7 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 			<ParsonsProblem
 				disabled={props.disabled}
 				questionId={question.id}
+				canvasUserId={props.canvasUserId}
 			/>
 		)
 	default:
