@@ -228,9 +228,9 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 	 */
 	return (
 		<StyledParsonsProblem>
-			{props.headerShown} && (
-			<Label>{question?.text}</Label>
-			)
+			{props.headerShown && (
+				<Label>{question?.text}</Label>
+			)}
 			<DragDropContext onDragEnd={onDragEnd} >
 				<StyledColumns>
 					<ParsonsColumn disabled={props.disabled || false} column={columns.unsorted} />

@@ -96,7 +96,7 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 					{submissions.map( ( submission, index ) => (
 						<tr key={index}>
 							<td>{submission.fullName}</td>
-							<td style={{ width: 400}}>
+							<td style={{ width: 600 }}>
 								<QuestionSwitch 
 									disabled
 									questionId={props.questionId}
