@@ -64,7 +64,7 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 	return (
 		<StyledMultipleChoice>
 			<RadioGroup
-				label={label}
+				label={props.headerShown ? label : undefined}
 				disabled={props.disabled}
 				onChange={handleChange}
 				selectedValue={submission?.value}

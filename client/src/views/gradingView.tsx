@@ -3,7 +3,7 @@ import { Button, Colors, Intent } from "@blueprintjs/core"
 import * as React from "react"
 import { batch } from "react-redux"
 import styled from "styled-components"
-import { Question } from "../App"
+import { Question, Submission } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { GradingGrid } from "../components/gradingGrid"
 import { examActions, selectQuestionIds, selectToken } from "../slices/examSlice"
@@ -54,13 +54,13 @@ export const GradingView = React.memo( () => {
 	React.useEffect( () => {
 		const initializeQuestions = async () => {
 			// Fetch exam questions
-			const data = await fetch( "/api/questions", {
+			let data = await fetch( "/api/questions", {
 				headers: {
 					"token": token
 				} 
 			} )
 			
-			const json  = await data.json()
+			let json  = await data.json()
 
 			const questions: Question[] = json.questions
 
@@ -72,7 +72,30 @@ export const GradingView = React.memo( () => {
 				newQuestionsMap.set( question.id, question )
 			} )
 
+			// Fetch exam submissions (if there are any)
+			data = await fetch( "/api/instructor/allsubmissions", {
+				headers: {
+					"token": token,
+				}
+			} )
+
+			json = await data.json()
+			const submissions: Submission[] = json.submissions
+
+			/*
+			Loop through submissions and create ids and a map 
+			for submissions and for confidence ratings
+			*/
+			const newSubmissionsMap = new Map<string, Map<number, Submission>>()
+			submissions.forEach( submission => {
+				const currentSubmissions = newSubmissionsMap.get( submission.canvasUserId || "student" ) || new Map<number, Submission>()
+				currentSubmissions.set( submission.questionId, submission )
+
+				newSubmissionsMap.set( submission.canvasUserId || "student", currentSubmissions )
+			} )
+
 			batch( () => {
+				dispatch( examActions.setSubmissionsMap( newSubmissionsMap ) )
 				dispatch( examActions.setQuestionIds( newQuestionIds ) )
 				dispatch( examActions.setQuestionsMap( newQuestionsMap ) )
 			} )

@@ -3,8 +3,9 @@ import { Colors, InputGroup, Tag } from "@blueprintjs/core"
 import * as React from "react"
 import styled from "styled-components"
 import { Submission } from "../App"
-import { useAppSelector } from "../app/hooks"
-import { selectQuestionById, selectToken } from "../slices/examSlice"
+import { useAppDispatch, useAppSelector } from "../app/hooks"
+import { examActions, selectQuestionById, selectSubmissionsByQuestionId, selectToken } from "../slices/examSlice"
+import { QuestionSwitch } from "../views/examView"
 
 /**
  * Props for the GradingGrid component
@@ -42,26 +43,26 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 	/**
 	 * Selectors
 	 */
+	// Dispatches an action to the store
+	const dispatch = useAppDispatch()
 	// Question from the store
 	const question = useAppSelector( state => selectQuestionById( state, props.questionId ) )
 	// Token from the store
 	const token = useAppSelector( selectToken )
-
-	/**
-	 * State
-	 */
-	// The array of submissions stored in the database that need to be updated and displayed
-	const [ submissions, setSubmissions ] = React.useState( [] as Submission[] )
+	// Submissions from the store
+	const submissions = useAppSelector( state => selectSubmissionsByQuestionId( state, props.questionId ) )
 
 	/**
 	 * Callbacks
 	 */
 	// Called whenever a new score is inputted - updates submissions to reflect the change
-	const updateSubmission = React.useCallback( ( index: number, score: number ) => {
-		const newSubmissions = [ ...submissions ]
-		newSubmissions[index] = { ...newSubmissions[index], scoredPoints: score}
+	const updateSubmission = React.useCallback( ( submission: Submission, score: number ) => {
+		const newSubmission: Submission = {
+			...submission,
+			scoredPoints: score
+		}
 
-		setSubmissions( newSubmissions )
+		dispatch( examActions.updateSubmission( newSubmission ) )
 	}, [ submissions ] )
 
 	// Updates the submissions in the database
@@ -76,29 +77,6 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 			}
 		} )
 	}, [ submissions ] )
-
-	/**
-	 * Effects
-	 */
-	// Called whenever the question changes - populates the submissions state from the database
-	React.useEffect( () => {
-		const fetchSubmissions = async () => {
-			const res = await fetch( "/api/instructor/responsesfromquestion", {
-				// Adding headers to the request
-				headers: {
-					"Content-type": "application/json; charset=UTF-8",
-					"token": token,
-					"questionId": props.questionId.toString()
-				}
-			} )
-			const json = await res.json()
-			const newSubmissions: Submission[] = json.submissions
-
-			setSubmissions( newSubmissions )
-		}
-
-		fetchSubmissions()
-	}, [ question ] )
 
 	/**
 	 * Render
@@ -118,11 +96,17 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 					{submissions.map( ( submission, index ) => (
 						<tr key={index}>
 							<td>{submission.fullName}</td>
-							<td>{submission.isText ? submission.value : ( question?.answers ? question?.answers[submission.value as number] : submission.value )}</td>
+							<td style={{ width: 600 }}>
+								<QuestionSwitch 
+									disabled
+									questionId={props.questionId}
+									canvasUserId={submission.canvasUserId}
+								/>
+							</td>
 							<td style={{ width: 100 }}>
 								<InputGroup 
 									value={submission.scoredPoints?.toString() || "0"}
-									onChange={e => updateSubmission( index, parseInt( e.target.value ) || 0 )}
+									onChange={e => updateSubmission( submission, parseInt( e.target.value ) || 0 )}
 									onBlur={updateDatabase}
 									style={{ textAlign: "right", position: "relative" }}
 									rightElement={

@@ -52,11 +52,13 @@ export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
 	 */
 	return (
 		<StyledShortAnswer>
-			<Label>
-				<ReactMarkdown>
-					{question ? question?.text : ""}
-				</ReactMarkdown>
-			</Label>
+			{props.headerShown && (
+				<Label>
+					<ReactMarkdown>
+						{question ? question?.text : ""}
+					</ReactMarkdown>
+				</Label>
+			)}
 			<TextArea 
 				disabled={props.disabled}
 				large

@@ -10,4 +10,4 @@ CREATE USER coding_exam_user WITH PASSWORD 'coding_exam_pass';
 DROP DATABASE coding_exam_test;
 CREATE DATABASE coding_exam_test;
 
-CREATE USER coding_exam_test_user WITH PASSWORD 'coding_exam_test_pass'
+CREATE USER coding_exam_test_user WITH PASSWORD 'coding_exam_test_pass';

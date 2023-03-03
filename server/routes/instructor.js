@@ -239,7 +239,7 @@ router.post( "/grade", instructorOnly, async( req, res ) => {
 			.from( "student_responses" )
 			.where( {
 				question_id: questionID,
-				user_id: userID
+				user_id: userID.id
 			} )
 	}
 
