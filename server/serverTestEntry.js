@@ -5,11 +5,13 @@
 // Create the app
 const app = require( "./app" )
 const knex = require( "knex" )
+
+// Custom knexConfig for the test database
 const knexConfig = {
 	client: "pg",
 	connection: {
 		host: process.env.CODING_EXAM_DB_HOST || "localhost",
-		port: 6543,
+		port: 5432,
 		user: process.env.CODING_EXAM_DB_TEST_USER,
 		password: process.env.CODING_EXAM_DB_TEST_PASSWORD,
 		database: process.env.CODING_EXAM_TESTDB_NAME
@@ -42,9 +44,12 @@ async function setup() {
 	}
 }
 
-setup()
+async function startServer() {
+	await setup()
+	// Start listening for requests on port 9000
+	app.listen( 9000, () => console.log( "Listening on port 9000" ) )
+}
 
-// Start listening for requests on port 9000
-app.listen( 9000, () => console.log( "Listening on port 9000" ) )
+startServer()
 
 module.exports = app

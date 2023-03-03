@@ -60,7 +60,6 @@ router.get( "/examtakers", instructorOnly, async( req, res ) => {
  */
 router.get( "/allsubmissions", instructorOnly, async( req, res ) => {
 	const {role, assignmentID, userID} = req.session
-	const questionID = req.headers.questionid
 	const knex = req.app.get( "db" )
 
 	// Gets the appropriate rows from the student responses table
@@ -85,8 +84,6 @@ router.get( "/allsubmissions", instructorOnly, async( req, res ) => {
 			scoredPoints: row.scored_points || 0
 		}
 	} )
-
-	console.log( submissions )
 
 	res.send( {submissions} )
 } )
