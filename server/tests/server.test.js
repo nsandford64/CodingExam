@@ -24,7 +24,7 @@ describe ( "/api/role endpoint tests", () => {
 
 	it( "GET /api/role should return a role", async () => {
 		const res = await requestWithSupertest.get( "/api/role" )
-			.set( { token: learnerToken} )
+			.set( { token: instructorToken} )
 		expect( res.status ).toEqual( 200 )
 		expect( res.type ).toEqual( expect.stringContaining( "json" ) )
 		expect( res.body ).toHaveProperty( "role" )

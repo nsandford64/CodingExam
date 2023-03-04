@@ -223,17 +223,20 @@ router.post( "/grade", instructorOnly, async( req, res ) => {
 	const {role, assignmentID } = req.session
 	const knex = req.app.get( "db" )
 
+	// Iterates through the list of submissions, gets the appropriate variables from them
 	for ( const submission of req.body ) {
 		const canvasUserID = submission.canvasUserId
 		const questionID = submission.questionId
 		const score = submission.scoredPoints
 
+		// Gets the internal userID of the user
 		const userID = await knex
 			.select( "id" )
 			.from( "users" )
 			.where( "canvas_user_id", canvasUserID )
 			.first()
 
+		// Updates the user's score
 		await knex
 			.update( {scored_points: score} )
 			.from( "student_responses" )
