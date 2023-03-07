@@ -165,18 +165,33 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 	const dispatch = useAppDispatch()
 
 	/**
+	 * State
+	 */
+	const [ editing, setEditing ] = React.useState( false )
+
+	/**
 	 * Render
 	 */
 	return (
 		<StyledQuestionContainer>
 			<StyledQuestionHeader>
 				Question {props.index + 1}
-				<Button 
-					intent={Intent.WARNING}
-					icon="edit"
-					//onClick={() => dispatch( examActions.deleteQuestion( props.questionId ) )}
-					style={{ marginLeft: "auto" }}
-				/>
+				{!editing && (
+					<Button 
+						intent={Intent.WARNING}
+						icon="edit"
+						onClick={() => setEditing( true )}
+						style={{ marginLeft: "auto" }}
+					/>
+				)}
+				{editing && (
+					<Button 
+						intent={Intent.SUCCESS}
+						icon="tick"
+						onClick={() => setEditing( false )}
+						style={{ marginLeft: "auto" }}
+					/>
+				)}
 				<Button 
 					intent={Intent.DANGER}
 					icon="delete"
@@ -188,6 +203,7 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 				questionId={props.questionId}
 				disabled
 				headerShown
+				editable={editing}
 			/>
 		</StyledQuestionContainer>
 	)

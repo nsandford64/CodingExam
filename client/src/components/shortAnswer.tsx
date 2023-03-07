@@ -1,9 +1,9 @@
 // Copyright 2022 under MIT License
-import { Label, TextArea } from "@blueprintjs/core"
+import { InputGroup, Label, TextArea } from "@blueprintjs/core"
 import * as React from "react"
 import ReactMarkdown from "react-markdown"
 import styled from "styled-components"
-import { ComponentProps, Submission } from "../App"
+import { ComponentProps, Question, Submission } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { examActions, selectQuestionById, selectSubmissionByUserIdAndQuestionId } from "../slices/examSlice"
 
@@ -34,9 +34,7 @@ export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
 	/**
 	 * Callbacks
 	 */
-	/*
-	Called when a new bubble is selected - updates the store with a new Response object
-	*/
+	//Called when a new bubble is selected - updates the store with a new Response object
 	const handleChange = React.useCallback( ( e: React.ChangeEvent<HTMLTextAreaElement> ) => {
 		const newSubmission: Submission = {
 			questionId: props.questionId,
@@ -46,18 +44,33 @@ export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
 
 		dispatch( examActions.updateSubmission( newSubmission ) )
 	}, [] )
-
+	
 	/**
 	 * Render
 	 */
 	return (
 		<StyledShortAnswer>
 			{props.headerShown && (
-				<Label>
-					<ReactMarkdown>
-						{question ? question?.text : ""}
-					</ReactMarkdown>
-				</Label>
+				<>
+					{props.editable && (
+						<InputGroup 
+							fill
+							style={{ marginBottom: 10 }}
+							value={question?.text}
+							onChange={e => props.editQuestion( {
+								...question,
+								text: e.target.value
+							} )}
+						/>
+					)}
+					{!props.editable && (
+						<Label>
+							<ReactMarkdown>
+								{question ? question?.text : ""}
+							</ReactMarkdown>
+						</Label>
+					)}
+				</>				
 			)}
 			<TextArea 
 				disabled={props.disabled}

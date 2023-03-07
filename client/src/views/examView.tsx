@@ -2,7 +2,7 @@
 import { Button, Callout, Colors, Intent, Spinner } from "@blueprintjs/core"
 import * as React from "react"
 import styled from "styled-components"
-import { QuestionType } from "../App"
+import { Question, QuestionType } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { CodingAnswer } from "../components/codingAnswer"
 import { FeedbackBox } from "../components/feedbackBox"
@@ -217,6 +217,7 @@ interface QuestionSwitchProps {
 	questionId: number
 	canvasUserId?: string
 	headerShown?: boolean
+	editable?: boolean
 }
 
 /**
@@ -229,11 +230,17 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 	/**
 	 * Selectors
 	 */
+	// Dispatches an action to the store
+	const dispatch = useAppDispatch()
 	// Question from the store
 	const question = useAppSelector( state => selectQuestionById( 
 		state, 
 		props.questionId 
 	) )
+
+	const handleEdit = React.useCallback( ( newQuestion: Question ) => {
+		dispatch( examActions.updateQuestion( newQuestion ) )
+	}, [] )
 
 	/**
 	 * Render
@@ -247,6 +254,8 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 				questionId={question.id}
 				canvasUserId={props.canvasUserId}
 				headerShown={props.headerShown}
+				editable={props.editable}
+				editQuestion={handleEdit}
 			/>
 		)
 	case QuestionType.TrueFalse:
@@ -256,6 +265,8 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 				questionId={question.id}
 				canvasUserId={props.canvasUserId}
 				headerShown={props.headerShown}
+				editable={props.editable}
+				editQuestion={handleEdit}
 			/>
 		)
 	case QuestionType.ShortAnswer:
@@ -265,6 +276,8 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 				questionId={question.id}
 				canvasUserId={props.canvasUserId}
 				headerShown={props.headerShown}
+				editable={props.editable}
+				editQuestion={handleEdit}
 			/>
 		)
 	case QuestionType.CodingAnswer:
@@ -274,6 +287,8 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 				questionId={question.id}
 				canvasUserId={props.canvasUserId}
 				headerShown={props.headerShown}
+				editable={props.editable}
+				editQuestion={handleEdit}
 			/>
 		)
 	case QuestionType.ParsonsProblem:
@@ -283,6 +298,8 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 				questionId={question.id}
 				canvasUserId={props.canvasUserId}
 				headerShown={props.headerShown}
+				editable={props.editable}
+				editQuestion={handleEdit}
 			/>
 		)
 	default:

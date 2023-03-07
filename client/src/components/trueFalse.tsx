@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Radio, RadioGroup } from "@blueprintjs/core"
+import { InputGroup, Label, Radio, RadioGroup } from "@blueprintjs/core"
 import * as React from "react"
 import ReactMarkdown from "react-markdown"
 import styled from "styled-components"
@@ -44,22 +44,41 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 
 		dispatch( examActions.updateSubmission( newSubmission ) )
 	}, [] )
-	// Format markdown in the question text
-	const label = question ? <ReactMarkdown>{question?.text}</ReactMarkdown> : ""
 
 	/**
 	 * Render
 	 */
 	return (
 		<StyledTrueFalse>
+			{props.headerShown && (
+				<>
+					{props.editable && (
+						<InputGroup 
+							fill
+							style={{ marginBottom: 10 }}
+							value={question?.text}
+							onChange={e => props.editQuestion( {
+								...question,
+								text: e.target.value
+							} )}
+						/>
+					)}
+					{!props.editable && (
+						<Label>
+							<ReactMarkdown>
+								{question ? question?.text : ""}
+							</ReactMarkdown>
+						</Label>
+					)}
+				</>				
+			)}
 			<RadioGroup
 				disabled={props.disabled}
-				label={props.headerShown ? label : undefined}
 				onChange={handleChange}
 				selectedValue={submission?.value}
 			>
-				<Radio label="False" value={0} />
 				<Radio label="True" value={1} />
+				<Radio label="False" value={0} />
 			</RadioGroup>
 		</StyledTrueFalse>
 	)

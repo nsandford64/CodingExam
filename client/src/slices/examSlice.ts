@@ -1,7 +1,7 @@
 // Copyright 2022 under MIT License
 import { createSelector, createSlice } from "@reduxjs/toolkit"
 import type { PayloadAction } from "@reduxjs/toolkit"
-import { Feedback, Question, Confidence, Submission } from "../App"
+import { Feedback, Question, Confidence, Submission, QuestionType } from "../App"
 import type { AppThunk, RootState } from "../app/store"
 import { batch } from "react-redux"
 
@@ -113,7 +113,20 @@ export const selectQuestionsMap = ( state: RootState ) => (
 export const selectQuestionById = createSelector(
 	selectQuestionsMap,
 	( state: RootState, id: number ) => id,
-	( questionsMap, id ) => questionsMap.get( id )
+	( questionsMap, id ) => {
+		let question = questionsMap.get( id )
+		if ( !question ) {
+			question = {
+				answers: [],
+				id: 0,
+				pointsPossible: 0,
+				text: "",
+				type: QuestionType.None,
+			}
+		}
+
+		return question
+	}
 )
 
 // Select the submissionsMap
