@@ -146,7 +146,6 @@ router.get( "/newquestionid", instructorOnly, async( req, res ) => {
 
 // Creates the questions for an exam when the instructor submits a question set
 router.post( "/createexam", instructorOnly, async( req, res ) => {
-	//console.log( req.body )
 	const {role, assignmentID, userID} = req.session
 	const knex = req.app.get( "db" )
 
