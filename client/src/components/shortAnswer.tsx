@@ -3,7 +3,7 @@ import { InputGroup, Label, TextArea } from "@blueprintjs/core"
 import * as React from "react"
 import ReactMarkdown from "react-markdown"
 import styled from "styled-components"
-import { ComponentProps, Question, Submission } from "../App"
+import { ComponentProps, Submission } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { examActions, selectQuestionById, selectSubmissionByUserIdAndQuestionId } from "../slices/examSlice"
 

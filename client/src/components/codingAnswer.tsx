@@ -1,12 +1,13 @@
 // Copyright 2022 under MIT License
-import { Label } from "@blueprintjs/core"
+import { Button, InputGroup, Label, MenuItem } from "@blueprintjs/core"
 import * as React from "react"
 import AceEditor from "react-ace"
 import ReactMarkdown from "react-markdown"
 import styled from "styled-components"
-import { ComponentProps, Submission } from "../App"
+import { ComponentProps, LANGUAGE_CHOICES, Submission } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { examActions, selectQuestionById, selectSubmissionByUserIdAndQuestionId } from "../slices/examSlice"
+import { Select2 } from "@blueprintjs/select"
 // Language modes for the ACE editor
 import "brace/mode/java"
 import "brace/mode/csharp"
@@ -18,6 +19,21 @@ import "brace/theme/sqlserver"
  */
 const StyledCodingAnswer = styled.div`
 	padding: 10px;
+`
+
+/**
+ * Style for the editable header
+ */
+const StyledEditableContainer = styled.div`
+	display: flex;
+	flex-direction: row;
+`
+
+/**
+ * Style to wrap the Select2 component
+ */
+const StyledSelectContainer = styled.div`
+	margin-left: 10px;
 `
 
 /**
@@ -56,15 +72,14 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 	 * Render Variables
 	 */
 	const splitText = question?.text.split( ":" ) || []
-
-	let text = ""
-	splitText.forEach( ( el, index ) => {
-		if( index !== splitText.length - 1 ) {
-			text += el
+	const text = splitText.reduce( ( prev, cur, index ) => {
+		if ( index !== splitText.length - 1 ) {
+			return prev + cur
 		}
-	} )
-	// Parses the language from the text stored in the database
-	const mode = splitText[ splitText.length - 1 ]
+
+		return prev
+	}, "" )
+	const mode = splitText[ splitText.length - 1]
 
 	/**
 	 * Render
@@ -72,11 +87,50 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 	return (
 		<StyledCodingAnswer>
 			{props.headerShown && (
-				<Label>
-					<ReactMarkdown>
-						{text}	
-					</ReactMarkdown>
-				</Label>
+				<>
+					{props.editable && (
+						<StyledEditableContainer>
+							<InputGroup 
+								fill
+								style={{ marginBottom: 10 }}
+								value={text}
+								onChange={e => props.editQuestion( {
+									...question,
+									text: `${e.target.value}:${mode}`
+								} )}
+							/>
+							<StyledSelectContainer>
+								<Select2<string> 
+									items={LANGUAGE_CHOICES}
+									filterable={false}
+									itemRenderer={( item, { handleClick } ) => (
+										<MenuItem 
+											key={item}
+											text={item}
+											onClick={handleClick}
+											roleStructure="listoption"
+											style={{ textAlign: "center" }}
+										/>
+									)}
+									onItemSelect={item => props.editQuestion( {
+										...question,
+										text: `${text}:${item}`
+									} )}
+									popoverProps={{ position: "bottom" }}
+								>
+									<Button text={mode || "Select language..."}/>
+								</Select2>
+							</StyledSelectContainer>
+						</StyledEditableContainer>
+					)}
+					{!props.editable && (
+						<Label>
+							<ReactMarkdown>
+								{text}
+							</ReactMarkdown>
+						</Label>
+					)}
+				</>				
 			)}
 			<AceEditor
 				readOnly={props.disabled}

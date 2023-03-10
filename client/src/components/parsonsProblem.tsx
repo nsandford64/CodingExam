@@ -6,8 +6,9 @@ import styled from "styled-components"
 import { DragDropContext, DropResult } from "react-beautiful-dnd"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { examActions, selectQuestionById, selectSubmissionByUserIdAndQuestionId } from "../slices/examSlice"
-import { Label } from "@blueprintjs/core"
+import { InputGroup, Label } from "@blueprintjs/core"
 import ParsonsColumn from "./column"
+import ReactMarkdown from "react-markdown"
 
 /**
  * Style for the ParsonsProblem
@@ -229,7 +230,26 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 	return (
 		<StyledParsonsProblem>
 			{props.headerShown && (
-				<Label>{question?.text}</Label>
+				<>
+					{props.editable && (
+						<InputGroup 
+							fill
+							style={{ marginBottom: 10 }}
+							value={question?.text}
+							onChange={e => props.editQuestion( {
+								...question,
+								text: e.target.value
+							} )}
+						/>
+					)}
+					{!props.editable && (
+						<Label>
+							<ReactMarkdown>
+								{question ? question?.text : ""}
+							</ReactMarkdown>
+						</Label>
+					)}
+				</>				
 			)}
 			<DragDropContext onDragEnd={onDragEnd} >
 				<StyledColumns>
