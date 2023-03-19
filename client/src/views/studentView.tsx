@@ -9,7 +9,8 @@ import { ExamView } from "./examView"
  * Props for StudentView
  */
 interface StudentViewProps {
-	disabled: boolean
+	disabled: boolean,
+	removeWarning: () => void
 }
 
 /**
@@ -46,6 +47,7 @@ export const StudentView = React.memo( ( props: StudentViewProps ) => {
 				review={true}
 				disabled={props.disabled}
 				feedback={props.disabled}
+				removeWarning={props.removeWarning}
 			/>
 		</StyledStudentView>
 	)

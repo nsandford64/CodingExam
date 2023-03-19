@@ -18,6 +18,7 @@ interface ExamViewProps {
 	feedback?: boolean
 	review?: boolean
 	canvasUserId?: string
+	removeWarning: () => void
 }
 
 /**
@@ -142,6 +143,7 @@ export const ExamView = ( props: ExamViewProps ) => {
 			} )
 			const json = await res.json()
 			dispatch( examActions.setResponseState( json.response ) )
+			props.removeWarning()
 		} 
 		catch( e ) {
 			console.error( e )

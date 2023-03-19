@@ -45,6 +45,7 @@ if( process.env.NODE_ENV == "development" ) {
 			<ul>
 				<li><a href="/learner">Learner Entry Point</a></li>
 				<li><a href="/instructor">Instructor Entry Point</a></li>
+				<li><a href="/retake">Retake Exam</a></li>
 			</ul>
 		` )
 	} )
@@ -79,6 +80,23 @@ if( process.env.NODE_ENV == "development" ) {
 			roles: "Learner"
 		}
 		// Creates the user if it does not exist already
+		await findOrCreateUser( knex, ltiData.userID, ltiData.fullName )
+		const token = generateAccessToken( ltiData )
+		serveIndex( res, token )
+	} )
+
+	/*
+	 * Resets the HasTaken property and lets the student view take the exam again
+	 */
+	router.get( "/retake", async ( req, res ) => {
+		const knex = req.app.get( "db" )
+		const ltiData = { 
+			assignmentID: "example-exam",
+			fullName: "Example Learner",
+			userID: "example-learner",
+			roles: "Learner"
+		}
+		resetHasTaken( knex, ltiData )
 		await findOrCreateUser( knex, ltiData.userID, ltiData.fullName )
 		const token = generateAccessToken( ltiData )
 		serveIndex( res, token )
@@ -232,6 +250,27 @@ async function findOrCreateUser( knex, userData ){
 	return user.id
 }
 	
+async function resetHasTaken( knex, ltiData ){
+
+	/**
+	 * Gets the internal database id of the user and exam
+	 */
+	const student = await knex.select( "*" )
+		.from( "users" )
+		.where( "canvas_user_id", ltiData.userID )
+		.first()
+		
+	const exam = await knex.select( "*" )
+		.from( "exams" )
+		.where( "canvas_assignment_id", ltiData.assignmentID )
+		.first()
+
+	await knex( "exams_users" )
+		.update( "HasTaken", false )
+		.where( "user_id", student.id )
+		.where( "exam_id", exam.id )
+}
+
 /**
  * Generates an access token using an object containing the encoded properties as the key 
  */

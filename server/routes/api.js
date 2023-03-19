@@ -164,12 +164,8 @@ router.post( "/", async ( req, res ) => {
 		.first()
 	if( !exam ) return res.send( {response: "Invalid Submission - unknown exam"} )
 
-	console.log( "break point 1" )
-	console.log( req.body )
-
 	// Prepare the student responses for insertion in the database
 	const responses = req.body.map( response => {
-		console.log( {response} )
 		if ( typeof response.value === "string" ) {
 			return {
 				question_id: response.questionId,
@@ -188,8 +184,6 @@ router.post( "/", async ( req, res ) => {
 			}
 		}
 	} )
-
-	console.log( {responses} )
 
 	// Insert each response into the StudentResponse table
 	await knex( "student_responses" )
