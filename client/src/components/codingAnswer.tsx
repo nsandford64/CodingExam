@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Label } from "@blueprintjs/core"
+import { InputGroup, Label } from "@blueprintjs/core"
 import * as React from "react"
 import AceEditor from "react-ace"
 import ReactMarkdown from "react-markdown"
@@ -72,11 +72,26 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 	return (
 		<StyledCodingAnswer>
 			{props.headerShown && (
-				<Label>
-					<ReactMarkdown>
-						{text}	
-					</ReactMarkdown>
-				</Label>
+				<>
+					{props.editable && (
+						<InputGroup 
+							fill
+							style={{ marginBottom: 10 }}
+							value={question?.text}
+							onChange={e => props.editQuestion( {
+								...question,
+								text: e.target.value
+							} )}
+						/>
+					)}
+					{!props.editable && (
+						<Label>
+							<ReactMarkdown>
+								{text}	
+							</ReactMarkdown>
+						</Label>
+					)}
+				</>				
 			)}
 			<AceEditor
 				readOnly={props.disabled}
