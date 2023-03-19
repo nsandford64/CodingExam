@@ -6,6 +6,6 @@ exports.seed = async function( knex ) {
 	// Deletes ALL existing entries
 	await knex( "exams_users" ).del()
 	await knex( "exams_users" ).insert( [
-		{ exam_id: 1, user_id: 1, HasTaken: true }
+		{ exam_id: 1, user_id: 1, HasTaken: false }
 	] )
 }

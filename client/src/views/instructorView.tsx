@@ -1,6 +1,7 @@
 // Copyright 2022 under MIT License
 import { Button, Intent } from "@blueprintjs/core"
 import * as React from "react"
+import { propTypes } from "react-markdown"
 import styled from "styled-components"
 import { User } from "../App"
 import { useAppSelector } from "../app/hooks"
@@ -8,6 +9,13 @@ import { selectFeedbackMap, selectToken } from "../slices/examSlice"
 import { CreateExamView } from "./createExamView"
 import { ExamView } from "./examView"
 import { GradingView } from "./gradingView"
+
+/**
+ * Props for InstructorView
+ */
+interface InstructorViewProps {
+	removeWarning: () => void
+}
 
 /**
  * Style for InstructorView
@@ -50,7 +58,7 @@ const StyledStudentListContainer = styled.div`
  * They can click on a student and view their responses, as well as leave
  * feedback.
  */
-export const InstructorView = React.memo( () => {
+export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 	/**
 	 * Selectors
 	 */
@@ -239,6 +247,7 @@ export const InstructorView = React.memo( () => {
 						feedback={true}
 						review={false}
 						canvasUserId={canvasUserId}
+						removeWarning={props.removeWarning}
 					/>
 					<Button 
 						text={"Submit Feedback"}
