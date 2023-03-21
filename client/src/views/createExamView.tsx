@@ -768,8 +768,6 @@ const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
 		correctAnswer: 0,
 		pointsPossible: 0
 	} as Question )
-	// State to hold the language, if this is a CodingAnswer question
-	const [ language, setLanguage ] = React.useState( "" )
 
 	/**
 	 * Callbacks
@@ -779,13 +777,14 @@ const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
 		if ( question.type === QuestionType.CodingAnswer ) {
 			props.createQuestion( {
 				...question,
-				text: question.text + ":" + ( language || "java" ) 
+				text: question.text,
+				language: question.language || "java"
 			} )
 		}
 		else {
 			props.createQuestion( question )
 		}
-	}, [ question, language ] )
+	}, [ question ] )
 
 	/**
 	 * Render
@@ -819,10 +818,10 @@ const CreateGeneric = React.memo( ( props: CreateGenericProps ) => {
 								style={{ textAlign: "center" }}
 							/>
 						)}
-						onItemSelect={item => setLanguage( item )}
+						onItemSelect={item => question.language = item }
 						popoverProps={{ position: "bottom" }}
 					>
-						<Button text={language || "Select language..."} />
+						<Button text={question.language || "Select language..."} />
 					</Select2>
 				</StyledRow>
 			)}

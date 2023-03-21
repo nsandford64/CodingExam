@@ -227,6 +227,7 @@ export const initializeQuestions = ( canvasUserId?: string ): AppThunk<Promise<v
 	} )
 			
 	let json  = await data.json()
+	console.log( json )
 	const questions: Question[] = json.questions
 
 	// Loop through questions and create ids and a map

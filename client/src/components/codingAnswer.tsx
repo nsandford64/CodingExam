@@ -53,20 +53,6 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 	}, [] )
 
 	/**
-	 * Render Variables
-	 */
-	const splitText = question?.text.split( ":" ) || []
-
-	let text = ""
-	splitText.forEach( ( el, index ) => {
-		if( index !== splitText.length - 1 ) {
-			text += el
-		}
-	} )
-	// Parses the language from the text stored in the database
-	const mode = splitText[ splitText.length - 1 ]
-
-	/**
 	 * Render
 	 */
 	return (
@@ -87,7 +73,7 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 					{!props.editable && (
 						<Label>
 							<ReactMarkdown>
-								{text}	
+								{question.text}	
 							</ReactMarkdown>
 						</Label>
 					)}
@@ -95,7 +81,7 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 			)}
 			<AceEditor
 				readOnly={props.disabled}
-				mode={mode}
+				mode={question.language}
 				theme="sqlserver"
 				onChange={handleChange}
 				name="editor"

@@ -184,6 +184,12 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 				correctAnswer: true && question.correctAnswer
 			}
 		}
+		// 4 is a Coding Answer
+		if( question.type === 4 ) {
+			answerData = {
+				language: question.language
+			}
+		}
 		// 5 is Parsons Problems
 		if ( question.type === 5 ) 
 		{

@@ -92,6 +92,10 @@ router.get( "/questions", async function( req, res ) {
 		if( question.type === 3 && role == "Instructor" ) {
 			question.correctAnswer = question.answer_data.correctAnswer
 		}
+		// coding answer
+		if ( question.type === 4 ) {
+			question.language = question.answer_data.language
+		}
 		// parsons
 		if( question.type === 5 ) {
 			question.answers = question.answer_data.answers
