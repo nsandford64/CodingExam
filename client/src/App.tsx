@@ -147,6 +147,7 @@ export interface ComponentProps {
 	canvasUserId?: string // The canvasUserId that should be pulled from the DB
 	headerShown?: boolean // Whether the header should be shown or not
 	editable?: boolean // Whether this component is editable or not
+	creating?: boolean // Whether this component is currently being created
 	editQuestion: ( newQuestion: Question ) => void // Function to update a question in the store
 }
 
