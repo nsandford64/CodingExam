@@ -69,19 +69,6 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 	}, [] )
 
 	/**
-	 * Render Variables
-	 */
-	const splitText = question?.text.split( ":" ) || []
-	const text = splitText.reduce( ( prev, cur, index ) => {
-		if ( index !== splitText.length - 1 ) {
-			return prev + cur
-		}
-
-		return prev
-	}, "" )
-	const mode = splitText[ splitText.length - 1]
-
-	/**
 	 * Render
 	 */
 	return (
@@ -93,10 +80,10 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 							<InputGroup 
 								fill
 								style={{ marginBottom: 10 }}
-								value={text}
+								value={question.text}
 								onChange={e => props.editQuestion( {
 									...question,
-									text: `${e.target.value}:${mode}`
+									text: e.target.value
 								} )}
 							/>
 							<StyledSelectContainer>
@@ -114,11 +101,11 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 									)}
 									onItemSelect={item => props.editQuestion( {
 										...question,
-										text: `${text}:${item}`
+										language: item
 									} )}
 									popoverProps={{ position: "bottom" }}
 								>
-									<Button text={mode || "Select language..."}/>
+									<Button text={question.language || "Select language..."}/>
 								</Select2>
 							</StyledSelectContainer>
 						</StyledEditableContainer>
@@ -126,7 +113,7 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 					{!props.editable && (
 						<Label>
 							<ReactMarkdown>
-								{text}
+								{question.text}
 							</ReactMarkdown>
 						</Label>
 					)}
