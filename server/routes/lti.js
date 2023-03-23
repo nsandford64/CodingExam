@@ -39,6 +39,7 @@ if( process.env.NODE_ENV == "development" ) {
 	
 	/*
 	 * Get the main entry point to the Client app
+	 * Gives an option to load the app as a student, instructor, or as a reset student to take it again
 	 */
 	router.get( "/", ( req, res ) => {	
 		res.send( `<h1>Debug access</h1>
