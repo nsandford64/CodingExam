@@ -99,13 +99,17 @@ export const App = React.memo( () => {
 		batch( () => {
 			dispatch( examActions.setToken( token ) )
 		} ) 
+
+		return () => {
+			window.removeEventListener( "beforeunload", preventUnload )
+		}
 	}, [] )
 
 	// Listener event that displays a prompt when the user tries to unload the page
 	const preventUnload = ( event: BeforeUnloadEvent ) => {
 		const message = "You are about to navigate away, and your entered data will not be saved. Are you sure you want to leave?"
-		event.preventDefault()
 		event.returnValue = message
+		event.preventDefault()
 	}
 
 	const removeWarning = () => {
