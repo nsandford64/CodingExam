@@ -134,7 +134,7 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 			)}
 			<AceEditor
 				readOnly={props.disabled}
-				mode={mode}
+				mode={question.language}
 				theme="sqlserver"
 				onChange={handleChange}
 				name="editor"

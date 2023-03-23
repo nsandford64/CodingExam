@@ -84,6 +84,11 @@ const setToken = ( state: ExamState, action: PayloadAction<string> ) => {
 	state.token = action.payload
 }
 
+// Sets the event listener that prevents backouts
+const setListener = ( state: ExamState, action: PayloadAction<( event: BeforeUnloadEvent ) => void> ) => {
+	state.listener = action.payload
+}
+
 // Re-initializes the store
 const reInitializeStore = ( state: ExamState, action: PayloadAction<number> ) => {
 	// Reset everything besides the token
@@ -200,6 +205,11 @@ export const selectToken = ( state: RootState ) => (
 	state.exam.token
 )
 
+// Selects the event listener from the store to disable it
+export const selectListener = ( state: RootState ) => {
+	state.exam.listener
+}
+
 /**
  * Thunks
  */
@@ -217,6 +227,7 @@ export const initializeQuestions = ( canvasUserId?: string ): AppThunk<Promise<v
 	} )
 			
 	let json  = await data.json()
+	console.log( json )
 	const questions: Question[] = json.questions
 
 	// Loop through questions and create ids and a map
@@ -300,23 +311,6 @@ export const initializeQuestions = ( canvasUserId?: string ): AppThunk<Promise<v
 	} )
 }
 
-/*
-// Gets an unused exam question id from the database using the server api
-export const fetchNextQuestionId = 
-	(): AppThunk<void> => 
-	async (dispatch, getState) => {
-		const state = getState()
-
-		const res = await fetch( "/api/nextquestionid", {
-			// Adding headers to the request
-			headers: {
-				"token": state.exam.token
-			}
-		})
-		const json = await res.json()
-		dispatch(advanceNextQuestionId(json.nextID));
-	}
-*/
 // Creates an exam in the database using the server api
 export const createExamThunk: AppThunk<void> = async ( dispatch, getState ) => {
 	const state = getState()
@@ -361,7 +355,8 @@ export interface ExamState {
 	confidenceIds: number[],
 	confidenceMap: Map<number, Confidence>,
 	nextQuestionId?: number,
-	token: string
+	token: string,
+	listener?: ( event: BeforeUnloadEvent ) => void
 }
 
 const initialState: ExamState = {
@@ -395,6 +390,7 @@ export const examSlice = createSlice( {
 		updateConfidence,
 		setNextQuestionId,
 		setToken,
+		setListener,
 		reInitializeStore
 	}
 } )

@@ -146,7 +146,6 @@ router.get( "/newquestionid", instructorOnly, async( req, res ) => {
 
 // Creates the questions for an exam when the instructor submits a question set
 router.post( "/createexam", instructorOnly, async( req, res ) => {
-	//console.log( req.body )
 	const {role, assignmentID, userID} = req.session
 	const knex = req.app.get( "db" )
 
@@ -183,6 +182,12 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 		{
 			answerData = {
 				correctAnswer: true && question.correctAnswer
+			}
+		}
+		// 4 is a Coding Answer
+		if( question.type === 4 ) {
+			answerData = {
+				language: question.language
 			}
 		}
 		// 5 is Parsons Problems

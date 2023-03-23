@@ -92,6 +92,10 @@ router.get( "/questions", async function( req, res ) {
 		if( question.type === 3 && role == "Instructor" ) {
 			question.correctAnswer = question.answer_data.correctAnswer
 		}
+		// coding answer
+		if ( question.type === 4 ) {
+			question.language = question.answer_data.language
+		}
 		// parsons
 		if( question.type === 5 ) {
 			question.answers = question.answer_data.answers
@@ -164,12 +168,8 @@ router.post( "/", async ( req, res ) => {
 		.first()
 	if( !exam ) return res.send( {response: "Invalid Submission - unknown exam"} )
 
-	console.log( "break point 1" )
-	console.log( req.body )
-
 	// Prepare the student responses for insertion in the database
 	const responses = req.body.map( response => {
-		console.log( {response} )
 		if ( typeof response.value === "string" ) {
 			return {
 				question_id: response.questionId,
@@ -188,8 +188,6 @@ router.post( "/", async ( req, res ) => {
 			}
 		}
 	} )
-
-	console.log( {responses} )
 
 	// Insert each response into the StudentResponse table
 	await knex( "student_responses" )
