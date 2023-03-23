@@ -1,6 +1,7 @@
 // Copyright 2022 under MIT License
-import { Button, InputGroup, Label, Radio } from "@blueprintjs/core"
+import { Button, Colors, Icon, InputGroup, Label, Radio } from "@blueprintjs/core"
 import * as React from "react"
+import { DragDropContext, Draggable, Droppable, DropResult } from "react-beautiful-dnd"
 import ReactMarkdown from "react-markdown"
 import styled from "styled-components"
 import { ComponentProps, Submission } from "../App"
@@ -43,8 +44,11 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 	/**
 	 * State
 	 */
+	// State for whether an answer is being added or not
 	const [ addingAnswer, setAddingAnswer ] = React.useState( false )
+	// State that holds the current editing answer index
 	const [ editingAnswerIndex, setEditingAnswerIndex ] = React.useState( -1 )
+	// Answer that is being added
 	const [ answer, setAnswer ] = React.useState( "" )
 
 	/**
@@ -76,6 +80,7 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 		setAddingAnswer( false )
 	}, [ question, answer ] )
 
+	// Called when an answer is removed - updates the question in the store
 	const handleRemoveAnswer = React.useCallback( ( index: number ) => {
 		props.editQuestion( {
 			...question,
@@ -83,6 +88,24 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 		} )
 
 		setEditingAnswerIndex( -1 )
+	}, [ question ] )
+
+	const reOrder = React.useCallback( ( arr: string[], startIndex: number, endIndex: number ) => {
+		const newArr = arr.slice()
+		const [ removed ] = newArr.splice( startIndex, 1 )
+		newArr.splice( endIndex, 0, removed )
+
+		return newArr
+	}, [] )
+
+	const onDragEnd = React.useCallback( ( result: DropResult ) => {
+		if ( !result.destination ) {
+			return
+		}
+
+		const newAnswers = reOrder( question.answers, result.source.index, result.destination.index )
+
+		props.editQuestion( { ...question, answers: newAnswers } )
 	}, [ question ] )
 
 	/**
@@ -124,58 +147,91 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 					)}
 				</>				
 			)}
-			{question?.answers.map( ( choice, index ) => (
-				<StyledAnswerInputContainer key={index} style={{ marginBottom: props.editable ? "10px" : undefined }}>
-					<Radio
-						key={index}
-						disabled={props.disabled}
-						value={index}
-						label={editingAnswerIndex === index ? undefined : choice}
-						checked={index === submission?.value}
-						onChange={() => handleChange( index )}
-						style={{ marginBottom: props.editable ? 0 : undefined }}
-					/>
-					{editingAnswerIndex === index && (
-						<>
-							<InputGroup 
-								fill
-								value={choice}
-								onChange={e => props.editQuestion( {
-									...question,
-									answers: question?.answers.map( ( answer, answerIndex ) => {
-										if ( answerIndex === index ) {
-											return e.target.value
-										}
+			<DragDropContext onDragEnd={onDragEnd}>
+				<Droppable droppableId="droppable">
+					{( provided ) => (
+						<div
+							{...provided.droppableProps}
+							ref={provided.innerRef}
+						>
+							{question.answers.map( ( choice, index ) => (
+								<Draggable isDragDisabled={props.disabled && ( !props.editable || editingAnswerIndex >= 0 )} key={choice} draggableId={choice} index={index}>
+									{( provided, snapshot ) => (
+										<StyledAnswerInputContainer
+											ref={provided.innerRef}
+											{...provided.draggableProps}
+											style={{ 
+												...provided.draggableProps.style,
+												backgroundColor: snapshot.isDragging ? "white" : undefined,
+												marginBottom: props.editable ? "10px" : undefined 
+											}}
+										>
+											{props.editable && (
+												<Icon 
+													icon="drag-handle-vertical"
+													size={24}
+													color={Colors.GRAY4}
+													style={{ marginRight: 10 }}
+													{...provided.dragHandleProps}
+												/>
+											)}
+											<Radio
+												key={index}
+												disabled={props.disabled}
+												value={index}
+												label={editingAnswerIndex === index ? undefined : choice}
+												checked={index === submission?.value}
+												onChange={() => handleChange( index )}
+												style={{ marginBottom: props.editable ? 0 : undefined }}
+											/>
+											{editingAnswerIndex === index && (
+												<>
+													<InputGroup 
+														fill
+														value={choice}
+														onChange={e => props.editQuestion( {
+															...question,
+															answers: question?.answers.map( ( answer, answerIndex ) => {
+																if ( answerIndex === index ) {
+																	return e.target.value
+																}
 
-										return answer
-									} )
-								} )}
-							/>
-							<Button 
-								icon="tick" 
-								style={{ marginLeft: 10 }} 
-								intent="success"
-								onClick={() => setEditingAnswerIndex( -1 )}
-							/>
-						</>
+																return answer
+															} )
+														} )}
+													/>
+													<Button 
+														icon="tick" 
+														style={{ marginLeft: 10 }} 
+														intent="success"
+														onClick={() => setEditingAnswerIndex( -1 )}
+													/>
+												</>
+											)}
+											{props.editable && editingAnswerIndex === -1 && (
+												<>
+													<Button 
+														icon="edit"
+														onClick={() => setEditingAnswerIndex( index )}
+														style={{ marginLeft: 10 }}
+													/>
+													<Button 
+														icon="cross" 
+														style={{ marginLeft: 10 }} 
+														intent="danger"
+														onClick={() => handleRemoveAnswer( index )}
+													/>
+												</>
+											)}
+										</StyledAnswerInputContainer>
+									)}
+								</Draggable>
+							) )}
+							{provided.placeholder}
+						</div>
 					)}
-					{props.editable && editingAnswerIndex === -1 && (
-						<>
-							<Button 
-								icon="edit"
-								onClick={() => setEditingAnswerIndex( index )}
-								style={{ marginLeft: 10 }}
-							/>
-							<Button 
-								icon="cross" 
-								style={{ marginLeft: 10 }} 
-								intent="danger"
-								onClick={() => handleRemoveAnswer( index )}
-							/>
-						</>
-					)}
-				</StyledAnswerInputContainer>
-			) )}
+				</Droppable>
+			</DragDropContext>
 			{props.editable && !addingAnswer && question?.answers.length < 4 && (
 				<Button 
 					icon="plus"
