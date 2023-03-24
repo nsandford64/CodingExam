@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Button, InputGroup, Intent, MenuItem, Spinner, Tag } from "@blueprintjs/core"
+import { Button, InputGroup, Intent, MenuItem, Spinner } from "@blueprintjs/core"
 import { Select2 } from "@blueprintjs/select"
 import * as React from "react"
 import { batch } from "react-redux"
@@ -193,6 +193,15 @@ interface QuestionDisplayProps {
 }
 
 /**
+ * Style for the container around the question text
+ */
+const StyledQuestionTextContainer = styled.div`
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+`
+
+/**
  * QuestionDisplay Component
  * 
  * This component renders a question along with
@@ -202,8 +211,8 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 	/**
 	 * Selectors
 	 */
+	// Dispatch an action to the store
 	const dispatch = useAppDispatch()
-
 	// Get particular question from the store
 	const question = useAppSelector( state => selectQuestionById(
 		state,
@@ -214,17 +223,6 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 	 * State
 	 */
 	const [ editing, setEditing ] = React.useState( props.editing )
-
-	const updatePointsPossible = React.useCallback( ( points: number ) => {
-
-		// Update the points possible field for the question
-		const newQuestion: Question = {
-			...question,
-			pointsPossible: points
-		}
-
-		dispatch( examActions.updateQuestion( newQuestion ) )
-	}, [ ] )
 
 	/**
 	 * Effects
@@ -239,7 +237,19 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 	return (
 		<StyledQuestionContainer>
 			<StyledQuestionHeader>
-				Question {props.index + 1}
+				<StyledQuestionTextContainer>
+					Question {props.index + 1}
+					{editing && (
+						<>
+							<InputGroup 
+								value={question?.pointsPossible.toString() || "0"}
+								onChange={e => dispatch( examActions.updateQuestion( { ...question, pointsPossible: parseInt( e.target.value ) || 0 } ) )}
+								style={{ width: 40, margin: "0 5px" }}
+							/>
+							points
+						</>
+					)}
+				</StyledQuestionTextContainer>
 				{!editing && (
 					<Button 
 						intent={Intent.WARNING}
@@ -263,24 +273,12 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 					style={{ marginLeft: "auto" }}
 				/>
 			</StyledQuestionHeader>
-			<>
-				<QuestionSwitch
-					questionId={props.questionId}
-					disabled
-					headerShown
-					editable={editing}
-				/>
-				<td style={{ width: 150 }}>
-					<InputGroup
-						value={question.pointsPossible.toString() || "0"}
-						style={{ textAlign: "right", position: "relative" }}
-						onChange={e => updatePointsPossible( parseInt( e.target.value ) || 0 )}
-						leftElement={
-							<Tag minimal>{"Points Possible: "}</Tag>
-						}
-					/>
-				</td>
-			</>
+			<QuestionSwitch
+				questionId={props.questionId}
+				disabled
+				headerShown
+				editable={editing}
+			/>
 		</StyledQuestionContainer>
 	)
 } )
