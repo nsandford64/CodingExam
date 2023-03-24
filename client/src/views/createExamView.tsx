@@ -6,7 +6,7 @@ import { batch } from "react-redux"
 import styled from "styled-components"
 import { Question, QuestionType } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
-import { createExamThunk, examActions, selectNextQuestionId, selectQuestionIds, selectToken } from "../slices/examSlice"
+import { createExamThunk, selectQuestionById, examActions, selectNextQuestionId, selectQuestionIds, selectToken } from "../slices/examSlice"
 import { QuestionSwitch, StyledQuestionContainer, StyledQuestionHeader, StyledQuestionsContainer } from "./examView"
 
 /**
@@ -204,10 +204,27 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 	 */
 	const dispatch = useAppDispatch()
 
+	// Get particular question from the store
+	const question = useAppSelector( state => selectQuestionById(
+		state,
+		props.questionId
+	) )
+
 	/**
 	 * State
 	 */
 	const [ editing, setEditing ] = React.useState( props.editing )
+
+	const updatePointsPossible = React.useCallback( ( points: number ) => {
+
+		// Update the points possible field for the question
+		const newQuestion: Question = {
+			...question,
+			pointsPossible: points
+		}
+
+		dispatch( examActions.updateQuestion( newQuestion ) )
+	}, [ ] )
 
 	/**
 	 * Effects
@@ -253,11 +270,14 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 					headerShown
 					editable={editing}
 				/>
-				<td style={{ width: 50 }}>
-					<Tag minimal>{"Points Possible: "}</Tag>
+				<td style={{ width: 150 }}>
 					<InputGroup
-						value={"0"}
+						value={question.pointsPossible.toString() || "0"}
 						style={{ textAlign: "right", position: "relative" }}
+						onChange={e => updatePointsPossible( parseInt( e.target.value ) || 0 )}
+						leftElement={
+							<Tag minimal>{"Points Possible: "}</Tag>
+						}
 					/>
 				</td>
 			</>
