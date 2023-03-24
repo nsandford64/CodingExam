@@ -47,6 +47,7 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 
 	/**
 	 * Render
+	 * Also contains code to re-render in editing mode
 	 */
 	return (
 		<StyledTrueFalse>

@@ -90,6 +90,10 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 		setEditingAnswerIndex( -1 )
 	}, [ question ] )
 
+	/**
+	 * The following are functions used for the drag and drop reordering for the multiple choise answers
+	 * Handles when an answer is reordered
+	 */
 	const reOrder = React.useCallback( ( arr: string[], startIndex: number, endIndex: number ) => {
 		const newArr = arr.slice()
 		const [ removed ] = newArr.splice( startIndex, 1 )
@@ -98,6 +102,7 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 		return newArr
 	}, [] )
 
+	// Handles when dragging an answer ends
 	const onDragEnd = React.useCallback( ( result: DropResult ) => {
 		if ( !result.destination ) {
 			return
@@ -122,6 +127,7 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 
 	/**
 	 * Render
+	 * Also contains functionality to re-render in editing mode
 	 */
 	return (
 		<StyledMultipleChoice>

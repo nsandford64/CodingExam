@@ -47,6 +47,7 @@ export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
 	
 	/**
 	 * Render
+	 * Also contains code to re-render in editing mode
 	 */
 	return (
 		<StyledShortAnswer>

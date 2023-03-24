@@ -70,6 +70,7 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 
 	/**
 	 * Render
+	 * Also contains functionality to re-render in editing mode
 	 */
 	return (
 		<StyledCodingAnswer>
