@@ -50,6 +50,8 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 	const [ editingAnswerIndex, setEditingAnswerIndex ] = React.useState( -1 )
 	// Answer that is being added
 	const [ answer, setAnswer ] = React.useState( "" )
+	// State that holds the answer that is currently being edited
+	const [ editingAnswer, setEditingAnswer ] = React.useState( "" )
 
 	/**
 	 * Callbacks
@@ -195,23 +197,27 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 												<>
 													<InputGroup 
 														fill
-														value={choice}
-														onChange={e => props.editQuestion( {
-															...question,
-															answers: question?.answers.map( ( answer, answerIndex ) => {
-																if ( answerIndex === index ) {
-																	return e.target.value
-																}
-
-																return answer
-															} )
-														} )}
+														value={editingAnswer}
+														onChange={e => setEditingAnswer( e.target.value )}
 													/>
 													<Button 
 														icon="tick" 
 														style={{ marginLeft: 10 }} 
 														intent="success"
-														onClick={() => setEditingAnswerIndex( -1 )}
+														onClick={() => {
+															props.editQuestion( {
+																...question,
+																answers: question.answers.map( ( oldAnswer, answerIndex ) => {
+																	if ( answerIndex === index ) {
+																		return editingAnswer
+																	}
+
+																	return oldAnswer
+																} )
+															} )
+
+															setEditingAnswerIndex( -1 )
+														}}
 													/>
 												</>
 											)}
@@ -219,7 +225,10 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 												<>
 													<Button 
 														icon="edit"
-														onClick={() => setEditingAnswerIndex( index )}
+														onClick={() => {
+															setEditingAnswer( question.answers[index] )
+															setEditingAnswerIndex( index )
+														}}
 														style={{ marginLeft: 10 }}
 													/>
 													<Button 
