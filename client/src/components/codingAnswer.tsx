@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Button, InputGroup, Label, MenuItem } from "@blueprintjs/core"
+import { Button, InputGroup, Label, MenuItem, TextArea } from "@blueprintjs/core"
 import * as React from "react"
 import AceEditor from "react-ace"
 import ReactMarkdown from "react-markdown"
@@ -78,7 +78,7 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 				<>
 					{props.editable && (
 						<StyledEditableContainer>
-							<InputGroup 
+							<TextArea 
 								fill
 								style={{ marginBottom: 10 }}
 								value={question.text}
@@ -86,6 +86,7 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 									...question,
 									text: e.target.value
 								} )}
+								growVertically
 							/>
 							<StyledSelectContainer>
 								<Select2<string> 

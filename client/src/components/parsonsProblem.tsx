@@ -6,7 +6,7 @@ import styled from "styled-components"
 import { DragDropContext, DropResult } from "react-beautiful-dnd"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { examActions, selectQuestionById, selectSubmissionByUserIdAndQuestionId } from "../slices/examSlice"
-import { InputGroup, Label } from "@blueprintjs/core"
+import { InputGroup, Label, TextArea } from "@blueprintjs/core"
 import ParsonsColumn from "./column"
 import ReactMarkdown from "react-markdown"
 
@@ -232,7 +232,7 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 			{props.headerShown && (
 				<>
 					{props.editable && (
-						<InputGroup 
+						<TextArea 
 							fill
 							style={{ marginBottom: 10 }}
 							value={question?.text}
@@ -240,6 +240,7 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 								...question,
 								text: e.target.value
 							} )}
+							growVertically
 						/>
 					)}
 					{!props.editable && (

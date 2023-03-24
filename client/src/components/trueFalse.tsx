@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { InputGroup, Label, Radio, RadioGroup } from "@blueprintjs/core"
+import { InputGroup, Label, Radio, RadioGroup, TextArea } from "@blueprintjs/core"
 import * as React from "react"
 import ReactMarkdown from "react-markdown"
 import styled from "styled-components"
@@ -54,7 +54,7 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 			{props.headerShown && (
 				<>
 					{props.editable && (
-						<InputGroup 
+						<TextArea 
 							fill
 							style={{ marginBottom: 10 }}
 							value={question?.text}
@@ -62,6 +62,7 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 								...question,
 								text: e.target.value
 							} )}
+							growVertically
 						/>
 					)}
 					{!props.editable && (

@@ -54,7 +54,7 @@ export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
 			{props.headerShown && (
 				<>
 					{props.editable && (
-						<InputGroup 
+						<TextArea 
 							fill
 							style={{ marginBottom: 10 }}
 							value={question?.text}
@@ -62,6 +62,7 @@ export const ShortAnswer = React.memo( ( props: ComponentProps ) => {
 								...question,
 								text: e.target.value
 							} )}
+							growVertically
 						/>
 					)}
 					{!props.editable && (

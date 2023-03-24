@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Button, Colors, Icon, InputGroup, Label, Radio } from "@blueprintjs/core"
+import { Button, Colors, Icon, InputGroup, Label, Radio, TextArea } from "@blueprintjs/core"
 import * as React from "react"
 import { DragDropContext, Draggable, Droppable, DropResult } from "react-beautiful-dnd"
 import ReactMarkdown from "react-markdown"
@@ -127,14 +127,14 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 
 	/**
 	 * Render
-	 * Also contains functionality to re-render in editing mode
+	 * Also contains functionality to re-render in editing mode and dragging answers
 	 */
 	return (
 		<StyledMultipleChoice>
 			{props.headerShown && (
 				<>
 					{props.editable && (
-						<InputGroup 
+						<TextArea 
 							fill
 							style={{ marginBottom: 10 }}
 							value={question?.text}
@@ -142,6 +142,7 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 								...question,
 								text: e.target.value
 							} )}
+							growVertically
 						/>
 					)}
 					{!props.editable && (

@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Button, Intent, MenuItem, Spinner } from "@blueprintjs/core"
+import { Button, InputGroup, Intent, MenuItem, Spinner, Tag } from "@blueprintjs/core"
 import { Select2 } from "@blueprintjs/select"
 import * as React from "react"
 import { batch } from "react-redux"
@@ -246,12 +246,21 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 					style={{ marginLeft: "auto" }}
 				/>
 			</StyledQuestionHeader>
-			<QuestionSwitch
-				questionId={props.questionId}
-				disabled
-				headerShown
-				editable={editing}
-			/>
+			<>
+				<QuestionSwitch
+					questionId={props.questionId}
+					disabled
+					headerShown
+					editable={editing}
+				/>
+				<td style={{ width: 50 }}>
+					<Tag minimal>{"Points Possible: "}</Tag>
+					<InputGroup
+						value={"0"}
+						style={{ textAlign: "right", position: "relative" }}
+					/>
+				</td>
+			</>
 		</StyledQuestionContainer>
 	)
 } )
