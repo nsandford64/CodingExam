@@ -1,6 +1,8 @@
 # CodingExam
 In this release, the app is still early in development, so it has been marked as pre-release. Instructions for setting up the development environment can be found in the "Developer Documentation" file in the "documentation-testing" folder. This includes how to set up the docker installation, start the application in development, and have the application display in Canvas through an HTTPS proxy. Additionally, a "ResetDatabaseScript.sql" file has been included in the "database" folder if the database needs to be reset in development mode. Major changes for this release include the ability to set point values for questions and a revamped grading GUI.
 
+Additionally, for next sprint, we are going to overhaul the Parson's Problem functionality, so the current functionality of it does not work. We have left the component itsself present in case there are existing exams that have those questions, but you cannot create new ones within the application.
+
 # Documentation
 User and developer documentation for this sprint can be found in the "documentation-testing" folder as well.
 
