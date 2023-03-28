@@ -6,9 +6,10 @@ import styled from "styled-components"
 import { DragDropContext, DropResult } from "react-beautiful-dnd"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { examActions, selectQuestionById, selectSubmissionByUserIdAndQuestionId } from "../slices/examSlice"
-import { InputGroup, Label, TextArea } from "@blueprintjs/core"
+import { Label } from "@blueprintjs/core"
 import ParsonsColumn from "./column"
 import ReactMarkdown from "react-markdown"
+import MDEditor from "@uiw/react-md-editor"
 
 /**
  * Style for the ParsonsProblem
@@ -232,15 +233,13 @@ export const ParsonsProblem = React.memo( ( props: ComponentProps ) => {
 			{props.headerShown && (
 				<>
 					{props.editable && (
-						<TextArea 
-							fill
-							style={{ marginBottom: 10 }}
+						<MDEditor 
 							value={question?.text}
-							onChange={e => props.editQuestion( {
+							onChange={text => props.editQuestion( {
 								...question,
-								text: e.target.value
+								text: text || ""
 							} )}
-							growVertically
+							style={{ borderRadius: 0, marginBottom: 10 }}
 						/>
 					)}
 					{!props.editable && (

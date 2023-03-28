@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Button, InputGroup, Label, MenuItem, TextArea } from "@blueprintjs/core"
+import { Button, Label, MenuItem } from "@blueprintjs/core"
 import * as React from "react"
 import AceEditor from "react-ace"
 import ReactMarkdown from "react-markdown"
@@ -13,6 +13,7 @@ import "brace/mode/java"
 import "brace/mode/csharp"
 import "brace/mode/python"
 import "brace/theme/sqlserver"
+import MDEditor from "@uiw/react-md-editor"
 
 /**
  * Style for the CodingAnswer component
@@ -26,14 +27,15 @@ const StyledCodingAnswer = styled.div`
  */
 const StyledEditableContainer = styled.div`
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
+	align-items: flex-start;
 `
 
 /**
  * Style to wrap the Select2 component
  */
 const StyledSelectContainer = styled.div`
-	margin-left: 10px;
+	margin-bottom: 10px;
 `
 
 /**
@@ -78,15 +80,13 @@ export const CodingAnswer = React.memo( ( props: ComponentProps ) => {
 				<>
 					{props.editable && (
 						<StyledEditableContainer>
-							<TextArea 
-								fill
-								style={{ marginBottom: 10 }}
-								value={question.text}
-								onChange={e => props.editQuestion( {
+							<MDEditor 
+								value={question?.text}
+								onChange={text => props.editQuestion( {
 									...question,
-									text: e.target.value
+									text: text || ""
 								} )}
-								growVertically
+								style={{ borderRadius: 0, marginBottom: 10, width: "100%" }}
 							/>
 							<StyledSelectContainer>
 								<Select2<string> 

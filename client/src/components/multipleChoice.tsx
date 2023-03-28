@@ -1,5 +1,6 @@
 // Copyright 2022 under MIT License
-import { Button, Colors, Icon, InputGroup, Label, Radio, TextArea } from "@blueprintjs/core"
+import { Button, Colors, Icon, InputGroup, Label, Radio } from "@blueprintjs/core"
+import MDEditor from "@uiw/react-md-editor"
 import * as React from "react"
 import { DragDropContext, Draggable, Droppable, DropResult } from "react-beautiful-dnd"
 import ReactMarkdown from "react-markdown"
@@ -136,15 +137,13 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 			{props.headerShown && (
 				<>
 					{props.editable && (
-						<TextArea 
-							fill
-							style={{ marginBottom: 10 }}
+						<MDEditor 
 							value={question?.text}
-							onChange={e => props.editQuestion( {
+							onChange={text => props.editQuestion( {
 								...question,
-								text: e.target.value
+								text: text || ""
 							} )}
-							growVertically
+							style={{ borderRadius: 0, marginBottom: 10 }}
 						/>
 					)}
 					{!props.editable && (
