@@ -33,6 +33,7 @@ const StyledList = styled.div`
 	flex-grow: 1;
 	border: 1px solid ${Colors.BLACK};
 	border-radius: 2px;
+	min-height: 50px;
 `
 
 /**
@@ -46,7 +47,7 @@ const ParsonsColumn = React.memo( ( props: ParsonsColumnProps ) => {
 	 * Render
 	 */
 	return (
-		<Droppable droppableId={props.column.id}>
+		<Droppable droppableId={props.column.id} isDropDisabled={props.disabled}>
 			{( provided ) => (
 				<StyledParsonsColumn>
 					<Label>{props.column.name}</Label>

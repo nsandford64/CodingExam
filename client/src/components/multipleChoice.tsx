@@ -19,7 +19,7 @@ const StyledMultipleChoice = styled.div`
 /**
  * Style for the container while adding an answer
  */
-const StyledAnswerInputContainer = styled.div`
+export const StyledAnswerInputContainer = styled.div`
 	display: flex;
 	flex-direction: row;
 	align-items: center;
