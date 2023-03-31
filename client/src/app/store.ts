@@ -1,11 +1,16 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit"
 import examReducer from "../slices/examSlice"
 
+/**
+ * Configures the store with all the necessary reducers, including
+ * the examReducer and the gradingReducer
+ */
 export const store = configureStore( {
 	reducer: {
-		exam: examReducer
+		exam: examReducer,
 	},
 	middleware( getDefaultMiddleware ) {
+		// Ensures that non JSON-serializable objects can be stored in the store
 		return getDefaultMiddleware( {
 			serializableCheck: false
 		} )

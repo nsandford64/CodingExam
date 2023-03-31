@@ -4,10 +4,10 @@ import * as React from "react"
 import styled from "styled-components"
 import { Confidence, ComponentProps } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
-import { examActions, selectQuestionById, selectConfidenceById } from "../slices/examSlice"
+import { examActions, selectConfidenceById } from "../slices/examSlice"
 
 /**
- * Style for the Confidence component
+ * Style for the ConfidenceRating component
  */
 const StyledConfidence = styled.div`
 	padding: 10px;
@@ -17,22 +17,26 @@ const StyledConfidence = styled.div`
 /**
  * ConfidenceRating Component
  * 
- * This component renders a multiple choice question for the user.
- * They can select any one option from a list of answer choices
+ * This component allows the user to select a confidence rating
+ * representing how confident they are in their answer.
  */
 export const ConfidenceRating = React.memo( ( props: ComponentProps ) => {
-
+	/**
+	 * Selectors
+	 */
 	// Dispatches an event to the store
 	const dispatch = useAppDispatch()
-
 	// Response from the store
 	const confidence = useAppSelector( state => selectConfidenceById( state, props.questionId ) )
 
 	/**
-	 * Called when the user selects one of the radio buttons - it
-	 * calls the updateResponse delegate to update the state in the App
-	 * to reflect their choice.
+	 * Callbacks
 	 */
+	/*
+	Called when the user selects one of the radio buttons - it
+	calls the updateResponse delegate to update the state in the App
+	to reflect their choice.
+	*/
 	const handleChange = React.useCallback( ( value: number ) => {
 		// Create a new response object
 		const newConfidence: Confidence = {
@@ -43,8 +47,9 @@ export const ConfidenceRating = React.memo( ( props: ComponentProps ) => {
 		dispatch( examActions.updateConfidence( newConfidence ) )
 	}, [] )
 
-	
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (
 		<StyledConfidence>
 			<Label>Mark your confidence in your answer (0 = Low, 5 = High)</Label>

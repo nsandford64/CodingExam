@@ -1,11 +1,12 @@
 // Copyright 2022 under MIT License
-import { Radio, RadioGroup } from "@blueprintjs/core"
+import { Label, Radio, RadioGroup } from "@blueprintjs/core"
+import MDEditor from "@uiw/react-md-editor"
 import * as React from "react"
 import ReactMarkdown from "react-markdown"
 import styled from "styled-components"
-import { Response, ComponentProps } from "../App"
+import { ComponentProps, Submission } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
-import { examActions, selectQuestionById, selectResponseById } from "../slices/examSlice"
+import { examActions, selectQuestionById, selectSubmissionByUserIdAndQuestionId } from "../slices/examSlice"
 
 /**
  * Style for the TrueFalse component
@@ -21,39 +22,64 @@ const StyledTrueFalse = styled.div`
  * must select between true or false
  */
 export const TrueFalse = React.memo( ( props: ComponentProps ) => {
-
+	/**
+	 * Selectors
+	 */
 	// Dispatches an event to the store
 	const dispatch = useAppDispatch()
-
 	// Question from the store
 	const question = useAppSelector( state => selectQuestionById( state, props.questionId ) )
-	// Response from the store
-	const response = useAppSelector( state => selectResponseById( state, props.questionId ) )
+	// Submission from the store
+	const submission = useAppSelector( state => selectSubmissionByUserIdAndQuestionId( state, props.questionId, props.canvasUserId ) )
 
+	/**
+	 * Callbacks
+	 */
 	// Called when the user selects between true or false - updates the App's responsesMap
 	const handleChange = React.useCallback( ( e: React.FormEvent<HTMLInputElement> ) => {
 		const value = ( e.target as HTMLInputElement ).value
-		const newResponse: Response = {
+		const newSubmission: Submission = {
 			questionId: props.questionId,
 			value: parseInt( value )
 		}
 
-		dispatch( examActions.updateResponse( newResponse ) )
+		dispatch( examActions.updateSubmission( newSubmission ) )
 	}, [] )
-	// Format markdown in the question text
-	const label = question ? <ReactMarkdown>{question?.text}</ReactMarkdown> : ""
 
-	// Render the component
+	/**
+	 * Render
+	 * Also contains code to re-render in editing mode
+	 */
 	return (
 		<StyledTrueFalse>
+			{props.headerShown && (
+				<>
+					{props.editable && (
+						<MDEditor 
+							value={question?.text}
+							onChange={text => props.editQuestion( {
+								...question,
+								text: text || ""
+							} )}
+							style={{ borderRadius: 0, marginBottom: 10 }}
+						/>
+					)}
+					{!props.editable && (
+						<Label>
+							<ReactMarkdown>
+								{question ? question?.text : ""}
+							</ReactMarkdown>
+						</Label>
+					)}
+				</>				
+			)}
 			<RadioGroup
 				disabled={props.disabled}
-				label={label}
 				onChange={handleChange}
-				selectedValue={response?.value}
+				selectedValue={submission?.value}
 			>
-				<Radio label="False" value={0} />
 				<Radio label="True" value={1} />
+				<Radio label="False" value={0} />
 			</RadioGroup>
 		</StyledTrueFalse>
 	)

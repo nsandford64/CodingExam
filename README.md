@@ -1,13 +1,12 @@
 # CodingExam
-In this release, the app is still early in development, so it has been marked as pre-release. Instructions for setting up the development environment can be found in the "Developer Documentation" file in the "documentation-testing" folder. This includes how to set up the docker installation, start the application in development, and have the application display in Canvas through an HTTPS proxy. Additionally, a "ResetDatabaseScript.sql" file has been included in the "database" folder if the database needs to be reset in development mode.
+In this release, the app is still early in development, so it has been marked as pre-release. Instructions for setting up the development environment can be found in the "Developer Documentation" file in the "documentation-testing" folder. This includes how to set up the docker installation, start the application in development, and have the application display in Canvas through an HTTPS proxy. Additionally, a "ResetDatabaseScript.sql" file has been included in the "database" folder if the database needs to be reset in development mode. Major changes for this release include the ability to set point values for questions and a revamped grading GUI.
 
-# Research/Prototypes
-For this sprint, we were also tasked with researching and prototyping a design for the GUI for the grading component of the application. The designs can be found in the "CodingExamGradingGUIDesigns_Sprint7" file in the "documentation-testing" folder.
+Additionally, for next sprint, we are going to overhaul the Parson's Problem functionality, so the current functionality of it does not work. We have left the component itsself present in case there are existing exams that have those questions, but you cannot create new ones within the application.
 
 # Documentation
 User and developer documentation for this sprint can be found in the "documentation-testing" folder as well.
 
 # Testing
-For testing, the server application contain unit tests which can be run by navigating to the "server" folder and running the command "npm test". These unit tests should be run after the application has been run once as per the development environment setup instructions.
+To initialize the test database for unit tests, the command "node serverTestEntry.js" should be run first to setup and seed the database. To run the unit tests, navigate to the "server" folder and run the command "npm test".
 
-For the client testing, to test the functionality of the components for the Student and Instructor views, testing plans have been included in the "documentation-testing" folder as well. Additionally, the User Documentation can also be used to supplement the testing plans, as it walks the user through most of the application's functionality.
+For testing the client, to test the functionality of the components for the Student and Instructor views, testing plans have been included in the "documentation-testing" folder as well. Additionally, the User Documentation can also be used to supplement the testing plans, as it walks the user through most of the application's functionality.

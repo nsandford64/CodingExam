@@ -35,12 +35,14 @@ if( process.env.NODE_ENV == "development" ) {
 	
 	/*
 	 * Get the main entry point to the Client app
+	 * Gives an option to load the app as a student, instructor, or as a reset student to take it again
 	 */
 	router.get( "/", ( req, res ) => {	
 		res.send( `<h1>Debug access</h1>
 			<ul>
 				<li><a href="/learner">Learner Entry Point</a></li>
 				<li><a href="/instructor">Instructor Entry Point</a></li>
+				<li><a href="/retake">Retake Exam</a></li>
 			</ul>
 		` )
 	} )
@@ -75,6 +77,23 @@ if( process.env.NODE_ENV == "development" ) {
 			roles: "Learner"
 		}
 		// Creates the user if it does not exist already
+		await findOrCreateUser( knex, ltiData.userID, ltiData.fullName )
+		const token = generateAccessToken( ltiData )
+		serveIndex( res, token )
+	} )
+
+	/*
+	 * Resets the HasTaken property and lets the student view take the exam again
+	 */
+	router.get( "/retake", async ( req, res ) => {
+		const knex = req.app.get( "db" )
+		const ltiData = { 
+			assignmentID: "example-exam",
+			fullName: "Example Learner",
+			userID: "example-learner",
+			roles: "Learner"
+		}
+		resetHasTaken( knex, ltiData )
 		await findOrCreateUser( knex, ltiData.userID, ltiData.fullName )
 		const token = generateAccessToken( ltiData )
 		serveIndex( res, token )
@@ -116,10 +135,13 @@ router.post( "/", async ( req, res ) => {
 				givenName: req.body.lis_person_name_given,
 				email: req.body.lis_person_contact_email_primary
 			}
+
+			const totalPoints = req.body.custom_canvas_assignment_points_possible
+
 			// Creates user and exam if they don't already exist
 			await findOrCreateUser( knex, ltiData )
 			if( ltiData.roles === "Instructor" ) {
-				await createExam( knex, ltiData.assignmentID )
+				await createExam( knex, ltiData.assignmentID, totalPoints )
 			}
 			if ( ltiData.roles === "Learner" ) {
 				const resultSourcedid = req.body.lis_result_sourcedid
@@ -159,8 +181,6 @@ async function serveIndex( res, token ) {
  * @param {*} outcomeServiceUrl - outcome service url from launch request
  */
 async function storeGradeInfo( knex, ltiData, resultSourcedid, outcomeServiceUrl ) {
-	console.log( "AssignmentID: " + ltiData.assignmentID )
-	console.log( "UserID: " + ltiData.userID )
 
 	/**
 	 * Gets the database ID for the student and exam and then
@@ -192,12 +212,13 @@ async function storeGradeInfo( knex, ltiData, resultSourcedid, outcomeServiceUrl
  * @param {Knex} knex - the database connection
  * @param {int} canvasAssignmentID - the canvas assignment id
  */
-async function createExam( knex, canvasAssignmentID ){
+async function createExam( knex, canvasAssignmentID, totalPoints ){
 	// Try creating an exam. Since the column canvas_exam_id is unique
 	// if one already exists, this will fail
 	try {
 		await knex( "exams" ).insert( {
-			canvas_assignment_id: canvasAssignmentID
+			canvas_assignment_id: canvasAssignmentID,
+			total_points: totalPoints
 		} )
 	// eslint-disable-next-line no-empty
 	} catch( _err ) {}
@@ -226,6 +247,27 @@ async function findOrCreateUser( knex, userData ){
 	return user.id
 }
 	
+async function resetHasTaken( knex, ltiData ){
+
+	/**
+	 * Gets the internal database id of the user and exam
+	 */
+	const student = await knex.select( "*" )
+		.from( "users" )
+		.where( "canvas_user_id", ltiData.userID )
+		.first()
+		
+	const exam = await knex.select( "*" )
+		.from( "exams" )
+		.where( "canvas_assignment_id", ltiData.assignmentID )
+		.first()
+
+	await knex( "exams_users" )
+		.update( "HasTaken", false )
+		.where( "user_id", student.id )
+		.where( "exam_id", exam.id )
+}
+
 /**
  * Generates an access token using an object containing the encoded properties as the key 
  */

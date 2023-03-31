@@ -1,14 +1,13 @@
 // Copyright 2022 under MIT License
-
-import { createAsyncThunk, createSelector, createSlice } from "@reduxjs/toolkit"
-import type {PayloadAction, ThunkAction, AnyAction} from '@reduxjs/toolkit'
-import { Feedback, Question, Response, Confidence } from "../App"
+import { createSelector, createSlice } from "@reduxjs/toolkit"
+import type { PayloadAction } from "@reduxjs/toolkit"
+import { Feedback, Question, Confidence, Submission, QuestionType } from "../App"
 import type { AppThunk, RootState } from "../app/store"
+import { batch } from "react-redux"
 
 /**
  * Reducers
  */
-
 // Set the questionIds array in the store
 const setQuestionIds = ( state: ExamState, action: PayloadAction<number[]> ) => {
 	state.questionIds = action.payload
@@ -30,20 +29,18 @@ const deleteQuestion = ( state: ExamState, action: PayloadAction<number> ) => {
 	state.questionsMap.delete( action.payload )
 }
 
-// Set the responseIds array in the store
-const setResponseIds = ( state: ExamState, action: PayloadAction<number[]> ) => {
-	state.responseIds = action.payload
+// Set the submissionsMap map in the store
+const setSubmissionsMap = ( state: ExamState, action: PayloadAction<Map<string, Map<number, Submission>>> ) => {
+	state.submissionsMap = action.payload
 }
-// Set the responsesMap map in the store
-const setResponsesMap = ( state: ExamState, action: PayloadAction<Map<number, Response>> ) => {
-	state.responsesMap = action.payload
-}
-// Update the responsesMap in the store to have the new Response
-const updateResponse = ( state: ExamState, action: PayloadAction<Response> ) => {
-	if( !state.responseIds.includes( action.payload.questionId ) ) {
-		state.responseIds.push( action.payload.questionId )
-	}
-	state.responsesMap.set( action.payload.questionId, action.payload )
+// Update the submissionsMap in the store to have the new Submission
+const updateSubmission = ( state: ExamState, action: PayloadAction<Submission> ) => {
+	const canvasUserId = action.payload.canvasUserId || "student"
+
+	const currentSubmissions = state.submissionsMap.get( canvasUserId ) || new Map<number, Submission>()
+	currentSubmissions.set( action.payload.questionId, action.payload )
+ 
+	state.submissionsMap.set( canvasUserId, currentSubmissions )
 }
 
 // Set the responseState in the store
@@ -77,13 +74,8 @@ const updateConfidence = ( state: ExamState, action: PayloadAction<Confidence> )
 	state.confidenceMap.set( action.payload.questionId, action.payload )
 }
 
-// Increment the nextQuestionId
-const incrementNextQuestionId = ( state: ExamState ) => {
-	state.nextQuestionId++
-}
-
-// Advance the NextQuestionId to the specified amount
-const advanceNextQuestionId = ( state: ExamState, action: PayloadAction<number> ) => {
+// Set next question ID based on response from server
+const setNextQuestionId = ( state: ExamState, action: PayloadAction<number> ) => {
 	state.nextQuestionId = action.payload
 }
 
@@ -92,25 +84,28 @@ const setToken = ( state: ExamState, action: PayloadAction<string> ) => {
 	state.token = action.payload
 }
 
+// Sets the event listener that prevents backouts
+const setListener = ( state: ExamState, action: PayloadAction<( event: BeforeUnloadEvent ) => void> ) => {
+	state.listener = action.payload
+}
+
 // Re-initializes the store
-const reInitializeStore = ( state: ExamState ) => {
+const reInitializeStore = ( state: ExamState, action: PayloadAction<number> ) => {
 	// Reset everything besides the token
 	state.questionIds = initialState.questionIds
 	state.questionsMap = initialState.questionsMap
-	state.responseIds = initialState.responseIds
-	state.responsesMap = initialState.responsesMap
+	state.submissionsMap = initialState.submissionsMap
 	state.responseState = initialState.responseState
 	state.feedbackIds = initialState.feedbackIds
 	state.feedbackMap = initialState.feedbackMap
 	state.confidenceIds = initialState.confidenceIds
 	state.confidenceMap = initialState.confidenceMap
-	state.nextQuestionId = initialState.nextQuestionId
+	state.nextQuestionId = action.payload
 }
 
 /**
  * Selectors
  */
-
 // Select all questionIds
 export const selectQuestionIds = ( state: RootState ) => (
 	state.exam.questionIds
@@ -123,18 +118,54 @@ export const selectQuestionsMap = ( state: RootState ) => (
 export const selectQuestionById = createSelector(
 	selectQuestionsMap,
 	( state: RootState, id: number ) => id,
-	( questionsMap, id ) => questionsMap.get( id )
+	( questionsMap, id ) => {
+		let question = questionsMap.get( id )
+		if ( !question ) {
+			question = {
+				answers: [],
+				id: 0,
+				pointsPossible: 0,
+				text: "",
+				type: QuestionType.None,
+			}
+		}
+
+		return question
+	}
 )
 
-// Select the responsesMap
-export const selectResponsesMap = ( state: RootState ) => (
-	state.exam.responsesMap
+// Select the submissionsMap
+export const selectSubmissionsMap = ( state: RootState ) => (
+	state.exam.submissionsMap
 )
-// Select a Response from the store with the given id
-export const selectResponseById = createSelector(
-	selectResponsesMap,
-	( state: RootState, id: number ) => id,
-	( responsesMap, id ) => responsesMap.get( id )
+// Select the submissions from the store with the given canvasUserId
+export const selectSubmissionByUserIdAndQuestionId = createSelector(
+	selectSubmissionsMap,
+	( _: RootState, questionId: number ) => questionId,
+	( _: RootState , __: number, canvasUserId?: string ) => canvasUserId || "student",
+	( submissionsMap, questionId, canvasUserId ) => {
+		const submissions = submissionsMap.get( canvasUserId )
+		
+		return submissions?.get( questionId )
+	}
+)
+// Selects a list of submissions from a questionId
+export const selectSubmissionsByQuestionId = createSelector(
+	selectSubmissionsMap,
+	( _: RootState, questionId: number ) => questionId,
+	( submissionsMap, questionId ) => {
+		const maps = Array.from( submissionsMap.values() )
+
+		const submissions: Submission[] = []
+		maps.forEach( map => {
+			const submission = map.get( questionId )
+			if ( submission ) {
+				submissions.push( submission )
+			}
+		} )
+
+		return submissions
+	}
 )
 
 // Select the responseState
@@ -174,26 +205,112 @@ export const selectToken = ( state: RootState ) => (
 	state.exam.token
 )
 
+// Selects the event listener from the store to disable it
+export const selectListener = ( state: RootState ) => {
+	state.exam.listener
+}
+
 /**
  * Thunks
  */
-/*
-// Gets an unused exam question id from the database using the server api
-export const fetchNextQuestionId = 
-	(): AppThunk<void> => 
-	async (dispatch, getState) => {
-		const state = getState()
+export const initializeQuestions = ( canvasUserId?: string ): AppThunk<Promise<void>> => async ( dispatch, getState ) => {
+	// Current state of the Redux store
+	const state = getState()
+	// Token from the store
+	const token = selectToken( state )
 
-		const res = await fetch( "/api/nextquestionid", {
-			// Adding headers to the request
-			headers: {
-				"token": state.exam.token
-			}
-		})
-		const json = await res.json()
-		dispatch(advanceNextQuestionId(json.nextID));
-	}
-*/
+	// Fetch exam questions
+	let data = await fetch( "/api/questions", {
+		headers: {
+			"token": token
+		} 
+	} )
+			
+	let json  = await data.json()
+	console.log( json )
+	const questions: Question[] = json.questions
+
+	// Loop through questions and create ids and a map
+	const newQuestionIds: number[] = []
+	const newQuestionsMap = new Map<number, Question>()
+	questions.forEach( question => {
+		newQuestionIds.push( question.id )
+		newQuestionsMap.set( question.id, question )
+	} )
+
+	// Fetch exam submissions (if there are any)
+	data = await fetch( "/api/submissions", {
+		headers: {
+			"token": token,
+			"userID": canvasUserId || ""
+		}
+	} )
+
+	json = await data.json()
+	const submissions: Submission[] = json.submissions
+
+	/*
+	Loop through submissions and create ids and a map 
+	for submissions and for confidence ratings
+	*/
+	const newSubmissionsMap = new Map<string, Map<number, Submission>>()
+	submissions.forEach( submission => {
+		const currentSubmissions = newSubmissionsMap.get( canvasUserId || "student" ) || new Map<number, Submission>()
+		currentSubmissions.set( submission.questionId, submission )
+
+		newSubmissionsMap.set( canvasUserId || "student", currentSubmissions )
+	} )
+
+	// Fetch exam confidence ratings 
+	data = await fetch( "/api/confidence", {
+		headers: {
+			"token": token,
+			"userID": canvasUserId || ""
+		}
+	} )
+
+	json = await data.json()
+	const confidence: Confidence[] = json.confidence
+
+	// Loop through the confidence and create ids and a map
+	const newConfidenceIds: number[] = []
+	const newConfidenceMap = new Map<number, Confidence>()
+	confidence.forEach( confidence => {
+		newConfidenceIds.push( confidence.questionId )
+		newConfidenceMap.set( confidence.questionId, confidence )
+	} )
+
+	// Fetch exam feedback
+	data = await fetch( "/api/feedback", {
+		headers: {
+			"token": token,
+			"userID": canvasUserId || ""
+		}
+	} )
+
+	json = await data.json()
+	const feedback: Feedback[] = json.feedback
+
+	// Loop through the feedback and create ids and a map
+	const newFeedbackIds: number[] = []
+	const newFeedbackMap = new Map<number, Feedback>()
+	feedback.forEach( feedback => {
+		newFeedbackIds.push( feedback.questionId )
+		newFeedbackMap.set( feedback.questionId, feedback )
+	} )
+
+	// Update the store
+	batch( () => {
+		dispatch( examActions.setFeedbackIds( newFeedbackIds ) )
+		dispatch( examActions.setFeedbackMap( newFeedbackMap ) )
+		dispatch( examActions.setQuestionIds( newQuestionIds ) )
+		dispatch( examActions.setQuestionsMap( newQuestionsMap ) )
+		dispatch( examActions.setSubmissionsMap( newSubmissionsMap ) )
+		dispatch( examActions.setConfidenceIds( newConfidenceIds ) )
+		dispatch( examActions.setConfidenceMap( newConfidenceMap ) )
+	} )
+}
+
 // Creates an exam in the database using the server api
 export const createExamThunk: AppThunk<void> = async ( dispatch, getState ) => {
 	const state = getState()
@@ -206,7 +323,7 @@ export const createExamThunk: AppThunk<void> = async ( dispatch, getState ) => {
 		}
 	} )
 
-	const res = await fetch( "/api/createexam", {
+	const res = await fetch( "/api/instructor/createexam", {
 		// Adding method type
 		method: "POST",
 
@@ -231,28 +348,26 @@ export const createExamThunk: AppThunk<void> = async ( dispatch, getState ) => {
 export interface ExamState {
 	questionIds: number[]
 	questionsMap: Map<number, Question>
-	responseIds: number[]
-	responsesMap: Map<number, Response>
+	submissionsMap: Map<string, Map<number, Submission>>
 	responseState: string,
 	feedbackIds: number[],
 	feedbackMap: Map<number, Feedback>,
 	confidenceIds: number[],
 	confidenceMap: Map<number, Confidence>,
-	nextQuestionId: number,
-	token: string
+	nextQuestionId?: number,
+	token: string,
+	listener?: ( event: BeforeUnloadEvent ) => void
 }
 
 const initialState: ExamState = {
 	questionIds: [],
 	questionsMap: new Map<number, Question>(),
-	responseIds: [],
-	responsesMap: new Map<number, Response>(),
+	submissionsMap: new Map<string, Map<number, Submission>>(),
 	responseState: "",
 	feedbackIds: [],
 	feedbackMap: new Map<number, Feedback>(),
 	confidenceIds: [],
 	confidenceMap: new Map<number, Confidence>(),
-	nextQuestionId: 30,
 	token: ""
 }
 
@@ -264,9 +379,8 @@ export const examSlice = createSlice( {
 		setQuestionsMap,
 		updateQuestion,
 		deleteQuestion,
-		setResponseIds,
-		setResponsesMap,
-		updateResponse,
+		setSubmissionsMap,
+		updateSubmission,
 		setResponseState,
 		setFeedbackIds,
 		setFeedbackMap,
@@ -274,13 +388,12 @@ export const examSlice = createSlice( {
 		setConfidenceIds,
 		setConfidenceMap,
 		updateConfidence,
-		incrementNextQuestionId,
-		advanceNextQuestionId,
+		setNextQuestionId,
 		setToken,
+		setListener,
 		reInitializeStore
 	}
 } )
 
 export const examActions = examSlice.actions
-
 export default examSlice.reducer

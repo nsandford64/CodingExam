@@ -1,14 +1,21 @@
 // Copyright 2022 under MIT License
-import { Button, Intent, TextArea } from "@blueprintjs/core"
+import { Button, Intent } from "@blueprintjs/core"
 import * as React from "react"
-import { initializeConnect } from "react-redux/es/components/connect"
+import { propTypes } from "react-markdown"
 import styled from "styled-components"
-import { IndentStyle } from "typescript"
 import { User } from "../App"
 import { useAppSelector } from "../app/hooks"
 import { selectFeedbackMap, selectToken } from "../slices/examSlice"
 import { CreateExamView } from "./createExamView"
 import { ExamView } from "./examView"
+import { GradingView } from "./gradingView"
+
+/**
+ * Props for InstructorView
+ */
+interface InstructorViewProps {
+	removeWarning: () => void
+}
 
 /**
  * Style for InstructorView
@@ -51,10 +58,18 @@ const StyledStudentListContainer = styled.div`
  * They can click on a student and view their responses, as well as leave
  * feedback.
  */
-export const InstructorView = React.memo( () => {
-
+export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
+	/**
+	 * Selectors
+	 */
+	// Token from the store
 	const token = useAppSelector( selectToken )
+	// feedbackMap from the store
+	const feedbackMap = useAppSelector( selectFeedbackMap )
 
+	/**
+	 * State
+	 */
 	// State that holds the array of Users
 	const [ users, setUsers ] = React.useState( [] as User[] )
 	// State that determines which view should be shown to the user
@@ -63,34 +78,32 @@ export const InstructorView = React.memo( () => {
 	const [ displayStatus, setDisplayStatus ] = React.useState( "" )
 	// State that holds the selected student's canvasUserId
 	const [ canvasUserId, setCanvasUserId ] = React.useState( "" )
-	// State that holds the grade for the currently selected student
-	const [ grade, setGrade ] = React.useState( 0 )
-
-	// feedbackMap from the store
-	const feedbackMap = useAppSelector( selectFeedbackMap )
 
 	/**
-	 * Called when a student is clicked - tells the InstructorView
-	 * to render that student's responses
+	 * Callbacks
 	 */
+	/*
+	Called when a student is clicked - tells the InstructorView
+	to render that student's responses
+	*/
 	const handleStudentClick = React.useCallback( ( id: string ) => {
 		setDisplayStatus( "" )
 		setView( "examView" )
 		setCanvasUserId( id )
 	}, [] )
 
+	// Called when the user clicks the "Create Exam" button - navigates to the createExamView
 	const handleCreateExamClick = React.useCallback( () => {
 		setDisplayStatus( "" )
 		setView( "createExamView" )
-
 	}, [] )
 
-	/**
-	 * Called when the Instructor clicks the "Submit Feedback" button -
-	 * updates feedback in the store
-	 */
+	/*
+	Called when the Instructor clicks the "Submit Feedback" button -
+	updates feedback in the store
+	*/
 	const handleFeedbackClick = React.useCallback( async () => {
-		const data = await fetch( "/api/instructorfeedback", {
+		const data = await fetch( "/api/instructor/feedback", {
 			method: "POST",
 			body: JSON.stringify(
 				Array.from( feedbackMap.values() )
@@ -103,7 +116,6 @@ export const InstructorView = React.memo( () => {
 		} )
 
 		const json = await data.json()
-		//console.log( json )
 
 		// Returns the view to the base student list view
 		setView( "studentListView" )
@@ -113,46 +125,43 @@ export const InstructorView = React.memo( () => {
 			status = "Feedback Submitted"
 		}
 		setDisplayStatus( status )
-
 	}, [ feedbackMap, canvasUserId ] )
 
-	/**
-	 * Handles when the instructor clicks the grade button on a student's
-	 * submission. Uses the value entered in the grade box in the view
-	 */
-	const handleGradeClick = React.useCallback( async () => {
-		const data = await fetch( "/api/grade", {
+	/*
+	Handles when the instructor clicks the grade button on a student's
+	submission. Uses the value entered in the grade box in the view
+	*/
+	const handleSubmitGradesClick = React.useCallback( async () => {
+		const data = await fetch( "/api/instructor/submitgrades", {
 			method: "POST",
-			body: JSON.stringify( { "grade": grade } ),
 			headers: {
 				"Content-type": "application/json; charset=UTF-8",
-				"token": token,
-				"userid": canvasUserId
+				"token": token
 			}
 		} )
 
 		const json = await data.json()
-		//console.log( json )
-
-		// Returns the view to the base student list view
-		setView( "studentListView" )
-
+		
 		let status = "Grade Submission Unsuccessful"
-		if ( json.response == "Valid submission" ) {
-			status = "Grade Submitted"
+		if ( json.status == 200 ) {
+			status = "Grades Submitted"
 		}
-		setGrade( 0 )
-		setDisplayStatus( status )
 
-	}, [ displayStatus, canvasUserId, grade ] )
+		setDisplayStatus( status )
+		
+
+	}, [ displayStatus ] )
 
 	/**
-	 * Called on render - pulls in the list of students that have taken
-	 * the exam
+	 * Effects
 	 */
+	/*
+	Called on render - pulls in the list of students that have taken
+	the exam
+	*/
 	React.useEffect( () => {
 		const initUsers = async () => {
-			const data = await fetch( "/api/examtakers", {
+			const data = await fetch( "/api/instructor/examtakers", {
 				headers: {
 					"token": token
 				}
@@ -163,11 +172,13 @@ export const InstructorView = React.memo( () => {
 
 			setUsers( users )
 		}
-
-		initUsers()
+		// Call the async function
+		initUsers()	
 	}, [] )
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (
 		<StyledInstructorView>
 			<StyledHeaderContainer>
@@ -180,26 +191,30 @@ export const InstructorView = React.memo( () => {
 						text="Back"
 						minimal
 						intent={Intent.PRIMARY}
-						onClick={() => setView( "studentListView" )}
+						onClick={() => { 
+							setView( "studentListView" )
+							setDisplayStatus( "" )
+						}}
 					/>
 					{view === "studentListView" && (
-						<Button 
-							text="Create Exam"
-							onClick={() => handleCreateExamClick()}
-						/>
-					)}
-					{view !== "studentListView" && view !== "createExamView" && (
 						<>
-							<TextArea
-								style={{ maxHeight: "30px", resize: "none" }}
-								intent={Intent.PRIMARY}
-								onChange={e => setGrade( parseInt( e.target.value ) || 0 )}
+							<Button 
+								text="Create Exam"
+								onClick={() => handleCreateExamClick()}
 							/>
+							<Button 
+								text="Grade Exams"
+								onClick={() => setView( "gradingView" )}
+							/>
+						</>
+					)}
+					{view === "gradingView" && (
+						<>
 							<Button
 								text="Grade"
 								minimal
 								intent={Intent.PRIMARY}
-								onClick={() => handleGradeClick()}
+								onClick={() => handleSubmitGradesClick()}
 							/>
 						</>
 					)}
@@ -232,6 +247,7 @@ export const InstructorView = React.memo( () => {
 						feedback={true}
 						review={false}
 						canvasUserId={canvasUserId}
+						removeWarning={props.removeWarning}
 					/>
 					<Button 
 						text={"Submit Feedback"}
@@ -240,12 +256,21 @@ export const InstructorView = React.memo( () => {
 					/>
 				</>
 			)}
+			{view === "gradingView" && (
+				<GradingView />
+			)}
 		</StyledInstructorView>
 	)
 } )
 InstructorView.displayName = "InstructorView"
 
+/**
+ * View Type
+ * 
+ * This view ensures that only valid views are presented to the user
+ */
 type View = 
 	"studentListView" 
   | "examView"
   | "createExamView"
+  | "gradingView"

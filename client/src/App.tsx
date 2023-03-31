@@ -1,5 +1,6 @@
 // Copyright 2022 under MIT License
 import React from "react"
+import { batch } from "react-redux"
 import styled from "styled-components"
 import { useAppDispatch } from "./app/hooks"
 import { examActions } from "./slices/examSlice"
@@ -29,7 +30,7 @@ const StyledApp = styled.div`
 const StyledViewContainer = styled.div`
 	width: 90%;
 	min-width: 600px;
-	max-widht: 1028px;
+	max-width: 1028px;
 `
 
 /**
@@ -39,9 +40,15 @@ const StyledViewContainer = styled.div`
  * be displayed to the user
  */
 export const App = React.memo( () => {
-
+	/**
+	 * Selectors
+	 */
+	// Dispatch an action to the store
 	const dispatch = useAppDispatch()
 
+	/**
+	 * State
+	 */
 	// State that determines if the App is in a loading state
 	const [ loading, setLoading ] = React.useState( true )
 	// State that holds whether the InstructorView or the StudentView should be rendered
@@ -50,10 +57,10 @@ export const App = React.memo( () => {
 	const [ taken, setTaken ] = React.useState( false )
 
 	// Stores the JWT token
-	const token = String( window.__INITIAL_DATA__ )
+	//const token = String( window.__INITIAL_DATA__ )
 
 	// Debug instructor token
-	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJleGFtcGxlLWV4YW0iLCJmdWxsTmFtZSI6IkV4YW1wbGUgSW5zdHJ1Y3RvciIsInVzZXJJRCI6ImV4YW1wbGUtaW5zdHJ1Y3RvciIsInJvbGVzIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTY3NTM3NzcxOH0.aH9JLLUHpRRJuhLQ-xmmEF2D1j6pu1iBXD5vP3mJxnE"
+	const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJleGFtcGxlLWV4YW0iLCJmdWxsTmFtZSI6IkV4YW1wbGUgSW5zdHJ1Y3RvciIsInVzZXJJRCI6ImV4YW1wbGUtaW5zdHJ1Y3RvciIsInJvbGVzIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTY3NTM3NzcxOH0.aH9JLLUHpRRJuhLQ-xmmEF2D1j6pu1iBXD5vP3mJxnE"
 	
 	// Debug learner token
 	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJleGFtcGxlLWV4YW0iLCJmdWxsTmFtZSI6IkV4YW1wbGUgTGVhcm5lciIsInVzZXJJRCI6ImV4YW1wbGUtbGVhcm5lciIsInJvbGVzIjoiTGVhcm5lciIsImlhdCI6MTY3NTM3NzYzOH0.HFMJmkONPDCcKVwAmfjhz0jllgG14S3yf4HmWjsJkhw"
@@ -70,9 +77,15 @@ export const App = React.memo( () => {
 	});
 
 	/**
-	 * Runs on render - determines the user's role based on their JWT token
+	 * Effects
 	 */
+	/*
+	Runs on render - determines the user's role based on their JWT token
+	*/
 	React.useEffect( () => {
+		// Prompts the user before letting them reload
+		window.addEventListener( "beforeunload", preventUnload )
+
 		// Gets the user's role depending on their token
 		const getRole = async () => {			
 			// Fetch role
@@ -96,20 +109,40 @@ export const App = React.memo( () => {
 		// Calls the async function
 		getRole()
 
-		// Set the token in the store
-		dispatch( examActions.setToken( token ) )
+		// Set the variables in the store
+		batch( () => {
+			dispatch( examActions.setToken( token ) )
+		} ) 
+
+		return () => {
+			window.removeEventListener( "beforeunload", preventUnload )
+		}
 	}, [] )
 
-	// Render the component
+	// Listener event that displays a prompt when the user tries to unload the page
+	const preventUnload = ( event: BeforeUnloadEvent ) => {
+		const message = "You are about to navigate away, and your entered data will not be saved. Are you sure you want to leave?"
+		event.returnValue = message
+		event.preventDefault()
+	}
+
+	const removeWarning = () => {
+		console.log( "Am I running too early" )
+		window.removeEventListener( "beforeunload", preventUnload )
+	}
+
+	/**
+	 * Render
+	 */
 	return (
 		<StyledApp>
 			{!loading && (
 				<StyledViewContainer>
 					{showInstructorView && (
-						<InstructorView />
+						<InstructorView removeWarning={removeWarning}/>
 					)}
 					{!showInstructorView && (
-						<StudentView disabled={taken} />
+						<StudentView disabled={taken} removeWarning={removeWarning}/>
 					)}
 				</StyledViewContainer>
 			)}
@@ -137,8 +170,13 @@ export type Exam = {
  * Each component can be disabled and has a questionId
  */
 export interface ComponentProps {
-	disabled?: boolean
+	disabled?: boolean // Whether it should be disabled or not
 	questionId: number // Specific questionId of the given question
+	canvasUserId?: string // The canvasUserId that should be pulled from the DB
+	headerShown?: boolean // Whether the header should be shown or not
+	editable?: boolean // Whether this component is editable or not
+	creating?: boolean // Whether this component is currently being created
+	editQuestion: ( newQuestion: Question ) => void // Function to update a question in the store
 }
 
 /**
@@ -153,7 +191,9 @@ export type Question = {
 	type: QuestionType // Type of the Question
 	answers: string[] // Array of answers choices to present to the user
 	correctAnswer?: number // Correct answer for the question
-	parsonsAnswer?: string
+	parsonsAnswer?: string // Correct answer for a Parson's Problem
+	language?: string // Language used for a CodingAnswer question
+	pointsPossible: number // Number of points this question is worth
 }
 
 /**
@@ -163,8 +203,8 @@ export type Question = {
 * Each item has an id and text to display
 */ 
 export type Item = {
-	id: number
-	text: string
+	id: number // Unique id for draggable
+	text: string // Text to be displayed in the Item
 }
 
 /**
@@ -174,9 +214,9 @@ export type Item = {
  * Each column has a list of items, a name, and an id
  */
 export type Column = {
-	list: Item[]
-	name: string
-	id: string
+	list: Item[] // List of Items to be displayed
+	name: string // Name to be displayed
+	id: string // Unique id to keep track of the column
 }
 
 /**
@@ -192,14 +232,28 @@ export type Response = {
 }
 
 /**
+ * Submission Type
+ * 
+ * This type defines what submission should like for grading purposes
+ */
+export type Submission = {
+	questionId: number // QuestionId in the DB that this submission relates to
+	isText?: boolean // Whether this Submission is a text submission or not
+	value: number | string // Value of the submission
+	canvasUserId?: string // CanvasId of the user that submitted this submission
+	fullName?: string // Full name of the user
+	scoredPoints?: number // Points that are entered by the instructor
+}
+
+/**
  * Feedback Type
  * 
  * This type defines what feedback from the instruction should look like.
  * Each feedback has a questionId and a value.
  */
 export type Feedback = {
-	questionId: number
-	value: string
+	questionId: number // QuestionId that this feedback applies to
+	value: string // Value of the feedback
 }
 
 /**
@@ -209,8 +263,8 @@ export type Feedback = {
  * Each confidence has a questionId and a value.
  */
 export type Confidence = {
-	questionId: number
-	value: number
+	questionId: number // QuestionId that this confidence rating applies to
+	value: number // Value between 0 and 5
 }
 
 /**
@@ -221,8 +275,8 @@ export type Confidence = {
  * Each user has a canvasUserId and a fullName
  */
 export type User = {
-	canvasUserId: string
-	fullName: string
+	canvasUserId: string // UserId that ties this User to Canvas
+	fullName: string // Full name of the user
 }
 
 /**
@@ -240,6 +294,12 @@ export enum QuestionType {
 	ParsonsProblem = 5
 }
 
+/**
+ * LANGUAGE_CHOICES array
+ * 
+ * This is a list of valid language choices for the instructor to choose
+ * from when creating an exam
+ */
 export const LANGUAGE_CHOICES = [
 	"java",
 	"python",

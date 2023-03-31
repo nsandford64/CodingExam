@@ -9,7 +9,8 @@ import { ExamView } from "./examView"
  * Props for StudentView
  */
 interface StudentViewProps {
-	disabled: boolean
+	disabled: boolean,
+	removeWarning: () => void
 }
 
 /**
@@ -28,11 +29,15 @@ const StyledStudentView = styled.div`
  * the exam
  */
 export const StudentView = React.memo( ( props: StudentViewProps ) => {
-
+	/**
+	 * Selectors
+	 */
 	// responseState from the store
 	const responseState = useAppSelector( selectResponseState )
 
-	// Render the component
+	/**
+	 * Render
+	 */
 	return (
 		<StyledStudentView>
 			{responseState && (
@@ -42,9 +47,9 @@ export const StudentView = React.memo( ( props: StudentViewProps ) => {
 				review={true}
 				disabled={props.disabled}
 				feedback={props.disabled}
+				removeWarning={props.removeWarning}
 			/>
 		</StyledStudentView>
 	)
 } )
 StudentView.displayName = "StudentView"
-
