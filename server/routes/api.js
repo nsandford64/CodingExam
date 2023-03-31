@@ -2,12 +2,7 @@
 const express = require( "express" )
 const router = express.Router()
 const jwt = require( "jsonwebtoken" )
-<<<<<<< HEAD
 const { default: knex } = require("knex")
-=======
-const { default: knex } = require( "knex" )
-const { Pool } = require( "pg" )
->>>>>>> Sprint-11
 
 // The secret for signing Json Web Tokens
 const jwtSecret = process.env.CODING_EXAM_JWT_SECRET
