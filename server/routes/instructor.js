@@ -2,10 +2,9 @@
 const express = require( "express" )
 const axios = require( "axios" )
 const router = express.Router()
-const jwt = require( "jsonwebtoken" )
 const OAuth1Signature = require( "oauth1-signature" )
 const { default: knex } = require( "knex" )
-const { Pool } = require( "pg" )
+const auth = require('../middleware/auth')
 
 // Credentials for PostGres database
 const credentials = require( "../knexfile" ).connection
@@ -15,28 +14,7 @@ const credentials = require( "../knexfile" ).connection
  * ensures that is the case, or serves a 403
  * Unauthorized error
  */
-router.use( async function( req, res, next ) {
-	const token = req.headers.token
-	// Send an unauthorized request response if the request doesn't have a token
-	if ( !token ) res.sendStatus( 403 )
-	// Decodes the token and returns the role contained within it
-	// Store these in the req.session so they are available 
-	// in downstream methods
-	else jwt.verify( token, process.env.TOKEN_SECRET, ( err, object ) => {
-		if( err ) {
-			console.error( err )
-			res.sendStatus( 403 )
-			return
-		}
-		req.session = {
-			role: object.roles,
-			assignmentID: object.assignmentID,
-			userID: object.userID
-		} 
-		//console.log( "token session:", req.session )
-		next()
-	} )
-} )
+router.use( auth )
 
 // Gets the users who have taken a particular exam for the instructor view
 router.get( "/examtakers", instructorOnly, async( req, res ) => {

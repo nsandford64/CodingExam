@@ -59,17 +59,6 @@ export const App = React.memo( () => {
 	// Stores the JWT token
 	const token = String( window.__INITIAL_DATA__ )
 
-	// Runs on render - determines the user's role based on their JWT token
-	React.useEffect( () => {
-		// Prompts the user before letting them reload
-		const preventUnload = ( event: BeforeUnloadEvent ) => {
-			const message = "You are about to navigate away, and your entered data will not be saved. Are you sure you want to leave?"
-			event.preventDefault()
-			event.returnValue = message
-		}
-		window.addEventListener( "beforeunload", preventUnload )
-	});
-
 	/**
 	 * Effects
 	 */
