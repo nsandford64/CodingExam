@@ -200,6 +200,8 @@ router.post( "/", async ( req, res ) => {
 		.onConflict( [ "exam_id", "user_id" ] )
 		.merge()
 
+	autoGrade( knex, userID, assignmentID )
+
 	// Respond a success message to the poster
 	res.send( {
 		"response": "Valid submission"
@@ -262,6 +264,80 @@ router.get( "/feedback", async ( req, res ) => {
 	res.send( {feedback} )
 } )
 
+async function autoGrade( knex, userId, assignmentId ) {
+	// Get the database user id for the student
+	const DBinfo = await getDBInfo( knex, userId, assignmentId )
+
+	// Gets the questions for the exam
+	let questions = await knex
+		.select( "exam_questions.id as id", "question_type_id as type", "answer_data", "points_possible" )
+		.from( "exam_questions" )
+		.leftJoin( "exams", "exams.id", "exam_questions.exam_id" )
+		.leftJoin( "question_types", "question_types.id", "exam_questions.question_type_id" )
+		.where( "exams.canvas_assignment_id", assignmentId )
+	
+	// We need to 'rehydrate' questions that have answer data 
+	// and also limit what data is available depending on user role
+	questions.map( question => {
+
+		// multiple choice
+		if( question.type === 1 ) {
+			question.correctAnswer = question.answer_data.correctAnswer
+		}
+		// true/false 
+		if( question.type === 3 ) {
+			question.correctAnswer = question.answer_data.correctAnswer
+		}
+
+		// remove the question_data property from the question
+		delete question.answer_data
+		// return the modified question
+		return question
+	} )
+
+	// Query to get the submissions for a student
+	const submissions = await knex
+		.select( "exam_questions.id as examQuestionsId",
+			"student_responses.id as studentResponsesId", "student_responses.answer_response" )
+		.from( "exam_questions" )
+		.innerJoin( "student_responses", "student_responses.question_id", "exam_questions.id" )
+		.where( "exam_questions.exam_id", DBinfo.exam.id )
+		.where( "student_responses.user_id", DBinfo.student.id )
+		.orderBy( "examQuestionsId" )
+		.orderBy( "studentResponsesId" )
+
+	// organize the submissions into a map based on the question ID
+	const submissionsMap = new Map()
+	submissions.forEach( submission => {
+		submissionsMap.set( submission.examQuestionsId, { studentResponsesId: submission.studentResponsesId, 
+			answer_response: submission.answer_response } )
+	} )
+
+	// Create a map for the new scores after autograding based on the question Id
+	const scoresMap = new Map()
+	questions.forEach( question => {
+		let score = 0
+		const submission = submissionsMap.get( question.id )
+
+		if ( question.type === 1 || question.type === 3 ) {
+			if ( submission.answer_response == question.correctAnswer ){
+				score = question.points_possible
+			}
+		}
+		scoresMap.set( submission.studentResponsesId, score )
+	} )
+
+	// Iterate through the new scores in the map and update them accordingly
+	for ( const score of scoresMap ) {
+		console.log( score )
+		await knex
+			.update( "scored_points", score[1] )
+			.from( "student_responses" )
+			.where( "id", score[0] )
+	}
+
+}
+
 // Logs the start of a user taking an exam 
 async function beginUserExam( knex, userId, assignmentId )
 {
@@ -291,6 +367,22 @@ async function beginUserExam( knex, userId, assignmentId )
 	} catch( e ) {
 		console.error( e )
 	}
+}
+
+async function getDBInfo( knex, userId, assignmentId ) {
+	// Get the database user id for the student
+	const student = await knex.select( "id" )
+		.from( "users" )
+		.where( "canvas_user_id", userId )
+		.first()
+
+	// Get the exam id for the assignment 
+	const exam = await knex.select( "id" )
+		.from( "exams" )
+		.where( "canvas_assignment_id", assignmentId )
+		.first()
+
+	return { student: student, exam: exam }
 }
 
 module.exports = router
