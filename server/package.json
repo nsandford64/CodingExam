@@ -22,6 +22,7 @@
     "morgan": "~1.9.1",
     "node-fetch": "^3.2.10",
     "oauth1-signature": "^1.0.5",
+    "openai": "^3.2.1",
     "pg": "^8.8.0",
     "supertest": "^6.3.0"
   },

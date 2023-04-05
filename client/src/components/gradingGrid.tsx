@@ -78,6 +78,26 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 		} )
 	}, [ submissions ] )
 
+
+	// Called when an AI-based feedback is requested
+	const generateFeedback = React.useCallback( async (questionId:number, canvasUserId?:string)=>{
+
+		const response = await fetch( "/api/instructor/ai-feedback", {
+			method: "POST",
+			body: JSON.stringify( {questionId} ),
+			// Adding headers to the request
+			headers: {
+				"Content-type": "application/json; charset=UTF-8",
+				"token": token
+			}
+		} )
+
+		if(response.ok) {
+			const {feedback} = await response.json()
+			console.log({feedback})
+		}
+	}, [ submissions ])
+
 	/**
 	 * Render
 	 */
@@ -89,6 +109,9 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 					<tr>
 						<th>Student</th>
 						<th>Submission</th>
+						<th>Feedback
+							<button onClick={()=>generateFeedback(props.questionId)}>Generate with AI</button>
+						</th>
 						<th>Grade</th>
 					</tr>
 				</thead>
@@ -102,6 +125,9 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 									questionId={props.questionId}
 									canvasUserId={submission.canvasUserId}
 								/>
+							</td>
+							<td>
+								<textarea>{submission.feedback}</textarea>
 							</td>
 							<td style={{ width: 100 }}>
 								<InputGroup 

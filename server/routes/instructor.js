@@ -5,6 +5,7 @@ const router = express.Router()
 const OAuth1Signature = require( "oauth1-signature" )
 const { default: knex } = require( "knex" )
 const auth = require('../middleware/auth')
+const ai = require('../helpers/ai')
 
 // Credentials for PostGres database
 const credentials = require( "../knexfile" ).connection
@@ -44,7 +45,7 @@ router.get( "/allsubmissions", instructorOnly, async( req, res ) => {
 	const results = await knex
 		.select( "student_responses.id", "student_responses.is_text_response", "student_responses.text_response", 
 			"student_responses.answer_response", "student_responses.question_id", "users.canvas_user_id",
-			"users.full_name", "student_responses.scored_points" )
+			"users.full_name", "student_responses.scored_points", "student_responses.instructor_feedback" )
 		.from( "student_responses" )
 		.innerJoin( "exam_questions", "exam_questions.id", "student_responses.question_id" )
 		.innerJoin( "exams", "exams.id", "exam_questions.exam_id" )
@@ -59,6 +60,7 @@ router.get( "/allsubmissions", instructorOnly, async( req, res ) => {
 			value: row.is_text_response ? row.text_response : row.answer_response,
 			canvasUserId: row.canvas_user_id,
 			fullName: row.full_name,
+			feedback: row.instructor_feedback,
 			scoredPoints: row.scored_points || 0
 		}
 	} )
@@ -66,28 +68,44 @@ router.get( "/allsubmissions", instructorOnly, async( req, res ) => {
 	res.send( {submissions} )
 } )
 
+// Generates feedback and grades using an Open AI language model
+router.post( "/ai-evaluation", instructorOnly, async( req, res) => {
+	const {role, assignmentID} = req.session
+	const {questionId} = req.body
+	const knex = req.app.get( "db" )
+	
+	const answers = await knex
+		.select( ["student_responses.id as id", "text_response", "question_text", "points_possible"] )
+		.from( "student_responses" )
+		.innerJoin( "exam_questions", "exam_questions.id", "student_responses.question_id" )
+		.where( "student_responses.question_id",  questionId )
+
+	const data = Promise.all(answers.map(async answer => {
+		let feedback = await ai.generateFeedback(answer.question_text, answer.text_response)
+		console.log(feedback);
+		feedback += "<br>This response was created with the assistance of an AI agent."
+		const rawGrade = await ai.grade(answer.question_text, answer.text_response)
+		const weightedGrade = answer.points_possible * (rawGrade / 100)
+		console.log({feedback, rawGrade, weightedGrade})
+		return {
+			id: answer.id,
+			grade: weightedGrade,
+			feedback: feedback 
+		}
+	}))
+
+	const results = data.reduce((acc, val) => ({ ... acc, [val.id]: val }))
+
+	res.send({results})
+
+})
+
 // Enters instructor feedback into the database
 router.post( "/feedback", instructorOnly, async( req, res ) => {
 	const {role, assignmentID} = req.session
 	const userID = req.headers.userid	
 	const knex = req.app.get( "db" )
-	/*
-	// req.body.questionId is NOT actually the question id, 
-	// but rather the index of the question in an array
-	// of all exam questions. Thus, we must fetch all
-	// questions and identify the one we want.
-	const questionIndex = req.body.questionId
-	const questions = await knex
-		.from("exam_questions")
-		.innerJoin("exams", "exams.id", "exam_questions.exam_id")
-		.where('exams.canvas_assignment_id', assignmentID)
-	const question = questions[questionIndex]
-	console.log(
-		questionIndex,
-		question,
-		questions
-	)
-*/
+	
 	// We must determine the student this feedback is for
 	const student = await knex( "users" )
 		.where( "canvas_user_id", userID )

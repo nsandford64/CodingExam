@@ -225,6 +225,7 @@ export type Submission = {
 	value: number | string // Value of the submission
 	canvasUserId?: string // CanvasId of the user that submitted this submission
 	fullName?: string // Full name of the user
+	feedback?: string // Feedback offered by the instructor
 	scoredPoints?: number // Points that are entered by the instructor
 }
 
