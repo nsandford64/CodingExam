@@ -93,8 +93,8 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 		} )
 
 		if(response.ok) {
-			const {feedback} = await response.json()
-			console.log({feedback})
+			const {results} = await response.json()
+			
 		}
 	}, [ submissions ])
 
