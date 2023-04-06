@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Button, Colors, Icon, InputGroup, Label, Radio } from "@blueprintjs/core"
+import { Button, Checkbox, Colors, Icon, InputGroup, Label, Radio } from "@blueprintjs/core"
 import MDEditor from "@uiw/react-md-editor"
 import * as React from "react"
 import { DragDropContext, Draggable, Droppable, DropResult } from "react-beautiful-dnd"
@@ -111,9 +111,15 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 			return
 		}
 
+		let correctAnswer = result.destination.index
+		// Update the correct answer index if the destination is correct
+		if ( result.destination.index === question.correctAnswer ) {
+			correctAnswer = result.source.index
+		}
+
 		const newAnswers = reOrder( question.answers, result.source.index, result.destination.index )
 
-		props.editQuestion( { ...question, answers: newAnswers } )
+		props.editQuestion( { ...question, answers: newAnswers, correctAnswer } )
 	}, [ question ] )
 
 	/**
@@ -222,13 +228,20 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 											)}
 											{props.editable && editingAnswerIndex === -1 && (
 												<>
+													<Checkbox 
+														style={{ marginLeft: 10, marginBottom: 0 }}
+														checked={question.correctAnswer === index}
+														onChange={() => props.editQuestion( {
+															...question,
+															correctAnswer: index
+														} )}
+													/>
 													<Button 
 														icon="edit"
 														onClick={() => {
 															setEditingAnswer( question.answers[index] )
 															setEditingAnswerIndex( index )
 														}}
-														style={{ marginLeft: 10 }}
 													/>
 													<Button 
 														icon="cross" 
