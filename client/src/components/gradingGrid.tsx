@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Colors, InputGroup, Tag } from "@blueprintjs/core"
+import { Colors, InputGroup, Tag, TextArea } from "@blueprintjs/core"
 import * as React from "react"
 import styled from "styled-components"
 import { Submission } from "../App"
@@ -56,7 +56,7 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 	 * Callbacks
 	 */
 	// Called whenever a new score is inputted - updates submissions to reflect the change
-	const updateSubmission = React.useCallback( ( submission: Submission, score: number ) => {
+	const updateGradeSubmission = React.useCallback( ( submission: Submission, score: number ) => {
 		const newSubmission: Submission = {
 			...submission,
 			scoredPoints: score
@@ -65,9 +65,19 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 		dispatch( examActions.updateSubmission( newSubmission ) )
 	}, [ submissions ] )
 
+	
+	const updateFeedbackSubmission = React.useCallback( ( submission: Submission, feedback: string ) => {
+		const newSubmission: Submission = {
+			...submission,
+			feedback: feedback
+		}
+
+		dispatch( examActions.updateSubmission( newSubmission ) )
+	}, [ submissions ] )
+
 	// Updates the submissions in the database
 	const updateDatabase = React.useCallback( async () => {
-		await fetch( "/api/instructor/grade", {
+		await fetch( "/api/instructor/gradesubmission", {
 			method: "POST",
 			body: JSON.stringify( submissions ),
 			// Adding headers to the request
@@ -89,6 +99,7 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 					<tr>
 						<th>Student</th>
 						<th>Submission</th>
+						<th>Feedback</th>
 						<th>Grade</th>
 					</tr>
 				</thead>
@@ -103,10 +114,17 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 									canvasUserId={submission.canvasUserId}
 								/>
 							</td>
+							<td>
+								<TextArea
+									value={submission.feedback || ""}
+									onChange={ e => updateFeedbackSubmission( submission, e.target.value || "" )}
+									onBlur={updateDatabase}
+								/>
+							</td>
 							<td style={{ width: 100 }}>
 								<InputGroup 
 									value={submission.scoredPoints?.toString() || "0"}
-									onChange={e => updateSubmission( submission, parseInt( e.target.value ) || 0 )}
+									onChange={e => updateGradeSubmission( submission, parseInt( e.target.value ) || 0 )}
 									onBlur={updateDatabase}
 									style={{ textAlign: "right", position: "relative" }}
 									rightElement={

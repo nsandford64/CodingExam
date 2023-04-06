@@ -82,6 +82,8 @@ export const GradingView = React.memo( () => {
 			json = await data.json()
 			const submissions: Submission[] = json.submissions
 
+			console.log( submissions )
+
 			/*
 			Loop through submissions and create ids and a map 
 			for submissions and for confidence ratings

@@ -66,7 +66,7 @@ router.get( "/allsubmissions", instructorOnly, async( req, res ) => {
 	const results = await knex
 		.select( "student_responses.id", "student_responses.is_text_response", "student_responses.text_response", 
 			"student_responses.answer_response", "student_responses.question_id", "users.canvas_user_id",
-			"users.full_name", "student_responses.scored_points" )
+			"users.full_name", "student_responses.scored_points", "student_responses.instructor_feedback" )
 		.from( "student_responses" )
 		.innerJoin( "exam_questions", "exam_questions.id", "student_responses.question_id" )
 		.innerJoin( "exams", "exams.id", "exam_questions.exam_id" )
@@ -81,7 +81,8 @@ router.get( "/allsubmissions", instructorOnly, async( req, res ) => {
 			value: row.is_text_response ? row.text_response : row.answer_response,
 			canvasUserId: row.canvas_user_id,
 			fullName: row.full_name,
-			scoredPoints: row.scored_points || 0
+			scoredPoints: row.scored_points || 0,
+			feedback: row.instructor_feedback
 		}
 	} )
 
@@ -224,15 +225,18 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 /**
  * Endpoint for updating a student's score on a question after it has been graded
  */
-router.post( "/grade", instructorOnly, async( req, res ) => {
+router.post( "/gradesubmission", instructorOnly, async( req, res ) => {
 	const {role, assignmentID } = req.session
 	const knex = req.app.get( "db" )
 
 	// Iterates through the list of submissions, gets the appropriate variables from them
 	for ( const submission of req.body ) {
+
+		console.log( submission )
 		const canvasUserID = submission.canvasUserId
 		const questionID = submission.questionId
 		const score = submission.scoredPoints
+		const feedback = submission.feedback
 
 		// Gets the internal userID of the user
 		const userID = await knex
@@ -241,9 +245,9 @@ router.post( "/grade", instructorOnly, async( req, res ) => {
 			.where( "canvas_user_id", canvasUserID )
 			.first()
 
-		// Updates the user's score
+		// Updates the user's score and any feedback the instructor left
 		await knex
-			.update( {scored_points: score} )
+			.update( {scored_points: score, instructor_feedback: feedback} )
 			.from( "student_responses" )
 			.where( {
 				question_id: questionID,
