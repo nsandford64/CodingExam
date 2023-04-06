@@ -78,7 +78,8 @@ export const CreateExamView = React.memo( () => {
 			id: nextQuestionId || -1,
 			pointsPossible: 0,
 			text: "",
-			type: newQuestionType
+			type: newQuestionType,
+			correctAnswer: 0
 		}
 
 		// Gets the next question ID from the server
