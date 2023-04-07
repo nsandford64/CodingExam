@@ -268,6 +268,17 @@ router.get( "/feedback", async ( req, res ) => {
 	res.send( {feedback} )
 } )
 
+/**
+ * A helper function that will automatically grade the multiple choice and true false questions for an exam submission.
+ * It does this by getting the questions and their correct answers as well as the student's submissions, compares the values,
+ * and updating the appropriate row in the database with either full or no points.
+ * 
+ * This function is called automatically after a student makes an exam submission.
+ * 
+ * @param {*} knex Database connection object
+ * @param {*} userId Canvas userID of the student who submitted the exam
+ * @param {*} assignmentId Canvas assignmentID of the assignment that was submitted
+ */
 async function autoGrade( knex, userId, assignmentId ) {
 	// Get the database user id for the student
 	const DBinfo = await getDBInfo( knex, userId, assignmentId )
@@ -282,6 +293,7 @@ async function autoGrade( knex, userId, assignmentId ) {
 	
 	// We need to 'rehydrate' questions that have answer data 
 	// and also limit what data is available depending on user role
+	// This snippet is taken from the /questions endpoint and modified for use here
 	questions.map( question => {
 
 		// multiple choice
