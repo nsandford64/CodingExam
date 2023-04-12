@@ -12,6 +12,7 @@ exports.up = async function( knex ) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.down = function( knex ) {
-  
+exports.down = async function( knex ) {
+  await knex.raw( "ALTER TABLE exam_questions DROP points_possible" )
+	await knex.raw( "ALTER TABLE student_responses DROP scored_points" )
 }

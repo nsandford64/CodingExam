@@ -75,26 +75,42 @@ router.post( "/ai-evaluation", instructorOnly, async( req, res) => {
 	const knex = req.app.get( "db" )
 	
 	const answers = await knex
-		.select( ["student_responses.id as id", "text_response", "question_text", "points_possible"] )
+		.select( ["canvas_user_id", "student_responses.id as id", "text_response", "question_text", "points_possible"] )
 		.from( "student_responses" )
 		.innerJoin( "exam_questions", "exam_questions.id", "student_responses.question_id" )
+		.innerJoin("users", "student_responses.user_id", "users.id")
 		.where( "student_responses.question_id",  questionId )
 
-	const data = Promise.all(answers.map(async answer => {
+	var data = await Promise.all(answers.map(async answer => {
+		// Generate feedback
 		let feedback = await ai.generateFeedback(answer.question_text, answer.text_response)
-		console.log(feedback);
-		feedback += "<br>This response was created with the assistance of an AI agent."
+		feedback += "\n\nNote: This feedback was created with the assistance of an AI agent."
+		feedback = feedback.trim()
+		// Generate grade
 		const rawGrade = await ai.grade(answer.question_text, answer.text_response)
-		const weightedGrade = answer.points_possible * (rawGrade / 100)
-		console.log({feedback, rawGrade, weightedGrade})
-		return {
+		const weightedGrade = parseInt(answer.points_possible * (rawGrade / 100))
+		// Update student_response
+		await knex('student_responses')
+			.update('scored_points', weightedGrade)
+			.update('instructor_feedback', feedback)
+			.where('id', answer.id)
+			.onConflict( "id" )
+			.merge()
+		/*console.log({
 			id: answer.id,
 			grade: weightedGrade,
-			feedback: feedback 
+			question: answer.question_text,
+			answer: answer.text_response,
+			feedback: feedback
+		})*/
+		return {
+			canvasUserId: answer.canvas_user_id,
+			score: weightedGrade,
+			feedback: feedback
 		}
 	}))
 
-	const results = data.reduce((acc, val) => ({ ... acc, [val.id]: val }))
+	const results = data.reduce((acc, item) => ({...acc, [item.canvasUserId]:item}), {})
 
 	res.send({results})
 

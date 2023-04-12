@@ -1,6 +1,7 @@
 version: "3"
 services:
   app:
+    container_name: coding_exam
     build: .
     depends_on:
       postgres:
@@ -28,7 +29,7 @@ services:
       # jwt variables
       CODING_EXAM_JWT_SECRET: JwtTokenSecret
       # openai variables
-      CODING_EXAM_OPENAI_API_KEY: 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
+      CODING_EXAM_OPENAI_API_KEY: openapikey
     ports:
       - "9000:9000"
     #volumes:

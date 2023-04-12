@@ -82,7 +82,7 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 	// Called when an AI-based feedback is requested
 	const generateFeedback = React.useCallback( async (questionId:number, canvasUserId?:string)=>{
 
-		const response = await fetch( "/api/instructor/ai-feedback", {
+		const response = await fetch( "/api/instructor/ai-evaluation", {
 			method: "POST",
 			body: JSON.stringify( {questionId} ),
 			// Adding headers to the request
@@ -93,7 +93,18 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 		} )
 
 		if(response.ok) {
-			const {results} = await response.json()
+			const data = await response.json()
+			console.log(data);
+			const {results} = data;
+			submissions.forEach((submission, index) => {
+				const newSubmission: Submission = {
+					...submission,
+					feedback: submission.canvasUserId ? results[submission.canvasUserId].feedback : "",
+					scoredPoints: submission.canvasUserId ? results[submission.canvasUserId].score : 0
+				}
+				console.log({newSubmission})
+				dispatch( examActions.updateSubmission( newSubmission ) )
+			})
 			
 		}
 	}, [ submissions ])
