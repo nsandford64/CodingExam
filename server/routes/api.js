@@ -192,6 +192,8 @@ router.post( "/", async ( req, res ) => {
 	// Insert each response into the StudentResponse table
 	await knex( "student_responses" )
 		.insert( responses )
+		.onConflict( [ "question_id", "user_id" ] )
+		.merge()
 
 	// Set the exam as taken 
 	await knex( "exams_users" )
