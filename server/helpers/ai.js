@@ -20,18 +20,15 @@ function delay(seconds) {
  * of the answer
  */
 async function generateFeedback(question, answer) {
-
+  await delay(1)
   try {
-
     const response = await openai.createCompletion({
       model: "text-davinci-003",
       prompt: `Please tell me if "${answer}" is a good answer to the question "${question}".`,
       temperature: 0,
       max_tokens: 100
     })
-
     return response.data.choices[0].text;
-
   } catch (error) {
     if (error.response) {
       console.log(error.response.status);
@@ -40,9 +37,7 @@ async function generateFeedback(question, answer) {
       console.log(error.message);
     }
   }
-
   return "Unable to generate feedback";
-
 }
 
 /** 
@@ -52,6 +47,7 @@ async function generateFeedback(question, answer) {
  * @returns a grade between 0 and 100
  */
 async function grade(question, answer) {
+  await delay(1)
   try {
     const response = await openai.createCompletion({
       model: "text-davinci-003",
