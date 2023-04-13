@@ -168,6 +168,15 @@ router.post( "/", async ( req, res ) => {
 		.first()
 	if( !exam ) return res.send( {response: "Invalid Submission - unknown exam"} )
 
+	// check if the exam has already been taken
+	const taken = await knex.select( "HasTaken" )
+		.from( "exams_users" )
+		.where( "user_id", student.id )
+		.where( "exam_id", exam.id )
+		.first()
+
+	if ( taken.HasTaken ) return res.send( { response: "Invalid Submission - exam already taken"} )
+
 	// Prepare the student responses for insertion in the database
 	const responses = req.body.map( response => {
 		if ( typeof response.value === "string" ) {
