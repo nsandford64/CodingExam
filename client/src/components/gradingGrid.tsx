@@ -97,8 +97,8 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 			submissions.forEach((submission, index) => {
 				const newSubmission: Submission = {
 					...submission,
-					feedback: submission.canvasUserId ? results[submission.canvasUserId].feedback : "",
-					scoredPoints: submission.canvasUserId ? results[submission.canvasUserId].score : 0
+					feedback: results[index] && results[index].feedback || "",
+					scoredPoints: results[index] && results[index].score || 0
 				}
 				console.log({newSubmission})
 				dispatch( examActions.updateSubmission( newSubmission ) )

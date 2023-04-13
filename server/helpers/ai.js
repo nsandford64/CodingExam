@@ -21,8 +21,6 @@ function delay(seconds) {
  */
 async function generateFeedback(question, answer) {
 
-  await delay(1)
-
   try {
 
     const response = await openai.createCompletion({
@@ -54,9 +52,6 @@ async function generateFeedback(question, answer) {
  * @returns a grade between 0 and 100
  */
 async function grade(question, answer) {
-
-  await delay(1)
-  
   try {
     const response = await openai.createCompletion({
       model: "text-davinci-003",

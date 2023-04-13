@@ -81,7 +81,8 @@ router.post( "/ai-evaluation", instructorOnly, async( req, res) => {
 		.innerJoin("users", "student_responses.user_id", "users.id")
 		.where( "student_responses.question_id",  questionId )
 
-	var data = await Promise.all(answers.map(async answer => {
+	var results = [];
+	for(const answer of answers) {
 		// Generate feedback
 		let feedback = await ai.generateFeedback(answer.question_text, answer.text_response)
 		feedback += "\n\nNote: This feedback was created with the assistance of an AI agent."
@@ -96,24 +97,14 @@ router.post( "/ai-evaluation", instructorOnly, async( req, res) => {
 			.where('id', answer.id)
 			.onConflict( "id" )
 			.merge()
-		/*console.log({
-			id: answer.id,
-			grade: weightedGrade,
-			question: answer.question_text,
-			answer: answer.text_response,
-			feedback: feedback
-		})*/
-		return {
-			canvasUserId: answer.canvas_user_id,
+		// store response
+		results.push({
 			score: weightedGrade,
 			feedback: feedback
-		}
-	}))
-
-	const results = data.reduce((acc, item) => ({...acc, [item.canvasUserId]:item}), {})
+		})
+	} 
 
 	res.send({results})
-
 })
 
 // Enters instructor feedback into the database
