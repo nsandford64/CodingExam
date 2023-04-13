@@ -5,6 +5,14 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 /**
+ * Delays for the supplied number of sections
+ * @param {int} seconds - the number of seconds to delay for
+ */
+function delay(seconds) {
+  return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+}
+
+/**
  * Generates feedback to a student using OpenAI
  * @param {string} question - the question being asked
  * @param {string} answer - the student's answer 
@@ -12,6 +20,8 @@ const openai = new OpenAIApi(configuration);
  * of the answer
  */
 async function generateFeedback(question, answer) {
+
+  await delay(1)
 
   try {
 
@@ -44,6 +54,9 @@ async function generateFeedback(question, answer) {
  * @returns a grade between 0 and 100
  */
 async function grade(question, answer) {
+
+  await delay(1)
+  
   try {
     const response = await openai.createCompletion({
       model: "text-davinci-003",
