@@ -275,7 +275,7 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 				/>
 			</StyledQuestionHeader>
 			<QuestionSwitch
-				questionId={props.questionId}
+				question={question}
 				disabled
 				headerShown
 				editable={editing}

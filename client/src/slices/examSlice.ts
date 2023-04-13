@@ -114,6 +114,16 @@ export const selectQuestionIds = ( state: RootState ) => (
 export const selectQuestionsMap = ( state: RootState ) => (
 	state.exam.questionsMap
 )
+// Selects all questions
+export const selectAllQuestions = ( state: RootState ) => (
+	state.exam.questionIds.map( id => state.exam.questionsMap.get( id ) || {
+		answers: [],
+		id: 0,
+		pointsPossible: 0,
+		text: "",
+		type: QuestionType.None,
+	} )
+)
 // Select a Question from the store with the given id
 export const selectQuestionById = createSelector(
 	selectQuestionsMap,

@@ -110,7 +110,7 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 							<td style={{ width: 600 }}>
 								<QuestionSwitch 
 									disabled
-									questionId={props.questionId}
+									question={question}
 									canvasUserId={submission.canvasUserId}
 								/>
 							</td>
