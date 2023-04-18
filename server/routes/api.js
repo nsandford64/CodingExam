@@ -61,6 +61,15 @@ router.get( "/role", async function ( req, res ) {
 		// If the student hasn't taken the exam, we need to "start the clock"
 		else await beginUserExam( knex, userID, assignmentID )
 	}
+	else if( role == "Instructor" ) {
+		const exam = await knex
+			.select( "show_points_possible" )
+			.from( "exams" )
+			.where( "canvas_assignment_id", assignmentID )
+			.first()
+		
+		show = exam.show_points_possible
+	}
 	// Sends back the role of the client along with if they have taken the exam
 	res.json( {
 		role: role,

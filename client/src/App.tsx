@@ -52,6 +52,8 @@ export const App = React.memo( () => {
 	const [ showInstructorView, setShowInstructorView ] = React.useState( false )
 	// State that holds whether the exam has already been taken
 	const [ taken, setTaken ] = React.useState( false )
+	// State that holds if points possible should be shown
+	const [ showPointsPossible, setShowPointsPossible ] = React.useState( false )
 
 	// Stores the JWT token
 	const token = String( window.__INITIAL_DATA__ )
@@ -82,8 +84,9 @@ export const App = React.memo( () => {
 			} )
 			
 			const json = await data.json()
-			
+
 			setTaken( json.taken )
+			setShowPointsPossible( json.show_points_possible )
 
 			if( json.role === "Instructor" ) {
 				setShowInstructorView( true )
@@ -125,10 +128,14 @@ export const App = React.memo( () => {
 			{!loading && (
 				<StyledViewContainer>
 					{showInstructorView && (
-						<InstructorView removeWarning={removeWarning}/>
+						<InstructorView 
+							removeWarning={removeWarning} 
+							showPointsPossible={showPointsPossible} 
+							toggleShowPointsPossible={() => setShowPointsPossible( prevState => !prevState )} 
+						/>
 					)}
 					{!showInstructorView && (
-						<StudentView disabled={taken} removeWarning={removeWarning}/>
+						<StudentView disabled={taken} removeWarning={removeWarning} showPointsPossible={showPointsPossible} />
 					)}
 				</StyledViewContainer>
 			)}

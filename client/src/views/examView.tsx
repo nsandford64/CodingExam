@@ -19,6 +19,7 @@ interface ExamViewProps {
 	review?: boolean
 	canvasUserId?: string
 	removeWarning: () => void
+	showPointsPossible: boolean
 }
 
 /**
@@ -170,9 +171,11 @@ export const ExamView = ( props: ExamViewProps ) => {
 									<div>
 										Question {index + 1}
 									</div>
-									<div>
-										{question.pointsPossible} pts
-									</div>
+									{props.showPointsPossible && (
+										<div>
+											{question.pointsPossible} pts
+										</div>
+									)}
 								</StyledQuestionHeader>
 								<QuestionSwitch
 									disabled={props.disabled}

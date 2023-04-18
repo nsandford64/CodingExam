@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Button, InputGroup, Intent, MenuItem, Spinner } from "@blueprintjs/core"
+import { Button, InputGroup, Intent, MenuItem, Spinner, Switch } from "@blueprintjs/core"
 import { Select2 } from "@blueprintjs/select"
 import * as React from "react"
 import { batch } from "react-redux"
@@ -8,6 +8,14 @@ import { Question, QuestionType } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { createExamThunk, selectQuestionById, examActions, selectNextQuestionId, selectQuestionIds, selectToken } from "../slices/examSlice"
 import { QuestionSwitch, StyledQuestionContainer, StyledQuestionHeader, StyledQuestionsContainer } from "./examView"
+
+/**
+ * Props for CreateExamView
+ */
+interface CreateExamViewProps {
+	showPointsPossible: boolean
+	toggleShowPointsPossible: () => void
+}
 
 /**
  * Style for the CreateExamView
@@ -25,7 +33,7 @@ const StyledCreateExamView = styled.div`
  * This component allows the Instructor to create
  * an exam using a GUI instead of the database
  */
-export const CreateExamView = React.memo( () => {
+export const CreateExamView = React.memo( ( props: CreateExamViewProps ) => {
 	/**
 	 * Selectors
 	 */
@@ -158,6 +166,12 @@ export const CreateExamView = React.memo( () => {
 	)
 	return (
 		<StyledCreateExamView>
+			<Switch 
+				label="Show points possible"
+				checked={props.showPointsPossible}
+				onChange={props.toggleShowPointsPossible}
+				style={{ alignSelf: "flex-end" }}
+			/>
 			<StyledQuestionsContainer>
 				{questionIds.map( ( id, index ) => (
 					<QuestionDisplay 
@@ -176,7 +190,7 @@ export const CreateExamView = React.memo( () => {
 				text="Done"
 				disabled={questionIds.length === 0}
 				fill
-				onClick={() => dispatch( createExamThunk )}
+				onClick={() => dispatch( createExamThunk( props.showPointsPossible ) )}
 				style={{ marginTop: "25px" }}
 			/>	
 		</StyledCreateExamView>

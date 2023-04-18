@@ -322,7 +322,7 @@ export const initializeQuestions = ( canvasUserId?: string ): AppThunk<Promise<v
 }
 
 // Creates an exam in the database using the server api
-export const createExamThunk: AppThunk<void> = async ( dispatch, getState ) => {
+export const createExamThunk = ( showPointsPossible: boolean ): AppThunk<void> => async ( dispatch, getState ) => {
 	const state = getState()
 
 	const questions: Question[] = []
@@ -338,7 +338,10 @@ export const createExamThunk: AppThunk<void> = async ( dispatch, getState ) => {
 		method: "POST",
 
 		// Adding body or contents to send
-		body: JSON.stringify( questions ),
+		body: JSON.stringify( {
+			questions,
+			showPointsPossible
+		} ),
      
 		// Adding headers to the request
 		headers: {
