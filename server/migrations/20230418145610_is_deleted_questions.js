@@ -4,8 +4,8 @@
  */
 exports.up = function( knex ) {
 	return knex.schema
-		.alterTable( "exams", table => {
-			table.boolean( "show_points_possible" ).default( true )
+		.alterTable( "exam_questions", table => {
+			table.boolean( "is_deleted" ).defaultTo( false )
 		} )
 }
 
@@ -14,8 +14,8 @@ exports.up = function( knex ) {
  * @returns { Promise<void> }
  */
 exports.down = function( knex ) {
-	return knex.schema   
-		.alterTable( "exams", table => {
-			table.dropColumn( "show_points_possible" )
+	return knex.schema
+		.alterTable( "exam_questions", table => {
+			table.dropColumn( "is_deleted" )
 		} )
 }

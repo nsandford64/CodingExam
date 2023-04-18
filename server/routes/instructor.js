@@ -222,6 +222,19 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 	} )
 } )
 
+router.post( "/deletequestion", instructorOnly, async( req, res ) => {
+	const {role, assignmentID} = req.session
+	const knex = req.app.get( "db" )
+	const questionID = parseInt( req.headers.questionid )
+
+	await knex
+		.update( "is_deleted", true )
+		.from( "exam_questions" )
+		.where( "exam_questions.id", questionID )
+
+	res.sendStatus( 200 )
+} )
+
 /**
  * Endpoint for updating a student's score on a question after it has been graded
  */
