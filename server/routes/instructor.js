@@ -158,14 +158,15 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 	*/
 	let [ exam ] = await knex( "exams" )
 		.insert( {
-			canvas_assignment_id: assignmentID
+			canvas_assignment_id: assignmentID,
+			show_points_possible: req.body.showPointsPossible
 		} )
 		.onConflict( "canvas_assignment_id" )
 		.merge()
 		.returning( "*" )
 
 	// Create or update the exam questions 
-	for ( const question of req.body ) {
+	for ( const question of req.body.questions ) {
 		/* Determine answer data based on question type. 
 		 * Answer data is stored in a JSON column in the db
 		 */

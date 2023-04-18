@@ -1,7 +1,6 @@
 // Copyright 2022 under MIT License
 import { Button, Intent } from "@blueprintjs/core"
 import * as React from "react"
-import { propTypes } from "react-markdown"
 import styled from "styled-components"
 import { User } from "../App"
 import { useAppSelector } from "../app/hooks"
@@ -15,6 +14,8 @@ import { GradingView } from "./gradingView"
  */
 interface InstructorViewProps {
 	removeWarning: () => void
+	showPointsPossible: boolean
+	toggleShowPointsPossible: () => void
 }
 
 /**
@@ -224,7 +225,7 @@ export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 				)}
 			</StyledHeaderContainer>
 			{view === "createExamView" && (
-				<CreateExamView />
+				<CreateExamView showPointsPossible={props.showPointsPossible} toggleShowPointsPossible={props.toggleShowPointsPossible}/>
 			)}
 			{view === "studentListView" && (
 				<StyledStudentListContainer>
@@ -248,6 +249,7 @@ export const InstructorView = React.memo( ( props: InstructorViewProps ) => {
 						review={false}
 						canvasUserId={canvasUserId}
 						removeWarning={props.removeWarning}
+						showPointsPossible={true}
 					/>
 					<Button 
 						text={"Submit Feedback"}
