@@ -243,6 +243,8 @@ export const initializeQuestions = ( canvasUserId?: string ): AppThunk<Promise<v
 	const newQuestionIds: number[] = []
 	const newQuestionsMap = new Map<number, Question>()
 	questions.forEach( question => {
+		console.log( question )
+
 		newQuestionIds.push( question.id )
 		newQuestionsMap.set( question.id, question )
 	} )
