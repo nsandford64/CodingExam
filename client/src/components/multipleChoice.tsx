@@ -122,6 +122,33 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 		props.editQuestion( { ...question, answers: newAnswers, correctAnswer } )
 	}, [ question ] )
 
+	// Shuffles an array
+	const shuffle = React.useCallback( ( arr: string[] ) => {
+		let curIndex = arr.length
+		let randomIndex
+
+		const newArr = arr.map( ( el, index ) => ( {
+			value: el,
+			originalIndex: index
+		} ) )
+
+		while( curIndex !== 0 ) {
+			randomIndex = Math.floor( Math.random() * curIndex )
+			curIndex--
+
+			[ newArr[curIndex], newArr[randomIndex] ] = [ newArr[randomIndex], newArr[curIndex] ]
+		}
+
+		return newArr
+	}, [] )
+
+	/**
+	 * Memos
+	 */
+	const randomizedAnswers = React.useMemo( () => (
+		shuffle( question.answers )
+	), [ question.answers ] )
+
 	/**
 	 * Effects
 	 */
@@ -161,6 +188,19 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 					)}
 				</>				
 			)}
+			{/*
+			{randomizedAnswers.map( ( item, index ) => (
+				<Radio
+					key={index}
+					disabled={props.disabled}
+					value={item.originalIndex}
+					label={item.value}
+					checked={item.originalIndex === submission?.value}
+					onChange={() => handleChange( item.originalIndex )}
+					style={{ marginBottom: props.editable ? 0 : undefined }}
+				/>
+			) )}
+			*/}
 			<DragDropContext onDragEnd={onDragEnd}>
 				<Droppable droppableId="droppable">
 					{( provided ) => (
