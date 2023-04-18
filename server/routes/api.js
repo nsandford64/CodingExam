@@ -43,12 +43,13 @@ router.get( "/role", async function ( req, res ) {
 	const {role, assignmentID, userID} = req.session
 	const knex = req.app.get( "db" )
 	let taken = false
+	let show = false
 	
 	if( role == "Learner" )
 	{
 		// Query the database to see if the client has taken the exam yet
 		const response = await knex
-			.select( "HasTaken" )
+			.select( "HasTaken", "show_points_possible" )
 			.from( "exams_users" )
 			.innerJoin( "exams", "exams.id", "exams_users.exam_id" )
 			.innerJoin( "users", "users.id", "exams_users.user_id" )
@@ -56,13 +57,15 @@ router.get( "/role", async function ( req, res ) {
 			.where( "canvas_assignment_id", assignmentID )
 			.first()
 		if( response && response.HasTaken ) taken = true
+		if( response && response.show_points_possible ) show = true
 		// If the student hasn't taken the exam, we need to "start the clock"
 		else await beginUserExam( knex, userID, assignmentID )
 	}
 	// Sends back the role of the client along with if they have taken the exam
 	res.json( {
 		role: role,
-		taken: taken
+		taken: taken,
+		show_points_possible: show
 	} )
 } )
 

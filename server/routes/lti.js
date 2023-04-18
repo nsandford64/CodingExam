@@ -44,15 +44,18 @@ if( process.env.NODE_ENV == "development" ) {
 	router.get( "/", ( req, res ) => {	
 		res.send( `<h1>Debug access</h1>
 			<ul>
-				<li><a href="/learner">Learner Entry Point</a></li>
-				<li><a href="/instructor">Instructor Entry Point</a></li>
-				<li><a href="/retake">Retake Exam</a></li>
+				<li><a href="/learner">Exam 1 Learner Entry Point</a></li>
+				<li><a href="/instructor">Exam 1 Instructor Entry Point</a></li>
+				<li><a href="/retake">Retake Exam 1</a></li>
+				<li><a href="/learner2">Exam 2 Learner Entry Point</a></li>
+				<li><a href="/instructor2">Exam 2 Instructor Entry Point</a></li>
+				<li><a href="/retake2">Retake Exam 2</a></li>
 			</ul>
 		` )
 	} )
 
 	/*
-	 * Loads the app as an instructor
+	 * Loads the app as an instructor in exam 1
 	 */
 	router.get( "/instructor", async ( req, res ) => {
 		const knex = req.app.get( "db" )
@@ -70,7 +73,25 @@ if( process.env.NODE_ENV == "development" ) {
 	} )
 
 	/*
-	 * Loads the app as a learner
+	 * Loads the app as an instructor in exam 2
+	 */
+	router.get( "/instructor2", async ( req, res ) => {
+		const knex = req.app.get( "db" )
+		const ltiData = { 
+			assignmentID: "example-exam-2",
+			fullName: "Example Instructor",
+			userID: "example-instructor",
+			roles: "Instructor"
+		}
+		// Creates the user and exam if either don't exist already
+		await findOrCreateUser( knex, ltiData.userID, ltiData.fullName )
+		await createExam( knex, ltiData.assignmentID )
+		const token = generateAccessToken( ltiData )
+		serveIndex( res, token )
+	} )
+
+	/*
+	 * Loads the app as a learner in exam 1
 	 */
 	router.get( "/learner", async ( req, res ) => {
 		const knex = req.app.get( "db" )
@@ -87,12 +108,46 @@ if( process.env.NODE_ENV == "development" ) {
 	} )
 
 	/*
-	 * Resets the HasTaken property and lets the student view take the exam again
+	 * Loads the app as a learner in exam 2
+	 */
+	router.get( "/learner2", async ( req, res ) => {
+		const knex = req.app.get( "db" )
+		const ltiData = { 
+			assignmentID: "example-exam-2",
+			fullName: "Example Learner",
+			userID: "example-learner",
+			roles: "Learner"
+		}
+		// Creates the user if it does not exist already
+		await findOrCreateUser( knex, ltiData.userID, ltiData.fullName )
+		const token = generateAccessToken( ltiData )
+		serveIndex( res, token )
+	} )
+
+	/*
+	 * Resets the HasTaken property and lets the student view take exam 1 again
 	 */
 	router.get( "/retake", async ( req, res ) => {
 		const knex = req.app.get( "db" )
 		const ltiData = { 
 			assignmentID: "example-exam",
+			fullName: "Example Learner",
+			userID: "example-learner",
+			roles: "Learner"
+		}
+		resetHasTaken( knex, ltiData )
+		await findOrCreateUser( knex, ltiData.userID, ltiData.fullName )
+		const token = generateAccessToken( ltiData )
+		serveIndex( res, token )
+	} )
+
+	/*
+	 * Resets the HasTaken property and lets the student view take exam 2 again
+	 */
+	router.get( "/retake2", async ( req, res ) => {
+		const knex = req.app.get( "db" )
+		const ltiData = { 
+			assignmentID: "example-exam-2",
 			fullName: "Example Learner",
 			userID: "example-learner",
 			roles: "Learner"
