@@ -228,6 +228,8 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 	 */
 	// Dispatch an action to the store
 	const dispatch = useAppDispatch()
+	// token from the store
+	const token = useAppSelector( selectToken )
 	// Get particular question from the store
 	const question = useAppSelector( state => selectQuestionById(
 		state,
@@ -238,6 +240,21 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 	 * State
 	 */
 	const [ editing, setEditing ] = React.useState( props.editing )
+
+	/**
+	 * Handles when a question is deleted
+	 */
+	const deleteQuestion = React.useCallback( async ( questionID: number ) => {
+		dispatch( examActions.deleteQuestion( questionID ) )
+		await fetch( "/api/instructor/deletequestion", {
+			method: "POST",
+			headers: {
+				"token": token,
+				"questionid": questionID + ""
+			} 
+		} )
+	}, [] )
+
 
 	/**
 	 * Effects
@@ -284,7 +301,7 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 				<Button 
 					intent={Intent.DANGER}
 					icon="delete"
-					onClick={() => dispatch( examActions.deleteQuestion( props.questionId ) )}
+					onClick={() => deleteQuestion( props.questionId ) }
 					style={{ marginLeft: "auto" }}
 				/>
 			</StyledQuestionHeader>

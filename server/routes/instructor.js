@@ -246,7 +246,6 @@ router.post( "/gradesubmission", instructorOnly, async( req, res ) => {
 	// Iterates through the list of submissions, gets the appropriate variables from them
 	for ( const submission of req.body ) {
 
-		console.log( submission )
 		const canvasUserID = submission.canvasUserId
 		const questionID = submission.questionId
 		const score = submission.scoredPoints

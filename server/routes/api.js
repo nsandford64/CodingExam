@@ -89,6 +89,7 @@ router.get( "/questions", async function( req, res ) {
 		.leftJoin( "exams", "exams.id", "exam_questions.exam_id" )
 		.leftJoin( "question_types", "question_types.id", "exam_questions.question_type_id" )
 		.where( "exams.canvas_assignment_id", assignmentID )
+		.where( "exam_questions.is_deleted", false )
 
 	// We need to 'rehydrate' questions that have answer data 
 	// and also limit what data is available depending on user role
@@ -368,7 +369,6 @@ async function autoGrade( knex, userId, assignmentId ) {
 
 	// Iterate through the new scores in the map and update them accordingly
 	for ( const score of scoresMap ) {
-		console.log( score )
 		await knex
 			.update( "scored_points", score[1] )
 			.from( "student_responses" )

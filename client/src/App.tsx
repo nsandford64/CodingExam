@@ -116,7 +116,6 @@ export const App = React.memo( () => {
 	}
 
 	const removeWarning = () => {
-		console.log( "Am I running too early" )
 		window.removeEventListener( "beforeunload", preventUnload )
 	}
 
