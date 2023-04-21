@@ -1,8 +1,11 @@
+# Important
+Double, triple, quadruple check the raw SQL query within the '20230413145122_add_unique_constraint.js' migration file before it is run. It has been checked by Dr. Bean already, but if it does not perform correctly it could drop the entire database of responses.
+
 # Changelog
-- Markdown text editor when creating questions
-- Ability to set correct answers for multiple choice and true false questions
-- Automatic grading of multiple choice and true false questions (can be overrided by instructor)
-- Ability to view and enter feedback on grading screen
+- Ability to set if possible points display or not
+- Ability to delete questions from the exam
+- Changed student_responses table to not store historical responses
+- Run multiple exams and students in development mode
 
 # CodingExam
 In this release, the app is still early in development, so it has been marked as pre-release. Instructions for setting up the development environment can be found in the "Developer Documentation" file in the "documentation-testing" folder. This includes how to set up the docker installation, start the application in development, and have the application display in Canvas through an HTTPS proxy. Additionally, a "ResetDatabaseScript.sql" file has been included in the "database" folder if the database needs to be reset in development mode.
