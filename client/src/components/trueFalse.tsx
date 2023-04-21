@@ -45,11 +45,10 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 	 * Callbacks
 	 */
 	// Called when the user selects between true or false - updates the App's responsesMap
-	const handleChange = React.useCallback( ( e: React.FormEvent<HTMLInputElement> ) => {
-		const value = ( e.target as HTMLInputElement ).value
+	const handleChange = React.useCallback( ( value: number ) => {
 		const newSubmission: Submission = {
 			questionId: props.questionId,
-			value: parseInt( value )
+			value
 		}
 
 		dispatch( examActions.updateSubmission( newSubmission ) )
@@ -82,12 +81,15 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 					)}
 				</>				
 			)}
-			<RadioGroup
-				onChange={handleChange}
-				selectedValue={submission?.value}
-			>
-				<RadioRow>
-					<Radio label="True" value={1} disabled={props.disabled} />
+			<RadioRow>
+				<Radio 
+					label="True" 
+					value={1} 
+					disabled={props.disabled} 
+					checked={submission?.value === 1}
+					onChange={() => handleChange( 1 )}
+				/>
+				{props.editable && (
 					<Checkbox 
 						style={{ marginLeft: 10 }}
 						checked={question.correctAnswer === 1}
@@ -96,9 +98,17 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 							correctAnswer: 1
 						} )}
 					/>
-				</RadioRow>
-				<RadioRow>
-					<Radio label="False" value={0} disabled={props.disabled} />
+				)}
+			</RadioRow>
+			<RadioRow>
+				<Radio 
+					label="False" 
+					value={0} 
+					disabled={props.disabled} 
+					checked={submission?.value === 0}
+					onChange={() => handleChange( 0 )}
+				/>
+				{props.editable && (
 					<Checkbox 
 						style={{ marginLeft: 10 }}
 						checked={question.correctAnswer === 0}
@@ -107,8 +117,8 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 							correctAnswer: 0
 						} )}
 					/>
-				</RadioRow>
-			</RadioGroup>
+				)}
+			</RadioRow>
 		</StyledTrueFalse>
 	)
 } )

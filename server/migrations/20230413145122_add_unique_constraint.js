@@ -9,7 +9,7 @@ exports.up = async function( knex ) {
 	 * This will keep the latest submission for each question for each student and delete all of the other submissions 
 	 * from that student for that question
 	 * */ 
-	await knex.raw( "delete from student_responses where (question_id, id) not in (select DISTINCT ON(question_id) question_id, id from student_responses order by question_id, id DESC);" )
+	await knex.raw( "delete from student_responses where id not in (select DISTINCT ON(user_id, question_id) id from student_responses order by user_id, question_id, id DESC);" )
 
 	return knex.schema
 		.alterTable( "student_responses", table => {

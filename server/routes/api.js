@@ -90,6 +90,7 @@ router.get( "/questions", async function( req, res ) {
 		.leftJoin( "question_types", "question_types.id", "exam_questions.question_type_id" )
 		.where( "exams.canvas_assignment_id", assignmentID )
 		.where( "exam_questions.is_deleted", false )
+		.orderBy( "exam_questions.id" )
 
 	// We need to 'rehydrate' questions that have answer data 
 	// and also limit what data is available depending on user role
@@ -408,6 +409,16 @@ async function beginUserExam( knex, userId, assignmentId )
 	}
 }
 
+/**
+ * 
+ * Takes the userID and assignmentID from the Canvas launch request/token and 
+ * retrieves the internal database id's for those values
+ * 
+ * @param {Database connection} knex 
+ * @param {Canvas user id of the request} userId 
+ * @param {Canvas assignment id from the request} assignmentId 
+ * @returns internal database ID's of the user and the assignment
+ */
 async function getDBInfo( knex, userId, assignmentId ) {
 	// Get the database user id for the student
 	const student = await knex.select( "id" )

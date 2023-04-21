@@ -223,6 +223,9 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 	} )
 } )
 
+/**
+ * Deletes a question from the exam
+ */
 router.post( "/deletequestion", instructorOnly, async( req, res ) => {
 	const {role, assignmentID} = req.session
 	const knex = req.app.get( "db" )
