@@ -165,7 +165,6 @@ export const ExamView = ( props: ExamViewProps ) => {
 			)}
 			{!loading && (				
 				<>
-					<div>Student {props.canvasUserId}</div>
 					<StyledQuestionsContainer>
 						{questionIds.map( ( id, index ) => (
 							<StyledQuestionContainer key={id}>
