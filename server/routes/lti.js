@@ -53,7 +53,7 @@ if( process.env.NODE_ENV == "development" ) {
 	router.get( "/instructor", async ( req, res ) => {
 		const knex = req.app.get( "db" )
 		const ltiData = { 
-			assignmentID: "example-exam",
+			assignmentID: "c38940c2-5521-422f-b520-7462fd820a7d",
 			fullName: "Example Instructor",
 			userID: "example-instructor",
 			roles: "Instructor"

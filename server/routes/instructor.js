@@ -51,6 +51,7 @@ router.get( "/allsubmissions", instructorOnly, async( req, res ) => {
 		.innerJoin( "exams", "exams.id", "exam_questions.exam_id" )
 		.innerJoin( "users", "users.id", "student_responses.user_id" )
 		.where( "exams.canvas_assignment_id", assignmentID )
+		.orderBy( "exam_questions.id")
 
 	// Sends the rows back in the form of a submissions typescript object
 	const submissions = results.map( row => {

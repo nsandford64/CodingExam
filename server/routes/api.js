@@ -57,6 +57,7 @@ router.get( "/questions", async function( req, res ) {
 		.leftJoin( "exams", "exams.id", "exam_questions.exam_id" )
 		.leftJoin( "question_types", "question_types.id", "exam_questions.question_type_id" )
 		.where( "exams.canvas_assignment_id", assignmentID )
+		.orderBy( "exam_questions.id ")
 
 	// We need to 'rehydrate' questions that have answer data 
 	// and also limit what data is available depending on user role
@@ -111,6 +112,7 @@ router.get( "/submissions", async ( req, res ) => {
 		.innerJoin( "exams", "exams.id", "exam_questions.exam_id" )
 		.where( "exams.canvas_assignment_id", assignmentID )
 		.where( "users.canvas_user_id", userID )
+		.orderBy( "users.family_name", "users.given_name")
 
 	// Map all result rows into an array of Submissions objects
 	const submissions = results.map( row => {

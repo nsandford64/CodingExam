@@ -6,8 +6,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      postgres_test:
-        condition: service_healthy
     environment:
       # trust proxy settings - use true or ip address when proxied
       #TRUST_PROXY: "true"
@@ -16,8 +14,8 @@ services:
       # postgres database variables
       CODING_EXAM_DB_HOST: postgres
       CODING_EXAM_DB_PORT: 5432
-      CODING_EXAM_DB_NAME: coding_exam
-      CODING_EXAM_DB_USER: coding_exam_user
+      CODING_EXAM_DB_NAME: codingexam
+      CODING_EXAM_DB_USER: codingexam
       CODING_EXAM_DB_PASSWORD: coding_exam_pass
       # test postgres database variables
       CODING_EXAM_TESTDB_NAME: coding_exam_test
@@ -29,7 +27,7 @@ services:
       # jwt variables
       CODING_EXAM_JWT_SECRET: JwtTokenSecret
       # openai variables
-      CODING_EXAM_OPENAI_API_KEY: openapikey
+      CODING_EXAM_OPENAI_API_KEY: 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
     ports:
       - "9000:9000"
     #volumes:
@@ -42,26 +40,11 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: coding_exam_user 
+      POSTGRES_USER: codingexam 
       POSTGRES_PASSWORD: coding_exam_pass
-      POSTGRES_DB: coding_exam
+      POSTGRES_DB: codingexam
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U coding_exam_user -d coding_exam"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  postgres_test:
-    container_name: postgres_test
-    image: "postgres:12"
-    ports:
-      - "6543:6543"
-    environment:
-      POSTGRES_USER: coding_exam_test_user
-      POSTGRES_PASSWORD: coding_exam_test_pass
-      POSTGRES_DB: coding_exam_test
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U coding_exam_test_user -d coding_exam_test"]
       interval: 10s
       timeout: 5s
       retries: 5

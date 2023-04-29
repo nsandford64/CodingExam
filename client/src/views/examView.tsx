@@ -10,7 +10,7 @@ import { MultipleChoice } from "../components/multipleChoice"
 import { ParsonsProblem } from "../components/parsonsProblem"
 import { ShortAnswer } from "../components/shortAnswer"
 import { TrueFalse } from "../components/trueFalse"
-import { examActions, selectQuestionById, selectQuestionIds, selectToken, selectResponseState, selectConfidenceMap, selectSubmissionsMap, initializeQuestions } from "../slices/examSlice"
+import { examActions, selectQuestionById, selectQuestionIds, selectToken, selectResponseState, selectConfidenceMap, selectSubmissionsMap, initializeQuestions, selectQuestionsMap } from "../slices/examSlice"
 
 // Props for the ExamView component
 interface ExamViewProps {
@@ -82,6 +82,8 @@ export const ExamView = ( props: ExamViewProps ) => {
 	const responseState = useAppSelector( selectResponseState )
 	// Array of questionIds from the Redux store
 	const questionIds = useAppSelector( selectQuestionIds )
+	// Map of questions from the store
+	const questionsMap = useAppSelector( selectQuestionsMap )
 	// Map of submissions from the store
 	const submissionsMap = useAppSelector( selectSubmissionsMap )
 	// Map of confidence ratings from the store
@@ -163,11 +165,15 @@ export const ExamView = ( props: ExamViewProps ) => {
 			)}
 			{!loading && (				
 				<>
+					<div>Student {props.canvasUserId}</div>
 					<StyledQuestionsContainer>
 						{questionIds.map( ( id, index ) => (
 							<StyledQuestionContainer key={id}>
 								<StyledQuestionHeader>
-									Question {index + 1}
+									<div>Question {index + 1}</div>
+									<div>
+										{(props.disabled && props.canvasUserId) ? `${submissionsMap.get(props.canvasUserId)?.get(id)?.scoredPoints}/${questionsMap.get(id)?.pointsPossible} Points` : `${questionsMap.get(id)?.pointsPossible} Points`}
+									</div> 
 								</StyledQuestionHeader>
 								<QuestionSwitch
 									disabled={props.disabled}
