@@ -10,7 +10,7 @@ import { MultipleChoice } from "../components/multipleChoice"
 import { ParsonsProblem } from "../components/parsonsProblem"
 import { ShortAnswer } from "../components/shortAnswer"
 import { TrueFalse } from "../components/trueFalse"
-import { examActions, selectQuestionById, selectQuestionIds, selectToken, selectResponseState, selectConfidenceMap, selectSubmissionsMap, initializeQuestions, selectQuestionsMap } from "../slices/examSlice"
+import { examActions, selectQuestionById, selectQuestionIds, selectToken, selectResponseState, selectConfidenceMap, selectSubmissionsMap, initializeQuestions, selectQuestionsMap, selectSubmissionByUserIdAndQuestionId } from "../slices/examSlice"
 
 // Props for the ExamView component
 interface ExamViewProps {
@@ -151,7 +151,7 @@ export const ExamView = ( props: ExamViewProps ) => {
 			console.error( e )
 		}
 	}, [ submissionsMap ] )
-
+	
 	/**
 	 * Render
 	 */
@@ -170,9 +170,7 @@ export const ExamView = ( props: ExamViewProps ) => {
 							<StyledQuestionContainer key={id}>
 								<StyledQuestionHeader>
 									<div>Question {index + 1}</div>
-									<div>
-										{(props.disabled && props.canvasUserId) ? `${submissionsMap.get(props.canvasUserId)?.get(id)?.scoredPoints}/${questionsMap.get(id)?.pointsPossible} Points` : `${questionsMap.get(id)?.pointsPossible} Points`}
-									</div> 
+									<QuestionHeaderInfo review={props.disabled} questionId={id} canvasUserId={props.canvasUserId}/> 
 								</StyledQuestionHeader>
 								<QuestionSwitch
 									disabled={props.disabled}
@@ -214,6 +212,29 @@ export const ExamView = ( props: ExamViewProps ) => {
 } 
 ExamView.displayName = "ExamView"
 
+interface QuestionHeaderInfoProps {
+	review?: boolean,
+	questionId: number,
+	canvasUserId?: string
+}
+
+/**
+ * QuestionHeaderInfo Component
+ * 
+ * This component displays the points possible, and if graded, points awarded
+ */
+const QuestionHeaderInfo = React.memo( ( props: QuestionHeaderInfoProps ) => {
+	// Selectors
+	const question = useAppSelector( state => selectQuestionById( 
+		state, 
+		props.questionId 
+	) )
+	const submission = useAppSelector( state => selectSubmissionByUserIdAndQuestionId( state, props.questionId, props.canvasUserId ) )
+	if(props.review) return <div>{`${submission?.scoredPoints}/${question.pointsPossible}`}</div>
+	else return <div>{`${question.pointsPossible} Points`}</div>
+})
+QuestionHeaderInfo.displayName = "QuestionHeaderInfo"
+
 /**
  * Props for the QuestionSwitch Component
  */
@@ -226,6 +247,7 @@ interface QuestionSwitchProps {
 	headerShown?: boolean
 	editable?: boolean
 }
+
 
 /**
  * QuestionSwitch Component

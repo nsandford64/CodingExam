@@ -59,7 +59,7 @@ if( process.env.NODE_ENV == "development" ) {
 			roles: "Instructor"
 		}
 		// Creates the user and exam if either don't exist already
-		await findOrCreateUser( knex, ltiData.userID, ltiData.fullName )
+		await findOrCreateUser( knex, ltiData )
 		await createExam( knex, ltiData.assignmentID )
 		const token = generateAccessToken( ltiData )
 		serveIndex( res, token )
@@ -71,13 +71,13 @@ if( process.env.NODE_ENV == "development" ) {
 	router.get( "/learner", async ( req, res ) => {
 		const knex = req.app.get( "db" )
 		const ltiData = { 
-			assignmentID: "example-exam",
+			assignmentID: "c38940c2-5521-422f-b520-7462fd820a7d",
 			fullName: "Example Learner",
 			userID: "example-learner",
 			roles: "Learner"
 		}
 		// Creates the user if it does not exist already
-		await findOrCreateUser( knex, ltiData.userID, ltiData.fullName )
+		await findOrCreateUser( knex, ltiData )
 		const token = generateAccessToken( ltiData )
 		serveIndex( res, token )
 	} )
@@ -94,7 +94,7 @@ if( process.env.NODE_ENV == "development" ) {
 			roles: "Learner"
 		}
 		resetHasTaken( knex, ltiData )
-		await findOrCreateUser( knex, ltiData.userID, ltiData.fullName )
+		await findOrCreateUser( knex, ltiData )
 		const token = generateAccessToken( ltiData )
 		serveIndex( res, token )
 	} )
