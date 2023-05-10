@@ -10,7 +10,7 @@ import { MultipleChoice } from "../components/multipleChoice"
 import { ParsonsProblem } from "../components/parsonsProblem"
 import { ShortAnswer } from "../components/shortAnswer"
 import { TrueFalse } from "../components/trueFalse"
-import { examActions, selectQuestionById, selectQuestionIds, selectToken, selectResponseState, selectConfidenceMap, selectSubmissionsMap, initializeQuestions, selectQuestionsMap } from "../slices/examSlice"
+import { examActions, selectToken, selectResponseState, selectConfidenceMap, selectSubmissionsMap, initializeQuestions, selectAllQuestions } from "../slices/examSlice"
 
 // Props for the ExamView component
 interface ExamViewProps {
@@ -19,6 +19,7 @@ interface ExamViewProps {
 	review?: boolean
 	canvasUserId?: string
 	removeWarning: () => void
+	showPointsPossible: boolean
 }
 
 /**
@@ -80,10 +81,8 @@ export const ExamView = ( props: ExamViewProps ) => {
 	const dispatch = useAppDispatch()
 	// Exam response state
 	const responseState = useAppSelector( selectResponseState )
-	// Array of questionIds from the Redux store
-	const questionIds = useAppSelector( selectQuestionIds )
-	// Map of questions from the store
-	const questionsMap = useAppSelector( selectQuestionsMap )
+	// Array of questions from the Redux store
+	const questions = useAppSelector( selectAllQuestions )
 	// Map of submissions from the store
 	const submissionsMap = useAppSelector( selectSubmissionsMap )
 	// Map of confidence ratings from the store
@@ -119,13 +118,13 @@ export const ExamView = ( props: ExamViewProps ) => {
 	response in the responsesMap to update the database
 	*/
 	const submit = React.useCallback( async () => {
-		const data = questionIds.map( id => {
-			const value = submissionsMap.get( "student" )?.get( id )?.value
+		const data = questions.map( question => {
+			const value = submissionsMap.get( "student" )?.get( question.id )?.value
 
 			return {
-				questionId: id,
+				questionId: question.id,
 				value,
-				confidence: confidenceMap.get( id )?.value
+				confidence: confidenceMap.get( question.id )?.value
 			}
 		} )
 
@@ -167,24 +166,28 @@ export const ExamView = ( props: ExamViewProps ) => {
 				<>
 					<div>Student {props.canvasUserId}</div>
 					<StyledQuestionsContainer>
-						{questionIds.map( ( id, index ) => (
-							<StyledQuestionContainer key={id}>
+						{questions.map( ( question, index ) => (
+							<StyledQuestionContainer key={question.id}>
 								<StyledQuestionHeader>
-									<div>Question {index + 1}</div>
 									<div>
-										{(props.disabled && props.canvasUserId) ? `${submissionsMap.get(props.canvasUserId)?.get(id)?.scoredPoints}/${questionsMap.get(id)?.pointsPossible} Points` : `${questionsMap.get(id)?.pointsPossible} Points`}
-									</div> 
+										Question {index + 1}
+									</div>
+									{props.showPointsPossible && (
+										<div>
+											{question.pointsPossible} pts
+										</div>
+									)}
 								</StyledQuestionHeader>
 								<QuestionSwitch
 									disabled={props.disabled}
-									questionId={id}
+									question={question}
 									canvasUserId={props.canvasUserId}
 									headerShown
 								/>
 								{props.feedback && (
 									<FeedbackBox
 										disabled={props.review}
-										questionId={id}
+										questionId={question.id}
 									/>
 								)}
 							</StyledQuestionContainer>
@@ -222,7 +225,7 @@ interface QuestionSwitchProps {
 	disabled?: boolean
 	feedback?: boolean
 	review?: boolean
-	questionId: number
+	question: Question
 	canvasUserId?: string
 	headerShown?: boolean
 	editable?: boolean
@@ -240,11 +243,6 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 	 */
 	// Dispatches an action to the store
 	const dispatch = useAppDispatch()
-	// Question from the store
-	const question = useAppSelector( state => selectQuestionById( 
-		state, 
-		props.questionId 
-	) )
 
 	const handleEdit = React.useCallback( ( newQuestion: Question ) => {
 		dispatch( examActions.updateQuestion( newQuestion ) )
@@ -254,12 +252,12 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 	 * Render
 	 */
 	// Render the component based on the question's type
-	switch ( question?.type ) {
+	switch ( props.question?.type ) {
 	case QuestionType.MultipleChoice:
 		return (
 			<MultipleChoice
 				disabled={props.disabled}
-				questionId={question.id}
+				questionId={props.question.id}
 				canvasUserId={props.canvasUserId}
 				headerShown={props.headerShown}
 				editable={props.editable}
@@ -270,7 +268,7 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 		return (
 			<TrueFalse
 				disabled={props.disabled}
-				questionId={question.id}
+				questionId={props.question.id}
 				canvasUserId={props.canvasUserId}
 				headerShown={props.headerShown}
 				editable={props.editable}
@@ -281,7 +279,7 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 		return (
 			<ShortAnswer
 				disabled={props.disabled}
-				questionId={question.id}
+				questionId={props.question.id}
 				canvasUserId={props.canvasUserId}
 				headerShown={props.headerShown}
 				editable={props.editable}
@@ -292,7 +290,7 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 		return (
 			<CodingAnswer
 				disabled={props.disabled}
-				questionId={question.id}
+				questionId={props.question.id}
 				canvasUserId={props.canvasUserId}
 				headerShown={props.headerShown}
 				editable={props.editable}
@@ -303,7 +301,7 @@ export const QuestionSwitch = React.memo( ( props: QuestionSwitchProps ) => {
 		return (
 			<ParsonsProblem
 				disabled={props.disabled}
-				questionId={question.id}
+				questionId={props.question.id}
 				canvasUserId={props.canvasUserId}
 				headerShown={props.headerShown}
 				editable={props.editable}

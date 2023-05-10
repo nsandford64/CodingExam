@@ -61,8 +61,8 @@ router.get( "/allsubmissions", instructorOnly, async( req, res ) => {
 			value: row.is_text_response ? row.text_response : row.answer_response,
 			canvasUserId: row.canvas_user_id,
 			fullName: row.full_name,
-			feedback: row.instructor_feedback,
-			scoredPoints: row.scored_points || 0
+			scoredPoints: row.scored_points || 0,
+			feedback: row.instructor_feedback
 		}
 	} )
 
@@ -161,14 +161,15 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 	*/
 	let [ exam ] = await knex( "exams" )
 		.insert( {
-			canvas_assignment_id: assignmentID
+			canvas_assignment_id: assignmentID,
+			show_points_possible: req.body.showPointsPossible
 		} )
 		.onConflict( "canvas_assignment_id" )
 		.merge()
 		.returning( "*" )
 
 	// Create or update the exam questions 
-	for ( const question of req.body ) {
+	for ( const question of req.body.questions ) {
 		/* Determine answer data based on question type. 
 		 * Answer data is stored in a JSON column in the db
 		 */
@@ -226,17 +227,35 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 } )
 
 /**
+ * Deletes a question from the exam
+ */
+router.post( "/deletequestion", instructorOnly, async( req, res ) => {
+	const {role, assignmentID} = req.session
+	const knex = req.app.get( "db" )
+	const questionID = parseInt( req.headers.questionid )
+
+	await knex
+		.update( "is_deleted", true )
+		.from( "exam_questions" )
+		.where( "exam_questions.id", questionID )
+
+	res.sendStatus( 200 )
+} )
+
+/**
  * Endpoint for updating a student's score on a question after it has been graded
  */
-router.post( "/grade", instructorOnly, async( req, res ) => {
+router.post( "/gradesubmission", instructorOnly, async( req, res ) => {
 	const {role, assignmentID } = req.session
 	const knex = req.app.get( "db" )
 
 	// Iterates through the list of submissions, gets the appropriate variables from them
 	for ( const submission of req.body ) {
+
 		const canvasUserID = submission.canvasUserId
 		const questionID = submission.questionId
 		const score = submission.scoredPoints
+		const feedback = submission.feedback
 
 		// Gets the internal userID of the user
 		const userID = await knex
@@ -245,9 +264,9 @@ router.post( "/grade", instructorOnly, async( req, res ) => {
 			.where( "canvas_user_id", canvasUserID )
 			.first()
 
-		// Updates the user's score
+		// Updates the user's score and any feedback the instructor left
 		await knex
-			.update( {scored_points: score} )
+			.update( {scored_points: score, instructor_feedback: feedback} )
 			.from( "student_responses" )
 			.where( {
 				question_id: questionID,

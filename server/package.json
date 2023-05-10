@@ -24,6 +24,7 @@
     "oauth1-signature": "^1.0.5",
     "openai": "^3.2.1",
     "pg": "^8.8.0",
+    "socket.io": "^4.6.1",
     "supertest": "^6.3.0"
   },
   "devDependencies": {

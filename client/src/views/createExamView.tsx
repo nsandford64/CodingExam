@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Button, InputGroup, Intent, MenuItem, Spinner } from "@blueprintjs/core"
+import { Button, InputGroup, Intent, MenuItem, Spinner, Switch } from "@blueprintjs/core"
 import { Select2 } from "@blueprintjs/select"
 import * as React from "react"
 import { batch } from "react-redux"
@@ -8,6 +8,14 @@ import { Question, QuestionType } from "../App"
 import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { createExamThunk, selectQuestionById, examActions, selectNextQuestionId, selectQuestionIds, selectToken } from "../slices/examSlice"
 import { QuestionSwitch, StyledQuestionContainer, StyledQuestionHeader, StyledQuestionsContainer } from "./examView"
+
+/**
+ * Props for CreateExamView
+ */
+interface CreateExamViewProps {
+	showPointsPossible: boolean
+	toggleShowPointsPossible: () => void
+}
 
 /**
  * Style for the CreateExamView
@@ -25,7 +33,7 @@ const StyledCreateExamView = styled.div`
  * This component allows the Instructor to create
  * an exam using a GUI instead of the database
  */
-export const CreateExamView = React.memo( () => {
+export const CreateExamView = React.memo( ( props: CreateExamViewProps ) => {
 	/**
 	 * Selectors
 	 */
@@ -78,7 +86,8 @@ export const CreateExamView = React.memo( () => {
 			id: nextQuestionId || -1,
 			pointsPossible: 0,
 			text: "",
-			type: newQuestionType
+			type: newQuestionType,
+			correctAnswer: 0
 		}
 
 		// Gets the next question ID from the server
@@ -157,6 +166,12 @@ export const CreateExamView = React.memo( () => {
 	)
 	return (
 		<StyledCreateExamView>
+			<Switch 
+				label="Show points possible"
+				checked={props.showPointsPossible}
+				onChange={props.toggleShowPointsPossible}
+				style={{ alignSelf: "flex-end" }}
+			/>
 			<StyledQuestionsContainer>
 				{questionIds.map( ( id, index ) => (
 					<QuestionDisplay 
@@ -175,7 +190,7 @@ export const CreateExamView = React.memo( () => {
 				text="Done"
 				disabled={questionIds.length === 0}
 				fill
-				onClick={() => dispatch( createExamThunk )}
+				onClick={() => dispatch( createExamThunk( props.showPointsPossible ) )}
 				style={{ marginTop: "25px" }}
 			/>	
 		</StyledCreateExamView>
@@ -213,6 +228,8 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 	 */
 	// Dispatch an action to the store
 	const dispatch = useAppDispatch()
+	// token from the store
+	const token = useAppSelector( selectToken )
 	// Get particular question from the store
 	const question = useAppSelector( state => selectQuestionById(
 		state,
@@ -223,6 +240,21 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 	 * State
 	 */
 	const [ editing, setEditing ] = React.useState( props.editing )
+
+	/**
+	 * Handles when a question is deleted
+	 */
+	const deleteQuestion = React.useCallback( async ( questionID: number ) => {
+		dispatch( examActions.deleteQuestion( questionID ) )
+		await fetch( "/api/instructor/deletequestion", {
+			method: "POST",
+			headers: {
+				"token": token,
+				"questionid": questionID + ""
+			} 
+		} )
+	}, [] )
+
 
 	/**
 	 * Effects
@@ -269,12 +301,12 @@ const QuestionDisplay = React.memo( ( props: QuestionDisplayProps ) => {
 				<Button 
 					intent={Intent.DANGER}
 					icon="delete"
-					onClick={() => dispatch( examActions.deleteQuestion( props.questionId ) )}
+					onClick={() => deleteQuestion( props.questionId ) }
 					style={{ marginLeft: "auto" }}
 				/>
 			</StyledQuestionHeader>
 			<QuestionSwitch
-				questionId={props.questionId}
+				question={question}
 				disabled
 				headerShown
 				editable={editing}

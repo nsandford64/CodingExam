@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Label, Radio, RadioGroup } from "@blueprintjs/core"
+import { Checkbox, Label, Radio, RadioGroup } from "@blueprintjs/core"
 import MDEditor from "@uiw/react-md-editor"
 import * as React from "react"
 import ReactMarkdown from "react-markdown"
@@ -13,6 +13,15 @@ import { examActions, selectQuestionById, selectSubmissionByUserIdAndQuestionId 
  */
 const StyledTrueFalse = styled.div`
 	padding: 10px;
+`
+
+/**
+ * Style for a radio row
+ */
+const RadioRow = styled.div`
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 `
 
 /**
@@ -36,11 +45,10 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 	 * Callbacks
 	 */
 	// Called when the user selects between true or false - updates the App's responsesMap
-	const handleChange = React.useCallback( ( e: React.FormEvent<HTMLInputElement> ) => {
-		const value = ( e.target as HTMLInputElement ).value
+	const handleChange = React.useCallback( ( value: number ) => {
 		const newSubmission: Submission = {
 			questionId: props.questionId,
-			value: parseInt( value )
+			value
 		}
 
 		dispatch( examActions.updateSubmission( newSubmission ) )
@@ -73,14 +81,44 @@ export const TrueFalse = React.memo( ( props: ComponentProps ) => {
 					)}
 				</>				
 			)}
-			<RadioGroup
-				disabled={props.disabled}
-				onChange={handleChange}
-				selectedValue={submission?.value}
-			>
-				<Radio label="True" value={1} />
-				<Radio label="False" value={0} />
-			</RadioGroup>
+			<RadioRow>
+				<Radio 
+					label="True" 
+					value={1} 
+					disabled={props.disabled} 
+					checked={submission?.value === 1}
+					onChange={() => handleChange( 1 )}
+				/>
+				{props.editable && (
+					<Checkbox 
+						style={{ marginLeft: 10 }}
+						checked={question.correctAnswer === 1}
+						onChange={() => props.editQuestion( {
+							...question,
+							correctAnswer: 1
+						} )}
+					/>
+				)}
+			</RadioRow>
+			<RadioRow>
+				<Radio 
+					label="False" 
+					value={0} 
+					disabled={props.disabled} 
+					checked={submission?.value === 0}
+					onChange={() => handleChange( 0 )}
+				/>
+				{props.editable && (
+					<Checkbox 
+						style={{ marginLeft: 10 }}
+						checked={question.correctAnswer === 0}
+						onChange={() => props.editQuestion( {
+							...question,
+							correctAnswer: 0
+						} )}
+					/>
+				)}
+			</RadioRow>
 		</StyledTrueFalse>
 	)
 } )

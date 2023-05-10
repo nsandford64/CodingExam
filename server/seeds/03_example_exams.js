@@ -8,6 +8,7 @@ exports.seed = async function( knex ) {
 	await knex( "exams" ).del()
 	await knex( "exams" ).insert( [
 		{ 	id: 1,
-			canvas_assignment_id: "example-exam" }	
+			canvas_assignment_id: "example-exam",
+			show_points_possible: true }	
 	] )
 }
