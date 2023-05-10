@@ -4,11 +4,6 @@ const lti = require( "ims-lti" )
 const path = require( "path" )
 const jwt = require( "jsonwebtoken" )
 const fs = require( "fs" )
-const app = require( "../app" )
-const { setDefaultResultOrder } = require( "dns/promises" )
-const { create } = require( "domain" )
-const { Http2ServerRequest } = require( "http2" )
-const { request } = require( "http" )
 
 const router = express.Router()
 

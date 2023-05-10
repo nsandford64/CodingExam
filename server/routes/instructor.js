@@ -3,8 +3,7 @@ const express = require( "express" )
 const axios = require( "axios" )
 const router = express.Router()
 const OAuth1Signature = require( "oauth1-signature" )
-const auth = require('../middleware/auth')
-const ai = require('../helpers/ai')
+const auth = require( "../middleware/auth" )
 
 
 /** All api calls require the request to have 
@@ -323,6 +322,7 @@ router.post( "/submitgrades", instructorOnly, async( req, res ) => {
 				headers: { "Content-Type": "application/xml" },
 				data: xml,
 			} )
+			console.log( gradeResponse.status )
 		}
 		catch( error ) {
 			console.log( "Error, are you running in canvas?" )
