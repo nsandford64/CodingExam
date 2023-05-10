@@ -1,5 +1,5 @@
 // Copyright 2022 under MIT License
-import { Button, Colors, Icon, InputGroup, Label, Radio } from "@blueprintjs/core"
+import { Button, Checkbox, Colors, Icon, InputGroup, Label, Radio } from "@blueprintjs/core"
 import MDEditor from "@uiw/react-md-editor"
 import * as React from "react"
 import { DragDropContext, Draggable, Droppable, DropResult } from "react-beautiful-dnd"
@@ -111,10 +111,43 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 			return
 		}
 
+		let correctAnswer = result.destination.index
+		// Update the correct answer index if the destination is correct
+		if ( result.destination.index === question.correctAnswer ) {
+			correctAnswer = result.source.index
+		}
+
 		const newAnswers = reOrder( question.answers, result.source.index, result.destination.index )
 
-		props.editQuestion( { ...question, answers: newAnswers } )
+		props.editQuestion( { ...question, answers: newAnswers, correctAnswer } )
 	}, [ question ] )
+
+	// Shuffles an array
+	const shuffle = React.useCallback( ( arr: string[] ) => {
+		let curIndex = arr.length
+		let randomIndex
+
+		const newArr = arr.map( ( el, index ) => ( {
+			value: el,
+			originalIndex: index
+		} ) )
+
+		while( curIndex !== 0 ) {
+			randomIndex = Math.floor( Math.random() * curIndex )
+			curIndex--
+
+			[ newArr[curIndex], newArr[randomIndex] ] = [ newArr[randomIndex], newArr[curIndex] ]
+		}
+
+		return newArr
+	}, [] )
+
+	/**
+	 * Memos
+	 */
+	const randomizedAnswers = React.useMemo( () => (
+		shuffle( question.answers )
+	), [ question.answers ] )
 
 	/**
 	 * Effects
@@ -155,6 +188,19 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 					)}
 				</>				
 			)}
+			{/*
+			{randomizedAnswers.map( ( item, index ) => (
+				<Radio
+					key={index}
+					disabled={props.disabled}
+					value={item.originalIndex}
+					label={item.value}
+					checked={item.originalIndex === submission?.value}
+					onChange={() => handleChange( item.originalIndex )}
+					style={{ marginBottom: props.editable ? 0 : undefined }}
+				/>
+			) )}
+			*/}
 			<DragDropContext onDragEnd={onDragEnd}>
 				<Droppable droppableId="droppable">
 					{( provided ) => (
@@ -222,13 +268,20 @@ export const MultipleChoice = React.memo( ( props: ComponentProps ) => {
 											)}
 											{props.editable && editingAnswerIndex === -1 && (
 												<>
+													<Checkbox 
+														style={{ marginLeft: 10, marginBottom: 0 }}
+														checked={question.correctAnswer === index}
+														onChange={() => props.editQuestion( {
+															...question,
+															correctAnswer: index
+														} )}
+													/>
 													<Button 
 														icon="edit"
 														onClick={() => {
 															setEditingAnswer( question.answers[index] )
 															setEditingAnswerIndex( index )
 														}}
-														style={{ marginLeft: 10 }}
 													/>
 													<Button 
 														icon="cross" 

@@ -8,6 +8,7 @@ const app = require( "../app" )
 const { setDefaultResultOrder } = require( "dns/promises" )
 const { create } = require( "domain" )
 const { Http2ServerRequest } = require( "http2" )
+const { request } = require( "http" )
 
 const router = express.Router()
 
@@ -40,15 +41,20 @@ if( process.env.NODE_ENV == "development" ) {
 	router.get( "/", ( req, res ) => {	
 		res.send( `<h1>Debug access</h1>
 			<ul>
-				<li><a href="/learner">Learner Entry Point</a></li>
-				<li><a href="/instructor">Instructor Entry Point</a></li>
-				<li><a href="/retake">Retake Exam</a></li>
+				<li><a href="/learner/1">Exam 1 Learner 1 Entry Point</a></li>
+				<li><a href="/learner/2">Exam 1 Learner 2 Entry Point</a></li>
+				<li><a href="/instructor">Exam 1 Instructor Entry Point</a></li>
+				<li><a href="/retake">Retake Exam 1</a></li>
+				<li><a href="/learner2/1">Exam 2 Learner 1 Entry Point</a></li>
+				<li><a href="/learner2/2">Exam 2 Learner 2 Entry Point</a></li>
+				<li><a href="/instructor2">Exam 2 Instructor Entry Point</a></li>
+				<li><a href="/retake2">Retake Exam 2</a></li>
 			</ul>
 		` )
 	} )
 
 	/*
-	 * Loads the app as an instructor
+	 * Loads the app as an instructor in exam 1
 	 */
 	router.get( "/instructor", async ( req, res ) => {
 		const knex = req.app.get( "db" )
@@ -66,14 +72,32 @@ if( process.env.NODE_ENV == "development" ) {
 	} )
 
 	/*
-	 * Loads the app as a learner
+	 * Loads the app as an instructor in exam 2
 	 */
-	router.get( "/learner", async ( req, res ) => {
+	router.get( "/instructor2", async ( req, res ) => {
 		const knex = req.app.get( "db" )
 		const ltiData = { 
-			assignmentID: "c38940c2-5521-422f-b520-7462fd820a7d",
-			fullName: "Example Learner",
-			userID: "example-learner",
+			assignmentID: "example-exam-2",
+			fullName: "Example Instructor",
+			userID: "example-instructor",
+			roles: "Instructor"
+		}
+		// Creates the user and exam if either don't exist already
+		await findOrCreateUser( knex, ltiData )
+		await createExam( knex, ltiData.assignmentID )
+		const token = generateAccessToken( ltiData )
+		serveIndex( res, token )
+	} )
+
+	/*
+	 * Loads the app as a learner in exam 1
+	 */
+	router.get( "/learner/:id", async ( req, res ) => {
+		const knex = req.app.get( "db" )
+		const ltiData = { 
+			assignmentID: "example-exam",
+			fullName: "Example Learner" + req.params.id,
+			userID: "example-learner" + req.params.id,
 			roles: "Learner"
 		}
 		// Creates the user if it does not exist already
@@ -83,12 +107,46 @@ if( process.env.NODE_ENV == "development" ) {
 	} )
 
 	/*
-	 * Resets the HasTaken property and lets the student view take the exam again
+	 * Loads the app as a learner in exam 2
+	 */
+	router.get( "/learner2/:id", async ( req, res ) => {
+		const knex = req.app.get( "db" )
+		const ltiData = { 
+			assignmentID: "example-exam-2",
+			fullName: "Example Learner" + req.params.id,
+			userID: "example-learner" + req.params.id,
+			roles: "Learner"
+		}
+		// Creates the user if it does not exist already
+		await findOrCreateUser( knex, ltiData )
+		const token = generateAccessToken( ltiData )
+		serveIndex( res, token )
+	} )
+
+	/*
+	 * Resets the HasTaken property and lets the student view take exam 1 again
 	 */
 	router.get( "/retake", async ( req, res ) => {
 		const knex = req.app.get( "db" )
 		const ltiData = { 
 			assignmentID: "example-exam",
+			fullName: "Example Learner",
+			userID: "example-learner",
+			roles: "Learner"
+		}
+		resetHasTaken( knex, ltiData )
+		await findOrCreateUser( knex, ltiData )
+		const token = generateAccessToken( ltiData )
+		serveIndex( res, token )
+	} )
+
+	/*
+	 * Resets the HasTaken property and lets the student view take exam 2 again
+	 */
+	router.get( "/retake2", async ( req, res ) => {
+		const knex = req.app.get( "db" )
+		const ltiData = { 
+			assignmentID: "example-exam-2",
 			fullName: "Example Learner",
 			userID: "example-learner",
 			roles: "Learner"
@@ -233,6 +291,7 @@ async function createExam( knex, canvasAssignmentID, totalPoints ){
  * @returns 
  */
 async function findOrCreateUser( knex, userData ){
+	console.log( userData )
 	const [ user ] = await knex( "users" )
 		.insert( {
 			canvas_user_id: userData.userID,
@@ -244,6 +303,7 @@ async function findOrCreateUser( knex, userData ){
 		.onConflict( "canvas_user_id" )
 		.merge()
 		.returning( "*" )
+	console.log( user )
 	return user.id
 }
 	
@@ -263,9 +323,13 @@ async function resetHasTaken( knex, ltiData ){
 		.first()
 
 	await knex( "exams_users" )
-		.update( "HasTaken", false )
-		.where( "user_id", student.id )
-		.where( "exam_id", exam.id )
+		.insert({
+			user_id: student.id,
+			exam_id: exam.id,
+			HasTaken: false
+		})
+		.onConflict(["user_id", "exam_id"])
+		.merge()
 }
 
 /**

@@ -3,12 +3,9 @@ const express = require( "express" )
 const axios = require( "axios" )
 const router = express.Router()
 const OAuth1Signature = require( "oauth1-signature" )
-const { default: knex } = require( "knex" )
 const auth = require('../middleware/auth')
 const ai = require('../helpers/ai')
 
-// Credentials for PostGres database
-const credentials = require( "../knexfile" ).connection
 
 /** All api calls require the request to have 
  * a valid token, so this middleware function
@@ -19,7 +16,7 @@ router.use( auth )
 
 // Gets the users who have taken a particular exam for the instructor view
 router.get( "/examtakers", instructorOnly, async( req, res ) => {
-	const {role, assignmentID, userID} = req.session
+	const {assignmentID} = req.session
 	const knex = req.app.get( "db" )
 
 	//Query the database for the students that have taken a particular exam
@@ -38,7 +35,7 @@ router.get( "/examtakers", instructorOnly, async( req, res ) => {
  * Gets the student responses for a particular question for grading purposes
  */
 router.get( "/allsubmissions", instructorOnly, async( req, res ) => {
-	const {role, assignmentID, userID} = req.session
+	const {assignmentID} = req.session
 	const knex = req.app.get( "db" )
 
 	// Gets the appropriate rows from the student responses table
@@ -61,56 +58,16 @@ router.get( "/allsubmissions", instructorOnly, async( req, res ) => {
 			value: row.is_text_response ? row.text_response : row.answer_response,
 			canvasUserId: row.canvas_user_id,
 			fullName: row.full_name,
-			feedback: row.instructor_feedback,
-			scoredPoints: row.scored_points || 0
+			scoredPoints: row.scored_points || 0,
+			feedback: row.instructor_feedback
 		}
 	} )
 
 	res.send( {submissions} )
 } )
 
-// Generates feedback and grades using an Open AI language model
-router.post( "/ai-evaluation", instructorOnly, async( req, res) => {
-	const {role, assignmentID} = req.session
-	const {questionId} = req.body
-	const knex = req.app.get( "db" )
-	
-	const answers = await knex
-		.select( ["canvas_user_id", "student_responses.id as id", "text_response", "question_text", "points_possible"] )
-		.from( "student_responses" )
-		.innerJoin( "exam_questions", "exam_questions.id", "student_responses.question_id" )
-		.innerJoin("users", "student_responses.user_id", "users.id")
-		.where( "student_responses.question_id",  questionId )
-
-	var results = [];
-	for(const answer of answers) {
-		// Generate feedback
-		let feedback = await ai.generateFeedback(answer.question_text, answer.text_response)
-		feedback += "\n\nNote: This feedback was created with the assistance of an AI agent."
-		feedback = feedback.trim()
-		// Generate grade
-		const rawGrade = await ai.grade(answer.question_text, answer.text_response)
-		const weightedGrade = parseInt(answer.points_possible * (rawGrade / 100))
-		// Update student_response
-		await knex('student_responses')
-			.update('scored_points', weightedGrade)
-			.update('instructor_feedback', feedback)
-			.where('id', answer.id)
-			.onConflict( "id" )
-			.merge()
-		// store response
-		results.push({
-			score: weightedGrade,
-			feedback: feedback
-		})
-	} 
-
-	res.send({results})
-})
-
 // Enters instructor feedback into the database
 router.post( "/feedback", instructorOnly, async( req, res ) => {
-	const {role, assignmentID} = req.session
 	const userID = req.headers.userid	
 	const knex = req.app.get( "db" )
 	
@@ -150,7 +107,7 @@ router.get( "/newquestionid", instructorOnly, async( req, res ) => {
 
 // Creates the questions for an exam when the instructor submits a question set
 router.post( "/createexam", instructorOnly, async( req, res ) => {
-	const {role, assignmentID, userID} = req.session
+	const {assignmentID} = req.session
 	const knex = req.app.get( "db" )
 
 	/*
@@ -161,14 +118,15 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 	*/
 	let [ exam ] = await knex( "exams" )
 		.insert( {
-			canvas_assignment_id: assignmentID
+			canvas_assignment_id: assignmentID,
+			show_points_possible: req.body.showPointsPossible
 		} )
 		.onConflict( "canvas_assignment_id" )
 		.merge()
 		.returning( "*" )
 
 	// Create or update the exam questions 
-	for ( const question of req.body ) {
+	for ( const question of req.body.questions ) {
 		/* Determine answer data based on question type. 
 		 * Answer data is stored in a JSON column in the db
 		 */
@@ -226,17 +184,33 @@ router.post( "/createexam", instructorOnly, async( req, res ) => {
 } )
 
 /**
+ * Deletes a question from the exam
+ */
+router.post( "/deletequestion", instructorOnly, async( req, res ) => {
+	const knex = req.app.get( "db" )
+	const questionID = parseInt( req.headers.questionid )
+
+	await knex
+		.update( "is_deleted", true )
+		.from( "exam_questions" )
+		.where( "exam_questions.id", questionID )
+
+	res.sendStatus( 200 )
+} )
+
+/**
  * Endpoint for updating a student's score on a question after it has been graded
  */
-router.post( "/grade", instructorOnly, async( req, res ) => {
-	const {role, assignmentID } = req.session
+router.post( "/gradesubmission", instructorOnly, async( req, res ) => {
 	const knex = req.app.get( "db" )
 
 	// Iterates through the list of submissions, gets the appropriate variables from them
 	for ( const submission of req.body ) {
+
 		const canvasUserID = submission.canvasUserId
 		const questionID = submission.questionId
 		const score = submission.scoredPoints
+		const feedback = submission.feedback
 
 		// Gets the internal userID of the user
 		const userID = await knex
@@ -245,9 +219,9 @@ router.post( "/grade", instructorOnly, async( req, res ) => {
 			.where( "canvas_user_id", canvasUserID )
 			.first()
 
-		// Updates the user's score
+		// Updates the user's score and any feedback the instructor left
 		await knex
-			.update( {scored_points: score} )
+			.update( {scored_points: score, instructor_feedback: feedback} )
 			.from( "student_responses" )
 			.where( {
 				question_id: questionID,
@@ -263,7 +237,7 @@ router.post( "/grade", instructorOnly, async( req, res ) => {
  * single batch
  */
 router.post( "/submitgrades", instructorOnly, async( req, res ) => {
-	const {role, assignmentID } = req.session
+	const {assignmentID } = req.session
 	const knex = req.app.get( "db" )
 
 	// Updates the grades for a particular assignment (recalculates scored points for the students)

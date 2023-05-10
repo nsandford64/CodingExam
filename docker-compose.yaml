@@ -26,8 +26,6 @@ services:
       CODING_EXAM_LTI_CLIENT_SECRET: Keysecret
       # jwt variables
       CODING_EXAM_JWT_SECRET: JwtTokenSecret
-      # openai variables
-      CODING_EXAM_OPENAI_API_KEY: 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
     ports:
       - "9000:9000"
     #volumes:

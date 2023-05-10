@@ -1,12 +1,7 @@
 // Copyright 2022 under MIT License
 const express = require( "express" )
 const router = express.Router()
-const jwt = require( "jsonwebtoken" )
-const { default: knex } = require("knex")
 const auth = require('../middleware/auth')
-
-// The secret for signing Json Web Tokens
-const jwtSecret = process.env.CODING_EXAM_JWT_SECRET
 
 /** All api calls require the request to have 
  * a valid token, so this middleware function
@@ -23,12 +18,13 @@ router.get( "/role", async function ( req, res ) {
 	console.log({role})
 	const knex = req.app.get( "db" )
 	let taken = false
+	let show = false
 	
 	if( role == "Learner" )
 	{
 		// Query the database to see if the client has taken the exam yet
 		const response = await knex
-			.select( "HasTaken" )
+			.select( "HasTaken", "show_points_possible" )
 			.from( "exams_users" )
 			.innerJoin( "exams", "exams.id", "exams_users.exam_id" )
 			.innerJoin( "users", "users.id", "exams_users.user_id" )
@@ -36,13 +32,24 @@ router.get( "/role", async function ( req, res ) {
 			.where( "canvas_assignment_id", assignmentID )
 			.first()
 		if( response && response.HasTaken ) taken = true
+		if( response && response.show_points_possible ) show = true
 		// If the student hasn't taken the exam, we need to "start the clock"
 		else await beginUserExam( knex, userID, assignmentID )
+	}
+	else if( role == "Instructor" ) {
+		const exam = await knex
+			.select( "show_points_possible" )
+			.from( "exams" )
+			.where( "canvas_assignment_id", assignmentID )
+			.first()
+		
+		show = exam.show_points_possible
 	}
 	// Sends back the role of the client along with if they have taken the exam
 	res.json( {
 		role: role,
-		taken: taken
+		taken: taken,
+		show_points_possible: show
 	} )
 } )
 
@@ -57,7 +64,8 @@ router.get( "/questions", async function( req, res ) {
 		.leftJoin( "exams", "exams.id", "exam_questions.exam_id" )
 		.leftJoin( "question_types", "question_types.id", "exam_questions.question_type_id" )
 		.where( "exams.canvas_assignment_id", assignmentID )
-		.orderBy( "exam_questions.id ")
+		.where( "exam_questions.is_deleted", false )
+		.orderBy( "exam_questions.id" )
 
 	// We need to 'rehydrate' questions that have answer data 
 	// and also limit what data is available depending on user role
@@ -132,7 +140,7 @@ router.get( "/submissions", async ( req, res ) => {
 
 // Inserts an answer into the StudentResponse table in the database
 router.post( "/", async ( req, res ) => {
-	const {role, userID, assignmentID} = req.session
+	const {userID, assignmentID} = req.session
 	const knex = req.app.get( "db" )
 
 	// Get the user id for the student
@@ -149,6 +157,15 @@ router.post( "/", async ( req, res ) => {
 		.where( "canvas_assignment_id", assignmentID )
 		.first()
 	if( !exam ) return res.send( {response: "Invalid Submission - unknown exam"} )
+
+	// check if the exam has already been taken
+	const taken = await knex.select( "HasTaken" )
+		.from( "exams_users" )
+		.where( "user_id", student.id )
+		.where( "exam_id", exam.id )
+		.first()
+
+	if ( taken.HasTaken ) return res.send( { response: "Invalid Submission - exam already taken"} )
 
 	// Prepare the student responses for insertion in the database
 	const responses = req.body.map( response => {
@@ -174,6 +191,8 @@ router.post( "/", async ( req, res ) => {
 	// Insert each response into the StudentResponse table
 	await knex( "student_responses" )
 		.insert( responses )
+		.onConflict( [ "question_id", "user_id" ] )
+		.merge()
 
 	// Set the exam as taken 
 	await knex( "exams_users" )
@@ -185,6 +204,8 @@ router.post( "/", async ( req, res ) => {
 		} )
 		.onConflict( [ "exam_id", "user_id" ] )
 		.merge()
+
+	autoGrade( knex, userID, assignmentID )
 
 	// Respond a success message to the poster
 	res.send( {
@@ -248,6 +269,91 @@ router.get( "/feedback", async ( req, res ) => {
 	res.send( {feedback} )
 } )
 
+/**
+ * A helper function that will automatically grade the multiple choice and true false questions for an exam submission.
+ * It does this by getting the questions and their correct answers as well as the student's submissions, compares the values,
+ * and updating the appropriate row in the database with either full or no points.
+ * 
+ * This function is called automatically after a student makes an exam submission.
+ * 
+ * @param {*} knex Database connection object
+ * @param {*} userId Canvas userID of the student who submitted the exam
+ * @param {*} assignmentId Canvas assignmentID of the assignment that was submitted
+ */
+async function autoGrade( knex, userId, assignmentId ) {
+	// Get the database user id for the student
+	const DBinfo = await getDBInfo( knex, userId, assignmentId )
+
+	// Gets the questions for the exam
+	let questions = await knex
+		.select( "exam_questions.id as id", "question_type_id as type", "answer_data", "points_possible" )
+		.from( "exam_questions" )
+		.leftJoin( "exams", "exams.id", "exam_questions.exam_id" )
+		.leftJoin( "question_types", "question_types.id", "exam_questions.question_type_id" )
+		.where( "exams.canvas_assignment_id", assignmentId )
+	
+	// We need to 'rehydrate' questions that have answer data 
+	// and also limit what data is available depending on user role
+	// This snippet is taken from the /questions endpoint and modified for use here
+	questions.map( question => {
+
+		// multiple choice
+		if( question.type === 1 ) {
+			question.correctAnswer = question.answer_data.correctAnswer
+		}
+		// true/false 
+		if( question.type === 3 ) {
+			question.correctAnswer = question.answer_data.correctAnswer
+		}
+
+		// remove the question_data property from the question
+		delete question.answer_data
+		// return the modified question
+		return question
+	} )
+
+	// Query to get the submissions for a student
+	const submissions = await knex
+		.select( "exam_questions.id as examQuestionsId",
+			"student_responses.id as studentResponsesId", "student_responses.answer_response" )
+		.from( "exam_questions" )
+		.innerJoin( "student_responses", "student_responses.question_id", "exam_questions.id" )
+		.where( "exam_questions.exam_id", DBinfo.exam.id )
+		.where( "student_responses.user_id", DBinfo.student.id )
+		.orderBy( "examQuestionsId" )
+		.orderBy( "studentResponsesId" )
+
+	// organize the submissions into a map based on the question ID
+	const submissionsMap = new Map()
+	submissions.forEach( submission => {
+		submissionsMap.set( submission.examQuestionsId, { studentResponsesId: submission.studentResponsesId, 
+			answer_response: submission.answer_response } )
+	} )
+
+	// Create a map for the new scores after autograding based on the question Id
+	const scoresMap = new Map()
+	questions.forEach( question => {
+		let score = 0
+		const submission = submissionsMap.get( question.id )
+
+		if ( question.type === 1 || question.type === 3 ) {
+			if ( submission.answer_response == question.correctAnswer ){
+				score = question.points_possible
+			}
+		}
+		scoresMap.set( submission.studentResponsesId, score )
+	} )
+
+	// Iterate through the new scores in the map and update them accordingly
+	for ( const score of scoresMap ) {
+		await knex
+			.update( "scored_points", score[1] )
+			.from( "student_responses" )
+			.where( "id", score[0] )
+	}
+
+}
+
 // Logs the start of a user taking an exam 
 async function beginUserExam( knex, userId, assignmentId )
 {
@@ -277,6 +383,32 @@ async function beginUserExam( knex, userId, assignmentId )
 	} catch( e ) {
 		console.error( e )
 	}
+}
+
+/**
+ * 
+ * Takes the userID and assignmentID from the Canvas launch request/token and 
+ * retrieves the internal database id's for those values
+ * 
+ * @param {Database connection} knex 
+ * @param {Canvas user id of the request} userId 
+ * @param {Canvas assignment id from the request} assignmentId 
+ * @returns internal database ID's of the user and the assignment
+ */
+async function getDBInfo( knex, userId, assignmentId ) {
+	// Get the database user id for the student
+	const student = await knex.select( "id" )
+		.from( "users" )
+		.where( "canvas_user_id", userId )
+		.first()
+
+	// Get the exam id for the assignment 
+	const exam = await knex.select( "id" )
+		.from( "exams" )
+		.where( "canvas_assignment_id", assignmentId )
+		.first()
+
+	return { student: student, exam: exam }
 }
 
 module.exports = router

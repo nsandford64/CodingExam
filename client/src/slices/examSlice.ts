@@ -114,6 +114,16 @@ export const selectQuestionIds = ( state: RootState ) => (
 export const selectQuestionsMap = ( state: RootState ) => (
 	state.exam.questionsMap
 )
+// Selects all questions
+export const selectAllQuestions = ( state: RootState ) => (
+	state.exam.questionIds.map( id => state.exam.questionsMap.get( id ) || {
+		answers: [],
+		id: 0,
+		pointsPossible: 0,
+		text: "",
+		type: QuestionType.None,
+	} )
+)
 // Select a Question from the store with the given id
 export const selectQuestionById = createSelector(
 	selectQuestionsMap,
@@ -227,13 +237,14 @@ export const initializeQuestions = ( canvasUserId?: string ): AppThunk<Promise<v
 	} )
 			
 	let json  = await data.json()
-	console.log( json )
 	const questions: Question[] = json.questions
 
 	// Loop through questions and create ids and a map
 	const newQuestionIds: number[] = []
 	const newQuestionsMap = new Map<number, Question>()
 	questions.forEach( question => {
+		console.log( question )
+
 		newQuestionIds.push( question.id )
 		newQuestionsMap.set( question.id, question )
 	} )
@@ -312,7 +323,7 @@ export const initializeQuestions = ( canvasUserId?: string ): AppThunk<Promise<v
 }
 
 // Creates an exam in the database using the server api
-export const createExamThunk: AppThunk<void> = async ( dispatch, getState ) => {
+export const createExamThunk = ( showPointsPossible: boolean ): AppThunk<void> => async ( dispatch, getState ) => {
 	const state = getState()
 
 	const questions: Question[] = []
@@ -328,7 +339,10 @@ export const createExamThunk: AppThunk<void> = async ( dispatch, getState ) => {
 		method: "POST",
 
 		// Adding body or contents to send
-		body: JSON.stringify( questions ),
+		body: JSON.stringify( {
+			questions,
+			showPointsPossible
+		} ),
      
 		// Adding headers to the request
 		headers: {
