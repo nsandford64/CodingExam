@@ -217,29 +217,6 @@ export const ExamView = ( props: ExamViewProps ) => {
 } 
 ExamView.displayName = "ExamView"
 
-interface QuestionHeaderInfoProps {
-	review?: boolean,
-	questionId: number,
-	canvasUserId?: string
-}
-
-/**
- * QuestionHeaderInfo Component
- * 
- * This component displays the points possible, and if graded, points awarded
- */
-const QuestionHeaderInfo = React.memo( ( props: QuestionHeaderInfoProps ) => {
-	// Selectors
-	const question = useAppSelector( state => selectQuestionById( 
-		state, 
-		props.questionId 
-	) )
-	const submission = useAppSelector( state => selectSubmissionByUserIdAndQuestionId( state, props.questionId, props.canvasUserId ) )
-	if(props.review) return <div>{`${submission?.scoredPoints}/${question.pointsPossible}`}</div>
-	else return <div>{`${question.pointsPossible} Points`}</div>
-})
-QuestionHeaderInfo.displayName = "QuestionHeaderInfo"
-
 /**
  * Props for the QuestionSwitch Component
  */

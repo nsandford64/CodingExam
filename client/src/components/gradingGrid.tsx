@@ -88,35 +88,6 @@ export const GradingGrid = React.memo( ( props: GradingGridProps ) => {
 		} )
 	}, [ submissions ] )
 
-
-	// Called when an AI-based feedback is requested
-	const generateFeedback = React.useCallback( async (questionId:number, canvasUserId?:string)=>{
-
-		const response = await fetch( "/api/instructor/ai-evaluation", {
-			method: "POST",
-			body: JSON.stringify( {questionId} ),
-			// Adding headers to the request
-			headers: {
-				"Content-type": "application/json; charset=UTF-8",
-				"token": token
-			}
-		} )
-
-		if(response.ok) {
-			const {results} = await response.json()
-			submissions.forEach((submission, index) => {
-				const newSubmission: Submission = {
-					...submission,
-					feedback: results[index] && results[index].feedback || "",
-					scoredPoints: results[index] && results[index].score || 0
-				}
-				console.log({newSubmission})
-				dispatch( examActions.updateSubmission( newSubmission ) )
-			})
-			
-		}
-	}, [ submissions ])
-
 	/**
 	 * Render
 	 */
