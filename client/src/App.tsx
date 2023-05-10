@@ -61,15 +61,13 @@ export const App = React.memo( () => {
 	// Stores the JWT token
 	const token = String( window.__INITIAL_DATA__ )
 
-<<<<<<< HEAD
-=======
+
 	// Debug instructor token
 	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJleGFtcGxlLWV4YW0iLCJmdWxsTmFtZSI6IkV4YW1wbGUgSW5zdHJ1Y3RvciIsInVzZXJJRCI6ImV4YW1wbGUtaW5zdHJ1Y3RvciIsInJvbGVzIjoiSW5zdHJ1Y3RvciIsImlhdCI6MTY3NTM3NzcxOH0.aH9JLLUHpRRJuhLQ-xmmEF2D1j6pu1iBXD5vP3mJxnE"
 	
 	// Debug learner token
 	//const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhc3NpZ25tZW50SUQiOiJleGFtcGxlLWV4YW0iLCJmdWxsTmFtZSI6IkV4YW1wbGUgTGVhcm5lciIsInVzZXJJRCI6ImV4YW1wbGUtbGVhcm5lciIsInJvbGVzIjoiTGVhcm5lciIsImlhdCI6MTY3NTM3NzYzOH0.HFMJmkONPDCcKVwAmfjhz0jllgG14S3yf4HmWjsJkhw"
 	
->>>>>>> 7537ec7fd76ecc806de53f32292f7719c6463d08
 	/**
 	 * Effects
 	 */
@@ -242,7 +240,6 @@ export type Submission = {
 	fullName?: string // Full name of the user
 	feedback?: string // Feedback offered by the instructor
 	scoredPoints?: number // Points that are entered by the instructor
-	feedback?: string // feedback for the submission
 }
 
 /**
