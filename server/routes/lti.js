@@ -323,9 +323,13 @@ async function resetHasTaken( knex, ltiData ){
 		.first()
 
 	await knex( "exams_users" )
-		.update( "HasTaken", false )
-		.where( "user_id", student.id )
-		.where( "exam_id", exam.id )
+		.insert({
+			user_id: student.id,
+			exam_id: exam.id,
+			HasTaken: false
+		})
+		.onConflict(["user_id", "exam_id"])
+		.merge()
 }
 
 /**
