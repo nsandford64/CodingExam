@@ -1,0 +1,85 @@
+# Build Docker Workflow
+
+# Workflow name
+name: Build Docker
+
+# Run only on pushed tags
+# https://docs.github.com/en/actions/using-workflows/triggering-a-workflow
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+# Define a single job named build
+jobs:
+  build:
+    # Run job on Ubuntu runner
+    runs-on: ubuntu-latest
+
+    # Job Steps
+    steps:
+
+      # Send New Commit to Discord
+      - name: Discord New Commit
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+
+      # Step 0 - Checkout the Repository
+      # https://github.com/actions/checkout
+      - name: 0 - Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      # Step 1 - Log In to GitHub Container Registry
+      # https://github.com/docker/login-action
+      - name: 1 - Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 2 - Build and Push Docker Image
+      # https://github.com/docker/build-push-action
+      - name: 2 - Build and Push Docker Image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps: 
+      # Step 3 - Make Release on GitHub
+      # https://github.com/softprops/action-gh-release
+      - name: 3 - Release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+      
+      # Step 4 - Notify Discord for Deploy
+      - name: Discord Deploy
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: "Build Complete! Starting Deploy..."
+
+      # Step 5 - Deploy App
+      - name: Deploy Stage
+        id: request
+        uses: fjogeleit/http-request-action@master
+        with:
+          url: 'https://watchtower.cs.ksu.edu/v1/update'
+          method: 'GET'
+          bearerToken: ${{ secrets.DEPLOY_TOKEN }}
+          timeout: 600000
+
+      # Step 6 - Show Response
+      - name: Show Response
+        run: echo ${{ steps.request.outputs.response }}

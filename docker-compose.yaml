@@ -1,0 +1,48 @@
+version: "3"
+services:
+  app:
+    container_name: coding_exam
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # trust proxy settings - use true or ip address when proxied
+      #TRUST_PROXY: "true"
+      # node environment variable - switch to production for production environment
+      NODE_ENV: development
+      # postgres database variables
+      CODING_EXAM_DB_HOST: postgres
+      CODING_EXAM_DB_PORT: 5432
+      CODING_EXAM_DB_NAME: codingexam
+      CODING_EXAM_DB_USER: codingexam
+      CODING_EXAM_DB_PASSWORD: coding_exam_pass
+      # test postgres database variables
+      CODING_EXAM_TESTDB_NAME: coding_exam_test
+      CODING_EXAM_DB_TEST_USER: coding_exam_test_user
+      CODING_EXAM_DB_TEST_PASSWORD: coding_exam_test_pass
+      # canvas LTI variables
+      CODING_EXAM_LTI_CLIENT_KEY: Codekey
+      CODING_EXAM_LTI_CLIENT_SECRET: Keysecret
+      # jwt variables
+      CODING_EXAM_JWT_SECRET: JwtTokenSecret
+    ports:
+      - "9000:9000"
+    #volumes:
+      #- .:/app/
+      #- /app/node_modules 
+
+  postgres:
+    container_name: postgres
+    image: "postgres:12"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: codingexam 
+      POSTGRES_PASSWORD: coding_exam_pass
+      POSTGRES_DB: codingexam
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coding_exam_user -d coding_exam"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

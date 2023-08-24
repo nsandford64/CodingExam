@@ -1,0 +1,36 @@
+{
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es2021": true,
+		"node": true
+    },
+    "extends": "eslint:recommended",
+    "overrides": [
+    ],
+    "parserOptions": {
+        "ecmaVersion": "latest"
+    },
+    "rules": {
+        "indent": [
+            "warn",
+            "tab"
+        ],
+        "quotes": [
+            "warn",
+            "double"
+        ],
+        "semi": [
+            "warn",
+            "never"
+        ],
+		"space-in-parens": [
+			"warn",
+			"always"
+		],
+		"array-bracket-spacing": [
+			"warn",
+			"always"
+		]
+    }
+}
